@@ -22,5 +22,15 @@
       <artifactId>msg-scheduling-api</artifactId>
       <version>${revision}</version>
     </dependency>
+
+    <!--spring体系-->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+    </dependency>
+
+
+
+
   </dependencies>
 </project>

@@ -33,7 +33,47 @@
     <lombok.version>1.18.8</lombok.version>
     <maven_flatten_version>1.1.0</maven_flatten_version>
     <java_persistence_api_version>2.2</java_persistence_api_version>
+    <commons_lang3_version>3.9</commons_lang3_version>
+    <commons_collections_version>3.2</commons_collections_version>
   </properties>
+
+  <dependencies>
+    <!-- Lombok框架 -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.persistence</groupId>
+      <artifactId>javax.persistence-api</artifactId>
+      <version>${java_persistence_api_version}</version>
+    </dependency>
+
+    <!--测试框架-->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>com.vaadin.external.google</groupId>
+          <artifactId>android-json</artifactId>
+        </exclusion>
+      </exclusions>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
