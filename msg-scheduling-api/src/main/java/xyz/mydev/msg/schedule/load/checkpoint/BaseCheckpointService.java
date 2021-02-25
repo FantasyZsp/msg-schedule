@@ -65,9 +65,10 @@ public interface BaseCheckpointService<K, CP> {
   /**
    * 获取一把调度锁
    *
+   * @param targetTableName 目标表
    * @return 调度锁，用于控制调度与读写并发
    */
-  Lock getScheduleLock();
+  Lock getScheduleLock(K targetTableName);
 
 
 }
