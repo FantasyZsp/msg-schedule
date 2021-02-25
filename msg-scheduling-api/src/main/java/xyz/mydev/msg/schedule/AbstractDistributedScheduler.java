@@ -1,10 +1,12 @@
 package xyz.mydev.msg.schedule;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
-import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
+import xyz.mydev.msg.schedule.bean.Message;
+import xyz.mydev.msg.schedule.load.AbstractMessageLoader;
+import xyz.mydev.msg.schedule.load.checkpoint.route.CheckpointServiceRouter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 
@@ -23,14 +25,14 @@ import static xyz.mydev.msg.schedule.load.ScheduleTimeCalculator.formatTime4Half
  * @author ZSP
  */
 @Slf4j
-public abstract class AbstractDistributedScheduler {
-  private final MessageRepository messageRepository;
-  private final CheckpointService checkpointService;
+public abstract class AbstractDistributedScheduler<T extends Message> {
+  private final AbstractMessageLoader<T> messageLoader;
+  private final CheckpointServiceRouter checkpointServiceRouter;
 
-  public AbstractDistributedScheduler(MessageRepository messageRepository,
-                                      CheckpointService checkpointService) {
-    this.messageRepository = messageRepository;
-    this.checkpointService = checkpointService;
+  public AbstractDistributedScheduler(AbstractMessageLoader<T> messageLoader,
+                                      CheckpointServiceRouter checkpointServiceRouter) {
+    this.messageLoader = messageLoader;
+    this.checkpointServiceRouter = checkpointServiceRouter;
   }
 
   private final AtomicBoolean appInitializationCompleted = new AtomicBoolean(false);
@@ -48,8 +50,8 @@ public abstract class AbstractDistributedScheduler {
 
   abstract Lock getLockOfLoadCyclically(String targetTableName);
 
-  private Lock checkPointLoadLock;
-  private Lock cyclicLoadLock;
+  private Lock lockOfLoadingFromCheckpoint;
+  private Lock lockOfLoadCyclically;
 
   /**
    * TODO 1. 线程池定时调度 2. 路由
@@ -69,7 +71,8 @@ public abstract class AbstractDistributedScheduler {
     if (getLockOfLoadCyclically(targetTableName).tryLock()) {
       log.info("lock LOAD_CYCLICALLY success");
       try {
-        loadCyclically(targetTableName);
+        // TODO 投递
+        List<T> msgListWillSend = loadCyclically(targetTableName);
         log.info("invoke business success");
 
       } catch (Throwable ex) {
@@ -83,12 +86,12 @@ public abstract class AbstractDistributedScheduler {
   }
 
 
-  private synchronized void loadCyclically(String targetTableName) {
+  public synchronized List<T> loadCyclically(String targetTableName) {
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime formattedStartTime = formatTime4HalfHour(now);
     LocalDateTime endTime = formattedStartTime.plusMinutes(30);
     log.info("scheduleLoader working at [{}] ,formatted at [{}], end at [{}]", now, formattedStartTime, endTime);
-    // TODO load(formattedStartTime, endTime); and port
+    return messageLoader.load(targetTableName, formattedStartTime, endTime);
   }
 
 
@@ -101,7 +104,8 @@ public abstract class AbstractDistributedScheduler {
       log.info("load delay msg in db when app up");
       try {
         log.info("invoke loadFromCheckPoint");
-        loadFromCheckPoint(targetTableName);
+        List<T> msgListWillSend = loadFromCheckPoint(targetTableName);
+        // TODO 投递
         log.info("invoke loadFromCheckPoint success");
 
       } catch (Throwable ex) {
@@ -120,12 +124,13 @@ public abstract class AbstractDistributedScheduler {
     appInitializationCompleted.set(true);
   }
 
-  private void loadFromCheckPoint(String targetTableName) {
+  public List<T> loadFromCheckPoint(String targetTableName) {
     LocalDateTime now = LocalDateTime.now();
-    LocalDateTime startTimeFromCheckPoint = checkpointService.readCheckpoint(targetTableName);
+    LocalDateTime startTimeFromCheckPoint = checkpointServiceRouter.get(targetTableName).readCheckpoint(targetTableName);
     LocalDateTime endTime = formatTime4HalfHour(now).plusMinutes(30);
     log.info("loadFromCheckPoint working at [{}] ,checkpoint  at [{}], end at [{}]", now, startTimeFromCheckPoint, endTime);
-    // TODO load(startTimeFromCheckPoint, endTime); and port
+    return messageLoader.load(targetTableName, startTimeFromCheckPoint, endTime);
+
   }
 
 
@@ -133,6 +138,10 @@ public abstract class AbstractDistributedScheduler {
    * 锁池初始化
    */
   public void init() {
+
+  }
+
+  public void initLocks() {
 
   }
 
