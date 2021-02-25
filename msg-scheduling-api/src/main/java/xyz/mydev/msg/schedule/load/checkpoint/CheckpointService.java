@@ -11,6 +11,10 @@ import java.util.List;
  */
 public interface CheckpointService extends BaseCheckpointService<String, LocalDateTime> {
 
+  /**
+   * 检查点服务负责维护的表名
+   * 外部通过表名获取表的仓储服务
+   */
   List<String> getTableNames();
 
 }

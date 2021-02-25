@@ -51,7 +51,7 @@ public interface BaseCheckpointService<K, CP> {
    * @param targetTableName 目标表
    * @param checkpoint      将要写入的检查点，一般是当前最新的检查点
    */
-  void writeCheckPoint(K targetTableName, CP checkpoint);
+  void writeCheckpoint(K targetTableName, CP checkpoint);
 
   /**
    * 获取读写锁
