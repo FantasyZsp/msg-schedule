@@ -13,7 +13,6 @@ public interface Repository<T, ID> {
 
   int insert(T entity);
 
-
   List<T> findWillSendBetween(LocalDateTime startTime, LocalDateTime endTime, int limitSize);
 
   long countWillSendBetween(LocalDateTime startTime, LocalDateTime endTime);
