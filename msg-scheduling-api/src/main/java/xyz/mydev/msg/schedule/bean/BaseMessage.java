@@ -16,7 +16,17 @@ public interface BaseMessage<T> {
 
   int getStatus();
 
-  default long getVersion() {
+  /**
+   * 快照版本，一般用于写幂等
+   */
+  default int getSnapShotVersion() {
+    return 0;
+  }
+
+  /**
+   * 消息设计版本
+   */
+  default int getVersion() {
     return 0;
   }
 }

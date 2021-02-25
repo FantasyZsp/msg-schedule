@@ -1,5 +1,7 @@
 package xyz.mydev.msg.schedule.load;
 
+import xyz.mydev.msg.schedule.bean.Message;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -8,12 +10,15 @@ import java.util.List;
  *
  * @author ZSP
  */
-public interface MessageLoader<T> {
+public interface MessageLoader<T extends Message> {
   /**
    * 从指定时间加载消息
    *
-   * @param startTime 开始时间
-   * @param endTime   结束时间
+   * @param targetTableName 目标表
+   * @param startTime       开始时间
+   * @param endTime         结束时间
    */
-  List<T> load(LocalDateTime startTime, LocalDateTime endTime);
+  List<T> load(String targetTableName, LocalDateTime startTime, LocalDateTime endTime);
+
+
 }

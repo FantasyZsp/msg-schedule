@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 /**
  * @author ZSP
  */
-public interface MessageRepository extends MessageCrudRepository<Message, String, LocalDateTime> {
+public interface MessageRepository<T extends Message> extends MessageCrudRepository<T, String, LocalDateTime> {
 
   String getTableName();
 

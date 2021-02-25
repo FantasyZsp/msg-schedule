@@ -4,9 +4,13 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 /**
+ * 调度时间计算器
+ * TODO 可配置调度时间
+ * 需要理清调度间隔对其他环节的数据影响： 可靠性、重复性
+ *
  * @author zhaosp
  */
-public interface LoadTimeCalculator {
+public interface ScheduleTimeCalculator {
   /**
    * 让时间停在整点，防止调度误差引起的遗漏记录
    * 校准时间到整30分钟，向前  2:05 --> 2:00

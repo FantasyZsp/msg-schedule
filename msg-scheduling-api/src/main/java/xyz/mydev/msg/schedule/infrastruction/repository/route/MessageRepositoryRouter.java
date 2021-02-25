@@ -1,12 +1,13 @@
 package xyz.mydev.msg.schedule.infrastruction.repository.route;
 
 import xyz.mydev.msg.common.route.Router;
+import xyz.mydev.msg.schedule.bean.Message;
 import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
 
 /**
  * @author ZSP
  */
-public interface MessageRepositoryRouter extends Router<String, MessageRepository> {
+public interface MessageRepositoryRouter<T extends Message> extends Router<String, MessageRepository<T>> {
   @Override
-  MessageRepository get(String msgTableName);
+  MessageRepository<T> get(String msgTableName);
 }

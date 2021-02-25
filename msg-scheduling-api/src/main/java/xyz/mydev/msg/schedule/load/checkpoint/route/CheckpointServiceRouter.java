@@ -26,5 +26,4 @@ public interface CheckpointServiceRouter extends Router<String, CheckpointServic
 
   Map<String, CheckpointService> getMap();
 
-
 }

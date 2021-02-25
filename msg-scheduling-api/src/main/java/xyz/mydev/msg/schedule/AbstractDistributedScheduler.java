@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 
-import static xyz.mydev.msg.schedule.load.LoadTimeCalculator.formatTime4HalfHour;
+import static xyz.mydev.msg.schedule.load.ScheduleTimeCalculator.formatTime4HalfHour;
 
 
 /**

@@ -3,8 +3,7 @@ package xyz.mydev.msg.common;
 /**
  * @author ZSP
  */
-public interface MessageBusinessId {
-
+public interface MessageBusinessInfo {
   String getBusinessId();
 
 }

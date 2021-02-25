@@ -14,7 +14,9 @@ public interface MessageCrudRepository<E, ID, CP> {
 
   int update(E entity);
 
-  List<E> findWillSendBetween(CP startTime, CP endTime, int limitSize);
+  List<E> findLimitSizeWillSendBetween(CP startTime, CP endTime, int limitSize);
+
+  List<E> findWillSendBetween(CP startTime, CP endTime);
 
   long countWillSendBetween(CP startTime, CP endTime);
 
