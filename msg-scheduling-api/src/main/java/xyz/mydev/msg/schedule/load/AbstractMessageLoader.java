@@ -1,6 +1,6 @@
 package xyz.mydev.msg.schedule.load;
 
-import xyz.mydev.msg.schedule.bean.Message;
+import xyz.mydev.msg.schedule.bean.BaseMessage;
 import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
 
@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author ZSP
  */
-public abstract class AbstractMessageLoader<T extends Message> implements MessageLoader<T> {
+public abstract class AbstractMessageLoader<T extends BaseMessage<String>> implements MessageLoader<T> {
 
   private final MessageRepositoryRouter<T> messageRepositoryRouter;
 
