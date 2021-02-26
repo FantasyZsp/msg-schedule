@@ -9,7 +9,6 @@ import java.util.List;
 
 /**
  * 消息加载器
- * TODO 考虑是否要将延时和事务消息调度进行统一
  *
  * @author ZSP
  */

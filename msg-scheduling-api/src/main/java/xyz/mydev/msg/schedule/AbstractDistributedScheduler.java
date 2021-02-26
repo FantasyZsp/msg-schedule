@@ -1,7 +1,7 @@
 package xyz.mydev.msg.schedule;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.mydev.msg.schedule.bean.Message;
+import xyz.mydev.msg.schedule.bean.BaseMessage;
 import xyz.mydev.msg.schedule.load.AbstractMessageLoader;
 import xyz.mydev.msg.schedule.load.checkpoint.route.CheckpointServiceRouter;
 
@@ -25,7 +25,7 @@ import static xyz.mydev.msg.schedule.load.ScheduleTimeCalculator.formatTime4Half
  * @author ZSP
  */
 @Slf4j
-public abstract class AbstractDistributedScheduler<T extends Message> {
+public abstract class AbstractDistributedScheduler<T extends BaseMessage<String>> {
   private final AbstractMessageLoader<T> messageLoader;
   private final CheckpointServiceRouter checkpointServiceRouter;
 
