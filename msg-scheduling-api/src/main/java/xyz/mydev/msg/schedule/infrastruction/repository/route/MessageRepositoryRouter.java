@@ -10,4 +10,9 @@ import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
 public interface MessageRepositoryRouter<T extends BaseMessage<String>> extends Router<String, MessageRepository<T>> {
   @Override
   MessageRepository<T> get(String msgTableName);
+
+
+  default MessageRepository<T> resolveByMessage(T msg) {
+    return get(msg.getTargetTableName());
+  }
 }

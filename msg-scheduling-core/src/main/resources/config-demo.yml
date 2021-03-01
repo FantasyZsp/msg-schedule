@@ -2,11 +2,11 @@ msg-shedule:
   scheduler: # 调度组件
     # 线程池配置
     schedule-executor:
-      min-thread: 2
-      max-thread: 2
+      min-thread: 2 # 需要调度的表个数
+      max-thread: 2 # 需要调度的表个数
     checkpoint-executor:
-      min-thread: 2
-      max-thread: 2
+      min-thread: 2 # 需要检查的表个数
+      max-thread: 2 # 需要检查的表个数
     default-schedule-delay:
       checkpoint-delay: 30 # 默认不写30分钟维护一次，route中不写默认以此值为默认值
       load-delay: 30 # 默认不写30分钟维护一次，route中不写默认以此值为默认值

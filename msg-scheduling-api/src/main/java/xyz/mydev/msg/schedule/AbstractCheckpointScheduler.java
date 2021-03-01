@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractCheckpointScheduler {
 
   private final CheckpointService checkpointService;
-
   private final ScheduledExecutorService scheduledExecutorService;
 
   public AbstractCheckpointScheduler(CheckpointService checkpointService) {
@@ -33,7 +32,7 @@ public abstract class AbstractCheckpointScheduler {
     this.scheduledExecutorService = Executors.newScheduledThreadPool(checkpointService.getTableNames().size(), r -> new Thread(r, "cpUpdateThread"));
   }
 
-  public void startScheduleCheckpoint() {
+  public void start() {
     checkpointService.getTableNames().forEach(tableName -> {
       CheckpointUpdateStrategy updateStrategy = checkpointService.getUpdateStrategy(tableName);
       if (updateStrategy != null) {

@@ -18,6 +18,8 @@ public interface BaseMessage<T> extends MessageType {
 
   Integer getStatus();
 
+  String getTargetTableName();
+
   /**
    * 快照版本，一般用于写幂等
    */

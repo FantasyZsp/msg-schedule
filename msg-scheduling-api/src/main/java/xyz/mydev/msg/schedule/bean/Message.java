@@ -12,6 +12,4 @@ public interface Message extends BaseMessage<String>, MessagePlatform, MessageBu
 
   String getTraceVersion();
 
-  String getSystemContext();
-
 }
