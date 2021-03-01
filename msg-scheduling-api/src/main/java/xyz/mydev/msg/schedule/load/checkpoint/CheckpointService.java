@@ -17,4 +17,6 @@ public interface CheckpointService extends BaseCheckpointService<String, LocalDa
    */
   List<String> getTableNames();
 
+  CheckpointUpdateStrategy getUpdateStrategy(String targetTableName);
+
 }

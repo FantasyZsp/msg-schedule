@@ -25,12 +25,12 @@ import static xyz.mydev.msg.schedule.load.ScheduleTimeCalculator.formatTime4Half
  * @author ZSP
  */
 @Slf4j
-public abstract class AbstractDistributedScheduler<T extends BaseMessage<String>> {
+public abstract class AbstractScheduler<T extends BaseMessage<String>> {
   private final AbstractMessageLoader<T> messageLoader;
   private final CheckpointService checkpointService;
 
-  public AbstractDistributedScheduler(AbstractMessageLoader<T> messageLoader,
-                                      CheckpointService checkpointService) {
+  public AbstractScheduler(AbstractMessageLoader<T> messageLoader,
+                           CheckpointService checkpointService) {
     this.messageLoader = messageLoader;
     this.checkpointService = checkpointService;
   }
