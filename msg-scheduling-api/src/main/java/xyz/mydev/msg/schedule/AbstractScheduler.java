@@ -3,14 +3,13 @@ package xyz.mydev.msg.schedule;
 import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.schedule.bean.BaseMessage;
 import xyz.mydev.msg.schedule.load.AbstractMessageLoader;
+import xyz.mydev.msg.schedule.load.ScheduleTimeEvaluator;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
-
-import static xyz.mydev.msg.schedule.load.ScheduleTimeCalculator.formatTime4HalfHour;
 
 
 /**
@@ -28,11 +27,14 @@ import static xyz.mydev.msg.schedule.load.ScheduleTimeCalculator.formatTime4Half
 public abstract class AbstractScheduler<T extends BaseMessage<String>> {
   private final AbstractMessageLoader<T> messageLoader;
   private final CheckpointService checkpointService;
+  private final ScheduleTimeEvaluator scheduleTimeEvaluator;
 
   public AbstractScheduler(AbstractMessageLoader<T> messageLoader,
-                           CheckpointService checkpointService) {
+                           CheckpointService checkpointService,
+                           ScheduleTimeEvaluator scheduleTimeEvaluator) {
     this.messageLoader = messageLoader;
     this.checkpointService = checkpointService;
+    this.scheduleTimeEvaluator = scheduleTimeEvaluator;
   }
 
   private final AtomicBoolean appInitializationCompleted = new AtomicBoolean(false);
@@ -88,8 +90,8 @@ public abstract class AbstractScheduler<T extends BaseMessage<String>> {
 
   public synchronized List<T> loadCyclically(String targetTableName) {
     LocalDateTime now = LocalDateTime.now();
-    LocalDateTime formattedStartTime = formatTime4HalfHour(now);
-    LocalDateTime endTime = formattedStartTime.plusMinutes(30);
+    LocalDateTime formattedStartTime = scheduleTimeEvaluator.formatTimeWithDefaultInterval(now);
+    LocalDateTime endTime = formattedStartTime.plusSeconds(scheduleTimeEvaluator.intervalSeconds());
     log.info("scheduleLoader working at [{}] ,formatted at [{}], end at [{}]", now, formattedStartTime, endTime);
     return messageLoader.load(targetTableName, formattedStartTime, endTime);
   }
@@ -127,7 +129,7 @@ public abstract class AbstractScheduler<T extends BaseMessage<String>> {
   public List<T> loadFromCheckPoint(String targetTableName) {
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime startTimeFromCheckPoint = checkpointService.readCheckpoint(targetTableName);
-    LocalDateTime endTime = formatTime4HalfHour(now).plusMinutes(30);
+    LocalDateTime endTime = scheduleTimeEvaluator.formatTimeWithDefaultInterval(now).plusSeconds(scheduleTimeEvaluator.intervalSeconds());
     log.info("loadFromCheckPoint working at [{}] ,checkpoint  at [{}], end at [{}]", now, startTimeFromCheckPoint, endTime);
     return messageLoader.load(targetTableName, startTimeFromCheckPoint, endTime);
 
