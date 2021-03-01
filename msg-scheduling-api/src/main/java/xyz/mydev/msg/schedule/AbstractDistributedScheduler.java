@@ -3,7 +3,7 @@ package xyz.mydev.msg.schedule;
 import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.schedule.bean.BaseMessage;
 import xyz.mydev.msg.schedule.load.AbstractMessageLoader;
-import xyz.mydev.msg.schedule.load.checkpoint.route.CheckpointServiceRouter;
+import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,12 +27,12 @@ import static xyz.mydev.msg.schedule.load.ScheduleTimeCalculator.formatTime4Half
 @Slf4j
 public abstract class AbstractDistributedScheduler<T extends BaseMessage<String>> {
   private final AbstractMessageLoader<T> messageLoader;
-  private final CheckpointServiceRouter checkpointServiceRouter;
+  private final CheckpointService checkpointService;
 
   public AbstractDistributedScheduler(AbstractMessageLoader<T> messageLoader,
-                                      CheckpointServiceRouter checkpointServiceRouter) {
+                                      CheckpointService checkpointService) {
     this.messageLoader = messageLoader;
-    this.checkpointServiceRouter = checkpointServiceRouter;
+    this.checkpointService = checkpointService;
   }
 
   private final AtomicBoolean appInitializationCompleted = new AtomicBoolean(false);
@@ -126,7 +126,7 @@ public abstract class AbstractDistributedScheduler<T extends BaseMessage<String>
 
   public List<T> loadFromCheckPoint(String targetTableName) {
     LocalDateTime now = LocalDateTime.now();
-    LocalDateTime startTimeFromCheckPoint = checkpointServiceRouter.get(targetTableName).readCheckpoint(targetTableName);
+    LocalDateTime startTimeFromCheckPoint = checkpointService.readCheckpoint(targetTableName);
     LocalDateTime endTime = formatTime4HalfHour(now).plusMinutes(30);
     log.info("loadFromCheckPoint working at [{}] ,checkpoint  at [{}], end at [{}]", now, startTimeFromCheckPoint, endTime);
     return messageLoader.load(targetTableName, startTimeFromCheckPoint, endTime);

@@ -1,7 +1,6 @@
 package xyz.mydev.msg.schedule.load.checkpoint;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.mydev.msg.schedule.load.checkpoint.route.CheckpointServiceRouter;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -18,19 +17,19 @@ import java.util.concurrent.locks.Lock;
 @Slf4j
 public class DefaultCheckpointUpdater {
 
-  private final CheckpointServiceRouter checkpointServiceRouter;
+  private final CheckpointService checkpointService;
 
   private final ScheduledExecutorService scheduledExecutorService;
 
-  public DefaultCheckpointUpdater(CheckpointServiceRouter checkpointServiceRouter) {
-    this.checkpointServiceRouter = Objects.requireNonNull(checkpointServiceRouter);
+  public DefaultCheckpointUpdater(CheckpointService checkpointService) {
+    this.checkpointService = Objects.requireNonNull(checkpointService);
     // TODO 自定义线程池：线程池名字、个数，队列大小，拒绝策略
-    scheduledExecutorService = Executors.newScheduledThreadPool(checkpointServiceRouter.getMsgTableNames().size(), r -> new Thread(r, "cpUpdateThread"));
+    scheduledExecutorService = Executors.newScheduledThreadPool(checkpointService.getTableNames().size(), r -> new Thread(r, "cpUpdateThread"));
     // TODO 线程池初始化策略
   }
 
   public void startWorking() {
-    checkpointServiceRouter.getMap().forEach((tableName, cpService) -> {
+    checkpointService.getTableNames().forEach(tableName -> {
       // TODO 自定义线程池
       scheduledExecutorService.scheduleWithFixedDelay(() -> updateCheckpoint(tableName), 2, 30, TimeUnit.MINUTES);
     });
@@ -41,7 +40,6 @@ public class DefaultCheckpointUpdater {
   }
 
   private void updateCheckpoint(String targetTableName) {
-    CheckpointService checkpointService = checkpointServiceRouter.get(targetTableName);
     Lock scheduleLock = checkpointService.getScheduleLock(targetTableName);
 
     boolean enableSchedule = scheduleLock.tryLock();
