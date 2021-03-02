@@ -6,7 +6,7 @@ import xyz.mydev.msg.common.MessagePlatform;
 /**
  * @author ZSP
  */
-public interface Message extends BaseMessage<String>, MessagePlatform, MessageBusinessInfo {
+public interface Message extends StringMessage, MessagePlatform, MessageBusinessInfo {
 
   String getTraceId();
 

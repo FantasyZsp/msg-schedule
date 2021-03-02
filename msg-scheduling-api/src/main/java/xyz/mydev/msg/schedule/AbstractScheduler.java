@@ -1,7 +1,7 @@
 package xyz.mydev.msg.schedule;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.mydev.msg.schedule.bean.BaseMessage;
+import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.load.AbstractMessageLoader;
 import xyz.mydev.msg.schedule.load.ScheduleTimeEvaluator;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
@@ -24,7 +24,7 @@ import java.util.concurrent.locks.Lock;
  * @author ZSP
  */
 @Slf4j
-public abstract class AbstractScheduler<T extends BaseMessage<String>> {
+public abstract class AbstractScheduler<T extends StringMessage> {
   private final AbstractMessageLoader<T> messageLoader;
   private final CheckpointService checkpointService;
   private final ScheduleTimeEvaluator scheduleTimeEvaluator;

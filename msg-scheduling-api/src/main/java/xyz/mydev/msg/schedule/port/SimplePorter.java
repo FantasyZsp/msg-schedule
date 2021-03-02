@@ -6,7 +6,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.common.util.CallerRunsPolicy;
 import xyz.mydev.msg.common.util.PrefixNameThreadFactory;
-import xyz.mydev.msg.schedule.bean.BaseMessage;
+import xyz.mydev.msg.schedule.bean.StringMessage;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -23,7 +23,7 @@ import java.util.function.Function;
  */
 @Slf4j
 @Getter
-public class SimplePorter<E extends BaseMessage<String>> extends AbstractPorterThread<E> {
+public class SimplePorter<E extends StringMessage> extends AbstractPorterThread<E> {
 
   private final Function<E, Runnable> runnableFunction;
   @Setter

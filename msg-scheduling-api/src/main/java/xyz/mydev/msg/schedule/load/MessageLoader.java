@@ -1,6 +1,6 @@
 package xyz.mydev.msg.schedule.load;
 
-import xyz.mydev.msg.schedule.bean.BaseMessage;
+import xyz.mydev.msg.schedule.bean.StringMessage;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
  *
  * @author ZSP
  */
-public interface MessageLoader<T extends BaseMessage<String>> {
+public interface MessageLoader<T extends StringMessage> {
   /**
    * 从指定时间加载消息
    *
