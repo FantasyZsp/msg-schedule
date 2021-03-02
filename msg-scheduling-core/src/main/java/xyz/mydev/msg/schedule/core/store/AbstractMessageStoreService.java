@@ -25,6 +25,6 @@ public abstract class AbstractMessageStoreService {
   public <T extends BaseMessage<String>> void store(T message) {
     Objects.requireNonNull(message.getId());
     messageRepositoryRouter.resolveByMessage(message).insert(message);
-    publisher.publishEvent(new GenericLocalMessageStoreEvent<>(this, message));
+    publisher.publishEvent(new GenericLocalMessageStoreEvent<>(message));
   }
 }

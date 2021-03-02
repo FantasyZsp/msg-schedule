@@ -12,8 +12,8 @@ public class GenericLocalMessageStoreEvent<T> extends ApplicationEvent implement
 
   private final T localMessage;
 
-  public GenericLocalMessageStoreEvent(Object source, T localMessage) {
-    super(source);
+  public GenericLocalMessageStoreEvent(T localMessage) {
+    super(localMessage);
     this.localMessage = localMessage;
   }
 
