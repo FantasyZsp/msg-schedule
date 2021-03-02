@@ -20,8 +20,7 @@ public abstract class AbstractPorter<E> extends Thread {
   @Setter
   private PortExceptionHandle portExceptionHandle;
 
-  public AbstractPorter(String name,
-                        TransferQueue<E> transferQueue) {
+  public AbstractPorter(String name, TransferQueue<E> transferQueue) {
     super(name);
     this.transferQueue = transferQueue;
   }
