@@ -14,14 +14,14 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Getter
-public abstract class AbstractPorterThread<E> extends Thread {
+public abstract class AbstractPorter<E> extends Thread {
 
   private final TransferQueue<E> transferQueue;
   @Setter
   private PortExceptionHandle portExceptionHandle;
 
-  public AbstractPorterThread(String name,
-                              TransferQueue<E> transferQueue) {
+  public AbstractPorter(String name,
+                        TransferQueue<E> transferQueue) {
     super(name);
     this.transferQueue = transferQueue;
   }
@@ -73,7 +73,7 @@ public abstract class AbstractPorterThread<E> extends Thread {
   }
 
   public void init() {
-    Runtime.getRuntime().addShutdownHook((new Thread(AbstractPorterThread.this::cancel)));
+    Runtime.getRuntime().addShutdownHook((new Thread(AbstractPorter.this::cancel)));
   }
 
   @Slf4j

@@ -23,7 +23,7 @@ import java.util.function.Function;
  */
 @Slf4j
 @Getter
-public class SimplePorter<E extends StringMessage> extends AbstractPorterThread<E> {
+public class SimplePorter<E extends StringMessage> extends AbstractPorter<E> {
 
   private final Function<E, Runnable> runnableFunction;
   @Setter
