@@ -26,7 +26,7 @@ public class CallerRunsPolicy implements RejectedExecutionHandler {
     if (!e.isShutdown()) {
       int standard = 10;
       if (howBusy >= standard && howBusy % standard == 0) {
-        log.warn("任务堆积过多!当前任务总量: [{}], 累计交付给调用者执行量: [{}], 队列大小: [{}]", e.getTaskCount() + queue.size(), howBusy, e.getQueue().size());
+        log.warn("Too many task at queue! Current task count: [{}], caller invoke size: [{}], queue size: [{}]", e.getTaskCount() + queue.size(), howBusy, e.getQueue().size());
       }
       r.run();
     }
