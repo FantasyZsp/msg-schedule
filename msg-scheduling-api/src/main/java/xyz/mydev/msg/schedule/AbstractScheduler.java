@@ -5,6 +5,8 @@ import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.load.AbstractMessageLoader;
 import xyz.mydev.msg.schedule.load.ScheduleTimeEvaluator;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
+import xyz.mydev.msg.schedule.port.AbstractPorter;
+import xyz.mydev.msg.schedule.port.route.PortRouter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,59 +30,63 @@ public abstract class AbstractScheduler<T extends StringMessage> {
   private final AbstractMessageLoader<T> messageLoader;
   private final CheckpointService checkpointService;
   private final ScheduleTimeEvaluator scheduleTimeEvaluator;
+  private final PortRouter<T> portRouter;
 
   public AbstractScheduler(AbstractMessageLoader<T> messageLoader,
                            CheckpointService checkpointService,
-                           ScheduleTimeEvaluator scheduleTimeEvaluator) {
+                           ScheduleTimeEvaluator scheduleTimeEvaluator, PortRouter<T> portRouter) {
     this.messageLoader = messageLoader;
     this.checkpointService = checkpointService;
     this.scheduleTimeEvaluator = scheduleTimeEvaluator;
+    this.portRouter = portRouter;
   }
 
-  private final AtomicBoolean appInitializationCompleted = new AtomicBoolean(false);
+  private final AtomicBoolean appStarted = new AtomicBoolean(false);
 
   /**
    * 存在同实例服务正在检查点加载
    */
-  abstract boolean isLoadingFromCp(String targetTableName);
+  abstract boolean isAppUpLoading(String targetTableName);
 
-  abstract String getLockKeyOfLoadingFromCheckpoint(String targetTableName);
+  abstract String getAppUpLoadingLockKey(String targetTableName);
 
-  abstract Lock getLockOfLoadingFromCheckpoint(String targetTableName);
+  abstract Lock getAppUpLoadingLock(String targetTableName);
 
-  abstract String getLockKeyOfLoadCyclically(String targetTableName);
+  abstract String getLoadCyclicallyLockKey(String targetTableName);
 
-  abstract Lock getLockOfLoadCyclically(String targetTableName);
-
-  private Lock lockOfLoadingFromCheckpoint;
-  private Lock lockOfLoadCyclically;
+  abstract Lock getLoadCyclicallyLock(String targetTableName);
 
   /**
    * TODO 1. 线程池定时调度 2. 路由
    */
   public void scheduleLoadCyclically(String targetTableName) {
 
-    if (!appInitializationCompleted.get()) {
+    if (!appStarted.get()) {
       log.warn("app is starting, skip this task");
       return;
     }
 
-    if (isLoadingFromCp(targetTableName)) {
+    if (isAppUpLoading(targetTableName)) {
       log.info("there is a service starting, skip this task");
       return;
     }
 
-    if (getLockOfLoadCyclically(targetTableName).tryLock()) {
+    Lock loadCyclicallyLock = getLoadCyclicallyLock(targetTableName);
+
+    if (loadCyclicallyLock.tryLock()) {
       log.info("lock LOAD_CYCLICALLY success");
       try {
-        // TODO 投递
+
         List<T> msgListWillSend = loadCyclically(targetTableName);
-        log.info("invoke business success");
+
+        transfer(targetTableName, msgListWillSend);
+
+        log.info("invoke schedule business success");
 
       } catch (Throwable ex) {
-        log.info("business ex");
+        log.info("schedule business ex");
       } finally {
-        getLockOfLoadCyclically(targetTableName).unlock();
+        loadCyclicallyLock.unlock();
       }
     } else {
       log.info("loadLock failed");
@@ -102,19 +108,21 @@ public abstract class AbstractScheduler<T extends StringMessage> {
    */
   public void onStart(String targetTableName) throws Exception {
 
-    if (getLockOfLoadingFromCheckpoint(targetTableName).tryLock()) {
+    if (getAppUpLoadingLock(targetTableName).tryLock()) {
       log.info("load delay msg in db when app up");
       try {
         log.info("invoke loadFromCheckPoint");
         List<T> msgListWillSend = loadFromCheckPoint(targetTableName);
-        // TODO 投递
+
+        transfer(targetTableName, msgListWillSend);
+
         log.info("invoke loadFromCheckPoint success");
 
       } catch (Throwable ex) {
         log.error("loadFromCheckPoint ex", ex);
       } finally {
         try {
-          getLockOfLoadingFromCheckpoint(targetTableName).unlock();
+          getAppUpLoadingLock(targetTableName).unlock();
         } catch (Throwable ex) {
           log.warn("checkPointLoadLock unlock ex", ex);
         }
@@ -123,7 +131,14 @@ public abstract class AbstractScheduler<T extends StringMessage> {
     } else {
       log.info("delay msg is loading from db by other app instance while I am starting");
     }
-    appInitializationCompleted.set(true);
+    appStarted.set(true);
+  }
+
+  private void transfer(String targetTableName, List<T> msgListWillSend) {
+    AbstractPorter<T> porter = portRouter.get(targetTableName);
+    for (T msg : msgListWillSend) {
+      porter.transfer(msg);
+    }
   }
 
   public List<T> loadFromCheckPoint(String targetTableName) {
@@ -132,7 +147,6 @@ public abstract class AbstractScheduler<T extends StringMessage> {
     LocalDateTime endTime = scheduleTimeEvaluator.formatTimeWithDefaultInterval(now).plusSeconds(scheduleTimeEvaluator.intervalSeconds());
     log.info("loadFromCheckPoint working at [{}] ,checkpoint  at [{}], end at [{}]", now, startTimeFromCheckPoint, endTime);
     return messageLoader.load(targetTableName, startTimeFromCheckPoint, endTime);
-
   }
 
 
