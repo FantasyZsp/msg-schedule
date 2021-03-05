@@ -27,29 +27,16 @@ public class DefaultPorter<E extends StringMessage> extends AbstractPorter<E> {
   private ExecutorService portExecutor;
   private ExecutorService transferExecutor;
 
+  private final TransferTaskFactory<E> transferTaskFactory;
+  private final PortTaskFactory<E> portTaskFactory;
+
   public DefaultPorter(String name,
-                       TransferQueue<E> transferQueue) {
+                       TransferQueue<E> transferQueue,
+                       TransferTaskFactory<E> transferTaskFactory,
+                       PortTaskFactory<E> portTaskFactory) {
     super(name, transferQueue);
-  }
-
-  @Override
-  public ExecutorService getTransferExecutor() {
-    return transferExecutor;
-  }
-
-  @Override
-  public ExecutorService getPortExecutor() {
-    return portExecutor;
-  }
-
-  @Override
-  public Runnable newPortTask(E e) {
-    return null;
-  }
-
-  @Override
-  public Runnable newTransferTask(E e) {
-    return () -> getTransferQueue().put(e);
+    this.transferTaskFactory = transferTaskFactory;
+    this.portTaskFactory = portTaskFactory;
   }
 
   @Override
