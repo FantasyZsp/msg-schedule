@@ -6,7 +6,6 @@ import java.util.concurrent.ExecutorService;
 /**
  * transfer and port elements
  * <p>
- * TODO 设计上分离 transfer port
  *
  * @author ZSP
  */
@@ -29,6 +28,7 @@ public interface Porter<E> {
 
   ExecutorService getPortExecutor();
 
+  @NotNull
   PortTaskFactory<E> getPortTaskFactory();
 
   default void port(E e) {
