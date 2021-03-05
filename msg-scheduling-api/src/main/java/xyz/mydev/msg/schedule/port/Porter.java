@@ -3,17 +3,19 @@ package xyz.mydev.msg.schedule.port;
 import java.util.concurrent.ExecutorService;
 
 /**
+ * transfer and port elements
+ *
  * @author ZSP
  */
 public interface Porter<E> {
 
-  ExecutorService getPutExecutor();
+  ExecutorService getTransferExecutor();
 
   ExecutorService getPortExecutor();
 
   Runnable newPortTask(E e);
 
-  Runnable newPutTask(E e);
+  Runnable newTransferTask(E e);
 
   default void port(E e) {
 
@@ -28,15 +30,15 @@ public interface Porter<E> {
     }
   }
 
-  default void put(E e) {
+  default void transfer(E e) {
 
-    Runnable putTask = newPutTask(e);
+    Runnable transferTask = newTransferTask(e);
 
-    if (putTask != null) {
-      if (getPutExecutor() == null) {
-        putTask.run();
+    if (transferTask != null) {
+      if (getTransferExecutor() == null) {
+        transferTask.run();
       } else {
-        getPutExecutor().execute(putTask);
+        getTransferExecutor().execute(transferTask);
       }
     }
   }

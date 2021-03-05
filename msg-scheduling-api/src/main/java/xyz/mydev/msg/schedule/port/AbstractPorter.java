@@ -67,8 +67,8 @@ public abstract class AbstractPorter<E> extends Thread implements Porter<E> {
 
   protected void shutDownExecutors() {
     // input first
-    if (getPutExecutor() != null) {
-      getPutExecutor().shutdownNow();
+    if (getTransferExecutor() != null) {
+      getTransferExecutor().shutdownNow();
     }
 
     if (getPortExecutor() != null) {

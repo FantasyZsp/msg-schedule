@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 public class DefaultPorter<E extends StringMessage> extends AbstractPorter<E> {
 
   private ExecutorService portExecutor;
-  private ExecutorService putExecutor;
+  private ExecutorService transferExecutor;
 
   public DefaultPorter(String name,
                        TransferQueue<E> transferQueue) {
@@ -33,8 +33,8 @@ public class DefaultPorter<E extends StringMessage> extends AbstractPorter<E> {
   }
 
   @Override
-  public ExecutorService getPutExecutor() {
-    return putExecutor;
+  public ExecutorService getTransferExecutor() {
+    return transferExecutor;
   }
 
   @Override
@@ -48,7 +48,7 @@ public class DefaultPorter<E extends StringMessage> extends AbstractPorter<E> {
   }
 
   @Override
-  public Runnable newPutTask(E e) {
+  public Runnable newTransferTask(E e) {
     return () -> getTransferQueue().put(e);
   }
 
@@ -68,10 +68,10 @@ public class DefaultPorter<E extends StringMessage> extends AbstractPorter<E> {
       );
     }
 
-    if (putExecutor == null) {
-      this.putExecutor = new ThreadPoolExecutor(4, 8, 1, TimeUnit.HOURS,
+    if (transferExecutor == null) {
+      this.transferExecutor = new ThreadPoolExecutor(4, 8, 1, TimeUnit.HOURS,
         new LinkedBlockingQueue<>(2000),
-        new PrefixNameThreadFactory(getName() + "-put"),
+        new PrefixNameThreadFactory(getName() + "-trans"),
         new CallerRunsPolicy(getTransferQueue().getTargetQueue())
       );
     }

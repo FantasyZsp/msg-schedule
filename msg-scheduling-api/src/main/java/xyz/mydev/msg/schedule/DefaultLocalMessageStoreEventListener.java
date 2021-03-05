@@ -23,7 +23,7 @@ public class DefaultLocalMessageStoreEventListener<T extends StringMessage> impl
     String targetTableName = localMessage.getTargetTableName();
     AbstractPorter<T> porter = router.get(targetTableName);
     if (porter != null) {
-      porter.put(localMessage);
+      porter.transfer(localMessage);
     } else {
       log.warn("porter 404 for {}, please check config", targetTableName);
     }
