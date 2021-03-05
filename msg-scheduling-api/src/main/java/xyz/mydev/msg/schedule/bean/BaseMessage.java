@@ -18,6 +18,9 @@ public interface BaseMessage<T> extends MessageType {
 
   Integer getStatus();
 
+  /**
+   * 隶属的表名
+   */
   String getTargetTableName();
 
   /**

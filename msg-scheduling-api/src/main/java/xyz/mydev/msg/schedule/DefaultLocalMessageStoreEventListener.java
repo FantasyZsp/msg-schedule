@@ -17,7 +17,6 @@ public class DefaultLocalMessageStoreEventListener<T extends StringMessage> impl
     this.router = abstractPorter;
   }
 
-
   @Override
   public void onEvent(LocalMessageStoreEvent<T> localMessageStoreEvent) {
     T localMessage = localMessageStoreEvent.getLocalMessage();

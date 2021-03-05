@@ -15,5 +15,4 @@ public interface PortRouter<T extends StringMessage> extends Router<String, Abst
     return get(msg.getTargetTableName());
   }
 
-
 }

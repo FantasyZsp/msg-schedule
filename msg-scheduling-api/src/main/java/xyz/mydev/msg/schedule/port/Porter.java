@@ -1,35 +1,47 @@
 package xyz.mydev.msg.schedule.port;
 
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author ZSP
  */
 public interface Porter<E> {
 
+  ExecutorService getPutExecutor();
 
-  Executor getPutExecutor();
+  ExecutorService getPortExecutor();
 
-  Executor getPortExecutor();
+  Runnable newPortTask(E e);
 
-  /**
-   * 直接调度msg到mq平台
-   */
-  void port(E msg);
+  Runnable newPutTask(E e);
 
+  default void port(E e) {
 
-  default void portAsync(E msg) {
-    getPortExecutor().execute(() -> port(msg));
+    Runnable portTask = newPortTask(e);
+
+    if (portTask != null) {
+      if (getPortExecutor() == null) {
+        portTask.run();
+      } else {
+        getPortExecutor().execute(portTask);
+      }
+    }
   }
 
-  void put(E msg);
+  default void put(E e) {
 
-  /**
-   * 将要投递的消息暂存到中转队列
-   */
-  default void putAsync(E msg) {
-    getPutExecutor().execute(() -> put(msg));
+    Runnable putTask = newPutTask(e);
+
+    if (putTask != null) {
+      if (getPutExecutor() == null) {
+        putTask.run();
+      } else {
+        getPutExecutor().execute(putTask);
+      }
+    }
   }
 
+  void start();
 
+  void shutdown();
 }

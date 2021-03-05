@@ -4,8 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.Executor;
-
 /**
  * 消息搬运工
  * 负责消息的投递
@@ -16,10 +14,12 @@ import java.util.concurrent.Executor;
  */
 @Slf4j
 @Getter
-public abstract class AbstractPorter<E> extends Thread {
+public abstract class AbstractPorter<E> extends Thread implements Porter<E> {
 
   private final TransferQueue<E> transferQueue;
-  public AbstractPorter(String name, TransferQueue<E> transferQueue) {
+
+  public AbstractPorter(String name,
+                        TransferQueue<E> transferQueue) {
     super(name);
     this.transferQueue = transferQueue;
   }
@@ -32,8 +32,8 @@ public abstract class AbstractPorter<E> extends Thread {
    */
   @Override
   public void run() {
-    log.info("Porter [{}] start working...", getName());
-    transferQueue.start();
+
+    beforeWorking();
 
     while (!Thread.currentThread().isInterrupted()) {
       try {
@@ -53,26 +53,32 @@ public abstract class AbstractPorter<E> extends Thread {
     }
   }
 
-  public void cancel() {
+  protected void beforeWorking() {
+    log.info("Porter [{}] start working...", getName());
+    transferQueue.start();
+  }
+
+  @Override
+  public void shutdown() {
     interrupt();
+    shutDownExecutors();
     transferQueue.destroy();
   }
 
-  /**
-   * 消息需要经 transferQueue 中转处理
-   */
-  public void put(E msg) {
-    if (msg != null) {
-      if (getPutExecutor() == null) {
-        transferQueue.put(msg);
-      } else {
-        putAsync(msg);
-      }
+  protected void shutDownExecutors() {
+    // input first
+    if (getPutExecutor() != null) {
+      getPutExecutor().shutdownNow();
+    }
+
+    if (getPortExecutor() != null) {
+      getPortExecutor().shutdownNow();
     }
   }
 
+
   public void init() {
-    Runtime.getRuntime().addShutdownHook((new Thread(AbstractPorter.this::cancel)));
+    Runtime.getRuntime().addShutdownHook((new Thread(AbstractPorter.this::shutdown)));
   }
 
   @Slf4j
@@ -80,24 +86,4 @@ public abstract class AbstractPorter<E> extends Thread {
     public void handleException(Throwable ignored) {
     }
   }
-
-
-  /**
-   * 直接调度msg到mq平台
-   */
-  public abstract void port(E msg);
-
-  /**
-   * 将要投递的消息暂存到中转队列
-   */
-  protected void putAsync(E msg) {
-    getPutExecutor().execute(() -> transferQueue.put(msg));
-  }
-
-
-  public abstract Executor getPutExecutor();
-
-  public abstract Executor getPortExecutor();
-
-
 }
