@@ -28,6 +28,5 @@ public class DefaultLocalMessageStoreEventListener<T extends StringMessage> impl
     } else {
       log.warn("porter 404 for {}, please check config", targetTableName);
     }
-
   }
 }

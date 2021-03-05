@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.Executor;
+
 /**
  * 消息搬运工
  * 负责消息的投递
@@ -17,19 +19,13 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractPorter<E> extends Thread {
 
   private final TransferQueue<E> transferQueue;
-  @Setter
-  private PortExceptionHandle portExceptionHandle;
-
   public AbstractPorter(String name, TransferQueue<E> transferQueue) {
     super(name);
     this.transferQueue = transferQueue;
   }
 
-  /**
-   * 直接调度msg到mq平台
-   */
-  public abstract void port(E msg);
-
+  @Setter
+  private PortExceptionHandle portExceptionHandle;
 
   /**
    * 这里并没有在模板流程里解决掉消费的可靠性，如果需要，子类请覆盖此方法。
@@ -67,7 +63,11 @@ public abstract class AbstractPorter<E> extends Thread {
    */
   public void put(E msg) {
     if (msg != null) {
-      transferQueue.put(msg);
+      if (getPutExecutor() == null) {
+        transferQueue.put(msg);
+      } else {
+        putAsync(msg);
+      }
     }
   }
 
@@ -77,8 +77,27 @@ public abstract class AbstractPorter<E> extends Thread {
 
   @Slf4j
   public static class PortExceptionHandle {
-    public void handleException(Throwable tx) {
+    public void handleException(Throwable ignored) {
     }
   }
+
+
+  /**
+   * 直接调度msg到mq平台
+   */
+  public abstract void port(E msg);
+
+  /**
+   * 将要投递的消息暂存到中转队列
+   */
+  protected void putAsync(E msg) {
+    getPutExecutor().execute(() -> transferQueue.put(msg));
+  }
+
+
+  public abstract Executor getPutExecutor();
+
+  public abstract Executor getPortExecutor();
+
 
 }

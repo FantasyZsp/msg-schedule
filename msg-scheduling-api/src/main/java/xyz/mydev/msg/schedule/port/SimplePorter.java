@@ -42,6 +42,17 @@ public class SimplePorter<E extends StringMessage> extends AbstractPorter<E> {
     executor.execute(runnableFunction.apply(msg));
   }
 
+
+  @Override
+  public Executor getPutExecutor() {
+    return null;
+  }
+
+  @Override
+  public Executor getPortExecutor() {
+    return executor;
+  }
+
   @Override
   public void init() {
     super.init();
@@ -50,10 +61,12 @@ public class SimplePorter<E extends StringMessage> extends AbstractPorter<E> {
 
   public void initExecutor() {
     log.info("init porter executor");
-    this.executor = new ThreadPoolExecutor(4, 8, 1, TimeUnit.HOURS,
-      new LinkedBlockingQueue<>(2000),
-      new PrefixNameThreadFactory("PorterPool"),
-      new CallerRunsPolicy(getTransferQueue().getTargetQueue())
-    );
+    if (executor == null) {
+      this.executor = new ThreadPoolExecutor(4, 8, 1, TimeUnit.HOURS,
+        new LinkedBlockingQueue<>(2000),
+        new PrefixNameThreadFactory("PorterPool"),
+        new CallerRunsPolicy(getTransferQueue().getTargetQueue())
+      );
+    }
   }
 }
