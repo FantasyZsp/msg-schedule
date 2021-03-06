@@ -34,7 +34,8 @@ public abstract class AbstractScheduler<T extends StringMessage> {
 
   public AbstractScheduler(AbstractMessageLoader<T> messageLoader,
                            CheckpointService checkpointService,
-                           ScheduleTimeEvaluator scheduleTimeEvaluator, PortRouter<T> portRouter) {
+                           ScheduleTimeEvaluator scheduleTimeEvaluator,
+                           PortRouter<T> portRouter) {
     this.messageLoader = messageLoader;
     this.checkpointService = checkpointService;
     this.scheduleTimeEvaluator = scheduleTimeEvaluator;
@@ -46,18 +47,14 @@ public abstract class AbstractScheduler<T extends StringMessage> {
   /**
    * 存在同实例服务正在检查点加载
    */
-  abstract boolean isAppUpLoading(String targetTableName);
+  abstract boolean isScheduling(String targetTableName);
 
-  abstract String getAppUpLoadingLockKey(String targetTableName);
+  abstract String getScheduleLockKey(String targetTableName);
 
-  abstract Lock getAppUpLoadingLock(String targetTableName);
-
-  abstract String getLoadCyclicallyLockKey(String targetTableName);
-
-  abstract Lock getLoadCyclicallyLock(String targetTableName);
+  abstract Lock getScheduleLock(String targetTableName);
 
   /**
-   * TODO 1. 线程池定时调度 2. 路由
+   * TODO 封装到Task中
    */
   public void scheduleLoadCyclically(String targetTableName) {
 
@@ -66,12 +63,12 @@ public abstract class AbstractScheduler<T extends StringMessage> {
       return;
     }
 
-    if (isAppUpLoading(targetTableName)) {
+    if (isScheduling(targetTableName)) {
       log.info("there is a service starting, skip this task");
       return;
     }
 
-    Lock loadCyclicallyLock = getLoadCyclicallyLock(targetTableName);
+    Lock loadCyclicallyLock = this.getScheduleLock(targetTableName);
 
     if (loadCyclicallyLock.tryLock()) {
       log.info("lock LOAD_CYCLICALLY success");
@@ -108,7 +105,7 @@ public abstract class AbstractScheduler<T extends StringMessage> {
    */
   public void onStart(String targetTableName) throws Exception {
 
-    if (getAppUpLoadingLock(targetTableName).tryLock()) {
+    if (getScheduleLock(targetTableName).tryLock()) {
       log.info("load delay msg in db when app up");
       try {
         log.info("invoke loadFromCheckPoint");
@@ -122,7 +119,7 @@ public abstract class AbstractScheduler<T extends StringMessage> {
         log.error("loadFromCheckPoint ex", ex);
       } finally {
         try {
-          getAppUpLoadingLock(targetTableName).unlock();
+          getScheduleLock(targetTableName).unlock();
         } catch (Throwable ex) {
           log.warn("checkPointLoadLock unlock ex", ex);
         }
