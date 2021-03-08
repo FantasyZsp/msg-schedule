@@ -49,13 +49,9 @@ public abstract class AbstractScheduler<T extends StringMessage> {
    */
   abstract boolean isScheduling(String targetTableName);
 
-  abstract String getScheduleLockKey(String targetTableName);
-
   abstract Lock getScheduleLock(String targetTableName);
 
-  /**
-   * TODO 封装到Task中
-   */
+
   public void scheduleLoadCyclically(String targetTableName) {
 
     if (!appStarted.get()) {
@@ -63,72 +59,56 @@ public abstract class AbstractScheduler<T extends StringMessage> {
       return;
     }
 
-    if (isScheduling(targetTableName)) {
-      log.info("there is a service starting, skip this task");
-      return;
-    }
-
-    Lock loadCyclicallyLock = this.getScheduleLock(targetTableName);
-
-    if (loadCyclicallyLock.tryLock()) {
-      log.info("lock LOAD_CYCLICALLY success");
+    Lock scheduleLock = getScheduleLock(targetTableName);
+    if (scheduleLock.tryLock()) {
+      log.info("lock scheduleLoadCyclically success");
       try {
 
         List<T> msgListWillSend = loadCyclically(targetTableName);
-
+        log.info("invoke transfer {} msg", msgListWillSend.size());
         transfer(targetTableName, msgListWillSend);
-
         log.info("invoke schedule business success");
 
       } catch (Throwable ex) {
-        log.info("schedule business ex");
+        log.error("schedule business ex", ex);
       } finally {
-        loadCyclicallyLock.unlock();
+        try {
+          scheduleLock.unlock();
+        } catch (Throwable ex) {
+          log.warn("checkPointLoadLock unlock ex", ex);
+        }
       }
     } else {
-      log.info("loadLock failed");
+      log.info("there is a task invoking by other app instance, so skip this one");
     }
   }
 
 
-  public synchronized List<T> loadCyclically(String targetTableName) {
-    LocalDateTime now = LocalDateTime.now();
-    LocalDateTime formattedStartTime = scheduleTimeEvaluator.formatTimeWithDefaultInterval(now);
-    LocalDateTime endTime = formattedStartTime.plusSeconds(scheduleTimeEvaluator.intervalSeconds());
-    log.info("scheduleLoader working at [{}] ,formatted at [{}], end at [{}]", now, formattedStartTime, endTime);
-    return messageLoader.load(targetTableName, formattedStartTime, endTime);
-  }
 
 
-  /**
-   * 应用启动时
-   */
-  public void onStart(String targetTableName) throws Exception {
 
-    if (getScheduleLock(targetTableName).tryLock()) {
+  public void loadOnStart(String targetTableName) {
+    Lock scheduleLock = getScheduleLock(targetTableName);
+    if (scheduleLock.tryLock()) {
       log.info("load delay msg in db when app up");
       try {
-        log.info("invoke loadFromCheckPoint");
         List<T> msgListWillSend = loadFromCheckPoint(targetTableName);
-
+        log.info("invoke transfer {} msg", msgListWillSend.size());
         transfer(targetTableName, msgListWillSend);
-
-        log.info("invoke loadFromCheckPoint success");
+        log.info("invoke schedule business success");
 
       } catch (Throwable ex) {
         log.error("loadFromCheckPoint ex", ex);
       } finally {
         try {
-          getScheduleLock(targetTableName).unlock();
+          scheduleLock.unlock();
         } catch (Throwable ex) {
           log.warn("checkPointLoadLock unlock ex", ex);
         }
       }
-
     } else {
-      log.info("delay msg is loading from db by other app instance while I am starting");
+      log.info("there is a task invoking by other app instance, so skip this one");
     }
-    appStarted.set(true);
   }
 
   private void transfer(String targetTableName, List<T> msgListWillSend) {
@@ -144,6 +124,14 @@ public abstract class AbstractScheduler<T extends StringMessage> {
     LocalDateTime endTime = scheduleTimeEvaluator.formatTimeWithDefaultInterval(now).plusSeconds(scheduleTimeEvaluator.intervalSeconds());
     log.info("loadFromCheckPoint working at [{}] ,checkpoint  at [{}], end at [{}]", now, startTimeFromCheckPoint, endTime);
     return messageLoader.load(targetTableName, startTimeFromCheckPoint, endTime);
+  }
+
+  public synchronized List<T> loadCyclically(String targetTableName) {
+    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime formattedStartTime = scheduleTimeEvaluator.formatTimeWithDefaultInterval(now);
+    LocalDateTime endTime = formattedStartTime.plusSeconds(scheduleTimeEvaluator.intervalSeconds());
+    log.info("scheduleLoader working at [{}] ,formatted at [{}], end at [{}]", now, formattedStartTime, endTime);
+    return messageLoader.load(targetTableName, formattedStartTime, endTime);
   }
 
 

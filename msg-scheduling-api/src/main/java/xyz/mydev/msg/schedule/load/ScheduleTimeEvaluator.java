@@ -16,7 +16,7 @@ public interface ScheduleTimeEvaluator {
    * @param now 当前时间，需要被校准
    * @return 校准后时间
    */
-  default LocalDateTime formatTime4HalfHour(LocalDateTime now) {
+  default LocalDateTime formatTimeWithHalfHour(LocalDateTime now) {
 
     final int halfHour = 30;
 
@@ -34,7 +34,7 @@ public interface ScheduleTimeEvaluator {
   }
 
   default LocalDateTime formatTimeWithDefaultInterval(LocalDateTime now) {
-    return formatTime4HalfHour(now);
+    return formatTimeWithHalfHour(now);
   }
 
   /**
