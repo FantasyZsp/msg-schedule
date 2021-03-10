@@ -96,7 +96,6 @@ public class ScheduleTask implements Runnable, TaskTimeType {
     }
 
     invokeWhenAppStart = Boolean.FALSE;
-
   }
 
 
@@ -105,6 +104,7 @@ public class ScheduleTask implements Runnable, TaskTimeType {
       porter.transfer(stringMessage);
     }
   }
+
 
   private List<? extends StringMessage> load(String targetTableName) {
     LocalDateTime now = LocalDateTime.now();

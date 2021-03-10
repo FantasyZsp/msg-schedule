@@ -33,6 +33,7 @@ public abstract class AbstractCheckpointScheduler {
   }
 
   public void start() {
+    // TODO 调整为外部化配置提供需要调度的列表
     checkpointService.getTableNames().forEach(tableName -> {
       CheckpointUpdateStrategy updateStrategy = checkpointService.getUpdateStrategy(tableName);
       if (updateStrategy != null) {

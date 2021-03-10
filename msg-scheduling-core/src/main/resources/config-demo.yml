@@ -10,18 +10,22 @@ msg-shedule:
     checkpoint-executor:
       min-thread: 2 # 需要检查的表个数
       max-thread: 2 # 需要检查的表个数
-    default-schedule-delay:
-      checkpoint-delay: 30 # 默认不写30分钟维护一次，route中不写默认以此值为默认值
-      load-delay: 30 # 默认不写30分钟维护一次，route中不写默认以此值为默认值
+
+
+    default-schedule-interval:
+      checkpoint-interval: 30 # 默认不写30分钟维护一次，route中不写默认以此值为默认值
+      load-interval: 30 # 默认不写30分钟维护一次，route中不写默认以此值为默认值
+
+
     route: # 表与调度组件关系。调度组件包含 MessageRepository、TransferQueue
       load-from-repository-api: true # 配置后，需要调度的表从 MessageRepository 实现类获取，tables中仅作为调度参数；当false时，调度的table对象从tables属性中获取，未指出的不调度。
       tables:
-        msgTableA: # 消息表名，仓储层将实现接口与此对应(不一定就是db表名，仅为了区分)
-          checkpoint-schedule-delay: 30 # 30分钟维护一次
-          load-schedule-delay: 30 # 30分钟调度一次；对于延时消息，预加载30分钟的内容或检查点到格式化时间的内容；对于事务消息，前置检查30分钟的消息或检查点到当前时间；
-        msgTableB:
-          checkpoint-schedule-delay: 30
-          load-schedule-delay: 30
+        delayMsgTableA: # 消息表名，仓储层将实现接口与此对应(不一定就是db表名，仅为了区分)
+          checkpoint-interval: 15 # 15分钟维护一次
+          load-interval: 30 # 30分钟调度一次；对于延时消息，预加载30分钟的内容或检查点到格式化时间的内容；对于事务消息，前置检查30分钟的消息或检查点到当前时间；
+        txMsgTableB:
+          checkpoint-interval: 15
+          load-interval: 15
         msgTableC: # 不指定，就遵从默认配置。
         msgTableD:
   message-queue: # 配置平台实现
