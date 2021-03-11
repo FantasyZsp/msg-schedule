@@ -130,35 +130,6 @@ public class ScheduleTask implements Runnable, TaskTimeType {
     return messageLoader.load(targetTableName, startTime, endTime);
   }
 
-  /**
-   * 根据外部化调度配置，实现指定间隔和频次的加载
-   * 这里需要给出最终得到的 时间加载区间
-   */
-  protected LocalDateTime getLoadStartTime(String targetTableName, LocalDateTime processTime) {
-
-    LocalDateTime startTime;
-
-    if (TaskTimeTypeEnum.CheckpointTimeTask.equals(getTaskTimeType())) {
-      startTime = checkpointService.readCheckpoint(targetTableName);
-    } else {
-      startTime = scheduleTimeEvaluator.formatTimeWithDefaultInterval(processTime);
-    }
-
-    return startTime;
-  }
-
-  protected LocalDateTime[] getLoadEndTime(String targetTableName, LocalDateTime processTime, LocalDateTime startTime) {
-
-    LocalDateTime endTime = null;
-
-    if (TaskTimeTypeEnum.CheckpointTimeTask.equals(getTaskTimeType())) {
-      startTime = checkpointService.readCheckpoint(targetTableName);
-    }
-
-
-    return new LocalDateTime[]{startTime, startTime};
-  }
-
 
   @Override
   public TaskTimeTypeEnum getTaskTimeType() {

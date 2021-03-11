@@ -38,7 +38,7 @@ public class DefaultCheckpointUpdateStrategy implements CheckpointUpdateStrategy
         // 调度任务拿到的检查点一定是可靠的、最新的，阻塞写入
         writeLock.lock();
         try {
-          LocalDateTime next = checkpointService.readNextCheckpoint(targetTableName);
+          LocalDateTime next = checkpointService.loadNextCheckpoint(targetTableName);
           checkpointService.writeCheckpoint(targetTableName, next);
           log.info("update checkpoint success , {}", next);
         } finally {

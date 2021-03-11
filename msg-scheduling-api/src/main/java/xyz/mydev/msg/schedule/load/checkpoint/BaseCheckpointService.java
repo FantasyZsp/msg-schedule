@@ -32,17 +32,17 @@ public interface BaseCheckpointService<K, CP> {
    * @param currentCheckpoint 当前检查点
    * @return 返回下个检查点，永远不会为null
    */
-  CP readNextCheckpoint(K targetTableName, CP currentCheckpoint);
+  CP loadNextCheckpoint(K targetTableName, CP currentCheckpoint);
 
   /**
    * 读取下个检查点。当存储或缓存中找不到时，默认返回 当前的检查点。
-   * 对{@link BaseCheckpointService#readNextCheckpoint(K, CP)}的封装，内部获取 currentCheckpoint
+   * 对{@link BaseCheckpointService#loadNextCheckpoint(K, CP)}的封装，内部获取 currentCheckpoint
    * 当前检查点最起码会是 {@link BaseCheckpointService#defaultStartCheckpoint(K)}
    *
    * @param targetTableName 所服务的消息表名称
    * @return 返回下个检查点，永远不会为null
    */
-  CP readNextCheckpoint(K targetTableName);
+  CP loadNextCheckpoint(K targetTableName);
 
   /**
    * 写入检查点。

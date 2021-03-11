@@ -9,6 +9,7 @@
     <module>msg-scheduling-core</module>
     <module>msg-scheduling-delay</module>
     <module>msg-scheduling-tx</module>
+    <module>msg-scheduling-checkpoint</module>
   </modules>
 
 
@@ -43,6 +44,13 @@
     <commons_lang3_version>3.9</commons_lang3_version>
     <commons_collections_version>3.2</commons_collections_version>
   </properties>
+
+  <repositories>
+    <repository>
+      <id>ss</id>
+      <url>http://192.168.2.112:8081/repository/maven-public/</url>
+    </repository>
+  </repositories>
 
   <dependencies>
     <!-- Lombok框架 -->
