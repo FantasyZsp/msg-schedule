@@ -10,15 +10,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 
@@ -41,46 +38,54 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
   private final Map<String, ReadWriteLock> writeLockPool = new ConcurrentHashMap<>();
   private final Map<String, Lock> scheduleLockPool = new ConcurrentHashMap<>();
   private final RedissonClient redissonClient;
+
+  /**
+   * immutable
+   * <p>
+   * hor ZSP
+   */
+  private final List<String> tableNames;
   private final MessageRepositoryRouter<? extends StringMessage> messageRepositoryRouter;
 
   public RedisCheckPointServiceImpl(RedissonClient redissonClient,
                                     MessageRepositoryRouter<? extends StringMessage> repositoryRouter,
-                                    Set<String> tableNames) {
+                                    Collection<String> tableNames) {
     Objects.requireNonNull(redissonClient);
     this.messageRepositoryRouter = Objects.requireNonNull(repositoryRouter);
     this.redissonClient = redissonClient;
+    this.tableNames = List.copyOf(tableNames);
 
     // 初始化
-    initCpHolderPool(tableNames);
-    initWriteLockPool(tableNames);
-    initScheduleLockPool(tableNames);
+    // TODO 考虑重构到初始化方法
+    initCpHolderPool();
+    initWriteLockPool();
+    initScheduleLockPool();
 
   }
 
-  private void initScheduleLockPool(Set<String> tableNames) {
+  private void initScheduleLockPool() {
 
     for (String tableName : tableNames) {
       scheduleLockPool.computeIfAbsent(tableName, currentTableName ->
-        redissonClient.getLock(getScheduleLockName(tableName)));
+        redissonClient.getLock(getScheduleLockName(currentTableName)));
     }
   }
 
-  private void initWriteLockPool(Set<String> tableNames) {
-    for (String tableName : tableNames) {
+  private void initWriteLockPool() {
+    for (String tableName : this.tableNames) {
       writeLockPool.computeIfAbsent(tableName, currentTableName ->
-        redissonClient.getReadWriteLock(getWriteLockName(tableName)));
+        redissonClient.getReadWriteLock(getWriteLockName(currentTableName)));
     }
   }
 
-  private void initCpHolderPool(Set<String> tableNames) {
-    for (String tableName : tableNames) {
+  private void initCpHolderPool() {
+    for (String tableName : this.tableNames) {
       cpHolderPool.computeIfAbsent(tableName, currentTableName ->
-        redissonClient.getBucket(getCpHolderName(tableName)));
+        redissonClient.getBucket(getCpHolderName(currentTableName)));
     }
   }
 
-  // TODO 更新策略实现
-  private final CheckPointUpdater updater = new CheckPointUpdater(this);
+  private final CheckpointUpdater updater = new CheckpointUpdater(this);
 
 
   /**
@@ -121,7 +126,8 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
   public LocalDateTime readCheckpoint(String targetTableName) {
     return getFromHolder(targetTableName)
       .orElseGet(() -> {
-        Lock writeLock = writeLockPool.get(targetTableName).writeLock();
+        Lock writeLock = writeLockPool.computeIfAbsent(targetTableName, currentTableName ->
+          redissonClient.getReadWriteLock(getWriteLockName(currentTableName))).writeLock();
         if (writeLock.tryLock()) {
           try {
             LocalDateTime checkpoint = messageRepositoryRouter.get(targetTableName).findCheckpoint().orElse(defaultStartCheckpoint(targetTableName));
@@ -172,15 +178,8 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
 
   @Override
   public ReadWriteLock getReadWriteLock(String targetTableName) {
-    return writeLockPool.get(getWriteLockName(targetTableName));
-  }
-
-  public void schedule() {
-    updater.startWorking();
-  }
-
-  public void stop() {
-    updater.stopWorking();
+    return writeLockPool.computeIfAbsent(targetTableName, currentTableName ->
+      redissonClient.getReadWriteLock(getWriteLockName(currentTableName)));
   }
 
   @Override
@@ -198,39 +197,38 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
 
   @Override
   public Lock getScheduleLock(String targetTableName) {
-    return scheduleLockPool.get(targetTableName);
+    return scheduleLockPool.computeIfAbsent(targetTableName, currentTableName ->
+      redissonClient.getLock(getScheduleLockName(currentTableName)));
   }
 
   @Override
   public List<String> getTableNames() {
-    return null;
+    return tableNames;
   }
 
   @Override
   public CheckpointUpdateStrategy getUpdateStrategy(String targetTableName) {
-    return null;
+    return updater;
   }
 
-  static class CheckPointUpdater {
+  /**
+   * 封装更新的任务，利用线程池进行调度。
+   * 每张表对应一个任务，但 CheckPointUpdater 可以只有一个。
+   *
+   * @author ZSP
+   */
+  static class CheckpointUpdater implements CheckpointUpdateStrategy {
 
     private final CheckpointService checkPointService;
-    private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "checkPointScheduleThread"));
 
-    CheckPointUpdater(CheckpointService checkPointService) {
+    CheckpointUpdater(CheckpointService checkPointService) {
       this.checkPointService = checkPointService;
     }
 
-    public void startWorking() {
-      scheduledExecutorService.scheduleWithFixedDelay(this::updateCheckpoint, 2, 30, TimeUnit.MINUTES);
-    }
+    @Override
+    public void updateCheckpoint(String targetTableName) {
 
-    public void stopWorking() {
-      scheduledExecutorService.shutdown();
-    }
-
-    private void updateCheckpoint() {
-
-      Lock scheduleLock = checkPointService.getScheduleLock();
+      Lock scheduleLock = checkPointService.getScheduleLock(targetTableName);
 
       boolean enableSchedule = scheduleLock.tryLock();
 
@@ -240,18 +238,17 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
 
       if (enableSchedule) {
         try {
-          Lock writeLock = checkPointService.getScheduleLock();
+          Lock writeLock = checkPointService.getReadWriteLock(targetTableName).writeLock();
 
           // 调度任务拿到的检查点一定是可靠的、最新的，阻塞写入
           writeLock.lock();
           try {
-            LocalDateTime next = checkPointService.loadNextCheckpoint();
-            checkPointService.writeCheckPoint(next);
-            log.info("update checkpoint success , {}", next);
+            LocalDateTime next = checkPointService.loadNextCheckpoint(targetTableName);
+            checkPointService.writeCheckpoint(targetTableName, next);
+            log.info("update checkpoint success for {} , {}", targetTableName, next);
           } finally {
             writeLock.unlock();
           }
-
 
         } catch (Throwable ex) {
           log.error("update checkpoint failed", ex);

@@ -9,7 +9,7 @@ import java.util.List;
  *
  * @author ZSP
  */
-public interface  CheckpointService extends BaseCheckpointService<String, LocalDateTime> {
+public interface CheckpointService extends BaseCheckpointService<String, LocalDateTime> {
 
   /**
    * 检查点服务负责维护的表名
