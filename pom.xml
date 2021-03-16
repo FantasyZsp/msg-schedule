@@ -47,6 +47,10 @@
 
   <repositories>
     <repository>
+      <id>ali</id>
+      <url>https://maven.aliyun.com/nexus/content/groups/public/</url>
+    </repository>
+    <repository>
       <id>ss</id>
       <url>http://192.168.2.112:8081/repository/maven-public/</url>
     </repository>
