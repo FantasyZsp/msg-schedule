@@ -12,11 +12,11 @@ import java.util.List;
  *
  * @author ZSP
  */
-public abstract class AbstractMessageLoader<T extends StringMessage> implements MessageLoader<T> {
+public class DefaultMessageLoader<T extends StringMessage> implements MessageLoader<T> {
 
   private final MessageRepositoryRouter<T> messageRepositoryRouter;
 
-  protected AbstractMessageLoader(MessageRepositoryRouter<T> messageRepositoryRouter) {
+  protected DefaultMessageLoader(MessageRepositoryRouter<T> messageRepositoryRouter) {
     this.messageRepositoryRouter = messageRepositoryRouter;
   }
 

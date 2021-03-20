@@ -10,14 +10,14 @@ import java.util.Objects;
 /**
  * @author ZSP
  */
-public abstract class AbstractMessageStoreService {
+public class MessageStoreService {
 
   private final LocalMessageStoreEventPublisher publisher;
   private final MessageRepositoryRouter<? super StringMessage> messageRepositoryRouter;
 
 
-  public AbstractMessageStoreService(LocalMessageStoreEventPublisher publisher,
-                                     MessageRepositoryRouter<? super StringMessage> messageRepositoryRouter) {
+  public MessageStoreService(LocalMessageStoreEventPublisher publisher,
+                             MessageRepositoryRouter<? super StringMessage> messageRepositoryRouter) {
     this.publisher = publisher;
     this.messageRepositoryRouter = messageRepositoryRouter;
   }

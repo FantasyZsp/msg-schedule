@@ -3,7 +3,7 @@ package xyz.mydev.msg.schedule;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.schedule.bean.StringMessage;
-import xyz.mydev.msg.schedule.load.AbstractMessageLoader;
+import xyz.mydev.msg.schedule.load.DefaultMessageLoader;
 import xyz.mydev.msg.schedule.load.ScheduleTimeEvaluator;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 import xyz.mydev.msg.schedule.port.Porter;
@@ -21,7 +21,7 @@ public class ScheduleTask implements Runnable, TaskTimeType {
 
   private final String targetTableName;
   private final Porter<? super StringMessage> porter;
-  private final AbstractMessageLoader<? extends StringMessage> messageLoader;
+  private final DefaultMessageLoader<? extends StringMessage> messageLoader;
   private final CheckpointService checkpointService;
 
 
@@ -39,7 +39,7 @@ public class ScheduleTask implements Runnable, TaskTimeType {
 
   public ScheduleTask(String targetTableName,
                       Porter<? super StringMessage> porter,
-                      AbstractMessageLoader<? extends StringMessage> messageLoader,
+                      DefaultMessageLoader<? extends StringMessage> messageLoader,
                       CheckpointService checkpointService, ScheduleTimeEvaluator scheduleTimeEvaluator,
 
                       AtomicBoolean appStarted,
