@@ -7,8 +7,8 @@
   <modules>
     <module>msg-scheduling-api</module>
     <module>msg-scheduling-core</module>
-    <module>msg-scheduling-autoconfig</module>
     <module>msg-scheduling-checkpoint</module>
+    <module>msg-scheduling-autoconfig</module>
     <module>msg-scheduling-delay</module>
     <module>msg-scheduling-tx</module>
   </modules>

@@ -3,7 +3,7 @@ package xyz.mydev.msg.schedule;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.schedule.bean.StringMessage;
-import xyz.mydev.msg.schedule.load.DefaultMessageLoader;
+import xyz.mydev.msg.schedule.load.MessageLoader;
 import xyz.mydev.msg.schedule.load.ScheduleTimeEvaluator;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 import xyz.mydev.msg.schedule.port.Porter;
@@ -14,16 +14,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 
 /**
- * TODO ING
+ * 调度任务说明：
+ * 任务类型 TaskTimeType：
+ * 1. 应用启动时，从检查点开始扫描到当前格式化时间
+ * 2. 定时调度，从当前格式化时间开始到一个间隔后格式化时间
+ * 并发调度：
+ * 当1和2多实例下并发时，启动优于调度。启动间需要争抢锁，调度间需要争抢锁。
+ * 调度需要在无应用启动时进入调度逻辑。
  *
  * @author ZSP
  */
 @Slf4j
 public class ScheduleTask implements Runnable, TaskTimeType {
 
+  /**
+   * 一个任务专为一个表而服务
+   */
   private final String targetTableName;
   private final Porter<? super StringMessage> porter;
-  private final DefaultMessageLoader<? extends StringMessage> messageLoader;
+  private final MessageLoader<? extends StringMessage> messageLoader;
   /**
    * TODO 可能和targetTableName不匹配
    * 二选一
@@ -31,7 +40,6 @@ public class ScheduleTask implements Runnable, TaskTimeType {
    * 2. 设计上避免
    */
   private final CheckpointService checkpointService;
-
 
   private final ScheduleTimeEvaluator scheduleTimeEvaluator;
 
@@ -50,7 +58,7 @@ public class ScheduleTask implements Runnable, TaskTimeType {
 
   public ScheduleTask(String targetTableName,
                       Porter<? super StringMessage> porter,
-                      DefaultMessageLoader<? extends StringMessage> messageLoader,
+                      MessageLoader<? extends StringMessage> messageLoader,
                       CheckpointService checkpointService,
                       ScheduleTimeEvaluator scheduleTimeEvaluator,
 

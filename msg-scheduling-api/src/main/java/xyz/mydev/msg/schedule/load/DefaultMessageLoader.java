@@ -6,6 +6,7 @@ import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryR
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 
 /**
  * 消息加载器
@@ -25,5 +26,10 @@ public class DefaultMessageLoader<T extends StringMessage> implements MessageLoa
   public List<T> load(String targetTableName, LocalDateTime startTime, LocalDateTime endTime) {
     MessageRepository<T> messageRepository = messageRepositoryRouter.get(targetTableName);
     return messageRepository.findWillSendBetween(startTime, endTime);
+  }
+
+  @Override
+  public Lock getScheduleLock(String targetTableName) {
+    return null;
   }
 }
