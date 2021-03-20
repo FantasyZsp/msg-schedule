@@ -16,7 +16,6 @@ import java.util.concurrent.locks.Lock;
 
 /**
  * 调度说明：
- * 先完善加载机制，再完善消费失败记录
  * 1. 应用启动时，从检查点开始扫描到当前格式化时间
  * 2. 定时调度，从当前格式化时间开始到一个间隔后格式化时间
  * 并发调度：
@@ -82,9 +81,6 @@ public abstract class AbstractScheduler<T extends StringMessage> {
       log.info("there is a task invoking by other app instance, so skip this one");
     }
   }
-
-
-
 
 
   public void loadOnStart(String targetTableName) {

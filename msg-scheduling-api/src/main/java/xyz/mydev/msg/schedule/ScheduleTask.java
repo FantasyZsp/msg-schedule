@@ -14,6 +14,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 
 /**
+ * TODO ING
+ *
  * @author ZSP
  */
 @Slf4j
@@ -22,6 +24,12 @@ public class ScheduleTask implements Runnable, TaskTimeType {
   private final String targetTableName;
   private final Porter<? super StringMessage> porter;
   private final DefaultMessageLoader<? extends StringMessage> messageLoader;
+  /**
+   * TODO 可能和targetTableName不匹配
+   * 二选一
+   * 1. 外层调用保证
+   * 2. 设计上避免
+   */
   private final CheckpointService checkpointService;
 
 
@@ -29,6 +37,9 @@ public class ScheduleTask implements Runnable, TaskTimeType {
 
   private final AtomicBoolean appStarted;
 
+  /**
+   * 锁本质上是在控制加载，考虑放到 MessageLoader
+   */
   private final Lock scheduleLock;
 
   private final TaskTimeTypeEnum taskTimeType;
@@ -40,7 +51,8 @@ public class ScheduleTask implements Runnable, TaskTimeType {
   public ScheduleTask(String targetTableName,
                       Porter<? super StringMessage> porter,
                       DefaultMessageLoader<? extends StringMessage> messageLoader,
-                      CheckpointService checkpointService, ScheduleTimeEvaluator scheduleTimeEvaluator,
+                      CheckpointService checkpointService,
+                      ScheduleTimeEvaluator scheduleTimeEvaluator,
 
                       AtomicBoolean appStarted,
                       Lock scheduleLock,
@@ -95,7 +107,7 @@ public class ScheduleTask implements Runnable, TaskTimeType {
       log.info("there is a task invoking by other app instance, so skip this one");
     }
 
-    invokeWhenAppStart = Boolean.FALSE;
+    invokeWhenAppStart = false;
   }
 
 
@@ -106,27 +118,39 @@ public class ScheduleTask implements Runnable, TaskTimeType {
   }
 
 
+  /**
+   * 加载目标表消息
+   * 时段的产生，依赖于各个表的配置。一般有下面的类型：
+   * <p>
+   * 延时类
+   * 1. checkpoint -> formatted now plus interval
+   * 2. formatted now -> plus interval
+   * 即时类
+   * 1. checkpoint -> formatted now plus interval
+   * 2. formatted now -> plus interval
+   */
   private List<? extends StringMessage> load(String targetTableName) {
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime startTime;
     LocalDateTime endTime;
     long intervalSeconds = scheduleTimeEvaluator.intervalSeconds();
 
-    // checkpoint -> formatted now
-    if (TaskTimeTypeEnum.CheckpointTimeTask.equals(getTaskTimeType())) {
+    TaskTimeTypeEnum taskTimeType = getTaskTimeType();
+
+    // TODO 关于 表加载时间范围的外部化配置与策略类实现
+    // checkpoint -> formatted now plus interval
+    if (TaskTimeTypeEnum.CheckpointTimeTask.equals(taskTimeType)) {
 
       startTime = checkpointService.readCheckpoint(targetTableName);
-
       endTime = scheduleTimeEvaluator.formatTimeWithDefaultInterval(now).plusSeconds(intervalSeconds);
-      log.info("loadFromCheckPoint working at [{}] ,checkpoint  at [{}], end at [{}]", now, startTime, endTime);
 
     } else {
       // formatted now -> plus interval
       startTime = scheduleTimeEvaluator.formatTimeWithDefaultInterval(now);
       endTime = startTime.plusSeconds(intervalSeconds);
-      log.info("scheduleLoader working at [{}] ,formatted at [{}], end at [{}]", now, startTime, endTime);
     }
 
+    log.info("task type [{}], working at [{}] ,formatted at [{}], end at [{}]", taskTimeType, now, startTime, endTime);
     return messageLoader.load(targetTableName, startTime, endTime);
   }
 
