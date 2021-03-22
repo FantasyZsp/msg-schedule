@@ -1,4 +1,4 @@
-package xyz.mydev.msg.schedule.load;
+package xyz.mydev.msg.schedule;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;

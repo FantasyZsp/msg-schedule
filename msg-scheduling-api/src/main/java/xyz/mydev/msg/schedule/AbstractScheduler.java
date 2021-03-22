@@ -2,7 +2,6 @@ package xyz.mydev.msg.schedule;
 
 import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.schedule.bean.StringMessage;
-import xyz.mydev.msg.schedule.load.ScheduleTimeEvaluator;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 import xyz.mydev.msg.schedule.port.route.PortRouter;
 
@@ -25,7 +24,6 @@ public abstract class AbstractScheduler<T extends StringMessage> {
     this.scheduleTimeEvaluator = scheduleTimeEvaluator;
     this.portRouter = portRouter;
   }
-
 
 
 }
