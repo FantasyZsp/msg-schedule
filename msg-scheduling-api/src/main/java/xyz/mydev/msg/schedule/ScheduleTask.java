@@ -44,11 +44,6 @@ public class ScheduleTask implements Runnable, TaskTimeType {
 
   private final AtomicBoolean appStarted;
 
-  /**
-   * 锁本质上是在控制加载，考虑放到 MessageLoader
-   */
-  private final Lock scheduleLock;
-
   private final TaskTimeTypeEnum taskTimeType;
 
 
@@ -62,7 +57,6 @@ public class ScheduleTask implements Runnable, TaskTimeType {
                       ScheduleTimeEvaluator scheduleTimeEvaluator,
 
                       AtomicBoolean appStarted,
-                      Lock scheduleLock,
                       TaskTimeTypeEnum taskTimeType,
                       boolean invokeWhenAppStart) {
 
@@ -72,7 +66,6 @@ public class ScheduleTask implements Runnable, TaskTimeType {
     this.checkpointService = checkpointService;
     this.scheduleTimeEvaluator = scheduleTimeEvaluator;
     this.appStarted = appStarted;
-    this.scheduleLock = scheduleLock;
     this.taskTimeType = taskTimeType;
     this.invokeWhenAppStart = invokeWhenAppStart;
   }
@@ -89,6 +82,8 @@ public class ScheduleTask implements Runnable, TaskTimeType {
     }
 
     log.info("task type: {}", getTaskTimeType());
+
+    Lock scheduleLock = messageLoader.getScheduleLock(targetTableName);
 
     if (scheduleLock.tryLock()) {
       try {
@@ -114,6 +109,7 @@ public class ScheduleTask implements Runnable, TaskTimeType {
       log.info("there is a task invoking by other app instance, so skip this one");
     }
 
+    // 执行完一次后，就变更为非启动任务
     invokeWhenAppStart = false;
   }
 

@@ -7,6 +7,7 @@ import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryR
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 消息加载器
@@ -16,11 +17,18 @@ import java.util.concurrent.locks.Lock;
 public class DefaultMessageLoader<T extends StringMessage> implements MessageLoader<T> {
 
   private final MessageRepositoryRouter<T> messageRepositoryRouter;
+  private final Lock lock;
 
   protected DefaultMessageLoader(MessageRepositoryRouter<T> messageRepositoryRouter) {
     this.messageRepositoryRouter = messageRepositoryRouter;
+    this.lock = new ReentrantLock();
   }
 
+  public DefaultMessageLoader(MessageRepositoryRouter<T> messageRepositoryRouter,
+                              Lock lock) {
+    this.messageRepositoryRouter = messageRepositoryRouter;
+    this.lock = lock;
+  }
 
   @Override
   public List<T> load(String targetTableName, LocalDateTime startTime, LocalDateTime endTime) {
@@ -30,6 +38,6 @@ public class DefaultMessageLoader<T extends StringMessage> implements MessageLoa
 
   @Override
   public Lock getScheduleLock(String targetTableName) {
-    return null;
+    return lock;
   }
 }
