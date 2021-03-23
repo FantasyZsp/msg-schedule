@@ -3,11 +3,15 @@ package xyz.mydev.msg.schedule;
 import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.load.MessageLoader;
+import xyz.mydev.msg.schedule.load.checkpoint.route.CheckpointServiceRouter;
 import xyz.mydev.msg.schedule.port.route.PortRouter;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -16,38 +20,67 @@ import java.util.concurrent.ScheduledExecutorService;
  * @author ZSP
  */
 @Slf4j
-public abstract class AbstractScheduler<T extends StringMessage> {
+public abstract class AbstractScheduler {
   private final Collection<String> scheduledTables;
   private final ScheduleTimeEvaluator scheduleTimeEvaluator;
-  private final PortRouter<T> portRouter;
-  private final MessageLoader<T> messageLoader;
+  private final PortRouter<? super StringMessage> portRouter;
+  private final MessageLoader<? extends StringMessage> messageLoader;
+  private final CheckpointServiceRouter checkpointServiceRouter;
+
 
   private final ScheduledExecutorService scheduledExecutorService;
 
   public AbstractScheduler(Collection<String> scheduledTables,
                            ScheduleTimeEvaluator scheduleTimeEvaluator,
-                           PortRouter<T> portRouter, MessageLoader<T> messageLoader) {
+                           PortRouter<? super StringMessage> portRouter,
+                           MessageLoader<? extends StringMessage> messageLoader,
+                           CheckpointServiceRouter checkpointServiceRouter) {
     this.scheduledTables = scheduledTables;
     this.scheduleTimeEvaluator = scheduleTimeEvaluator;
     this.portRouter = portRouter;
     this.messageLoader = messageLoader;
 
     // TODO 个性化配置线程池
-    this.scheduledExecutorService = Executors.newScheduledThreadPool(scheduledTables.size(), r -> new Thread(r, "cpUpdateThread"));
+    this.scheduledExecutorService = Executors.newScheduledThreadPool(scheduledTables.size(), r -> new Thread(r, "Scheduler"));
+    this.checkpointServiceRouter = checkpointServiceRouter;
   }
 
-
   public void start() {
-    // TODO 调整为外部化配置提供需要调度的列表
+
+    LocalDateTime snapshotTime = LocalDateTime.now();
+
     for (String tableName : scheduledTables) {
-//      Runnable scheduleTask = new ScheduleTask(tableName, portRouter.get(tableName), messageLoader, che);
-      //  todo 调度任务
-//      CheckpointUpdateStrategy updateStrategy = checkpointService.getUpdateStrategy(tableName);
-//      if (updateStrategy != null) {
-//        scheduledExecutorService.scheduleWithFixedDelay(() -> updateStrategy.updateCheckpoint(tableName), 2, 30, TimeUnit.MINUTES);
-//      }
+
+      Runnable startingTask = buildTask(tableName, true);
+      scheduledExecutorService.execute(startingTask);
+
+      Runnable scheduleTask = buildTask(tableName, false);
+      // TODO 根据外部化配置，拿到当前表的调度间隔
+      long period = 30;
+      long initialDelay = calculateInitialDelay(snapshotTime, tableName);
+      scheduledExecutorService.scheduleAtFixedRate(scheduleTask, initialDelay, period, TimeUnit.MILLISECONDS);
     }
 
+  }
+
+  /**
+   * formattedEndOfSnapshotTime minus snapshotTime
+   * TimeUnit.MILLISECONDS
+   * TODO 格式化时间策略
+   */
+  private long calculateInitialDelay(LocalDateTime snapshotTime, String tableName) {
+    return 0;
+  }
+
+  private ScheduleTask buildTask(String tableName, boolean isStartingTask) {
+    return new ScheduleTask(tableName,
+      Objects.requireNonNull(portRouter.get(tableName)),
+      messageLoader,
+      Objects.requireNonNull(checkpointServiceRouter.get(tableName)),
+      scheduleTimeEvaluator,
+      isStartingTask ? TaskTimeType.TaskTimeTypeEnum.CheckpointTimeTask : TaskTimeType.TaskTimeTypeEnum.IntervalTimeTask,
+      isStartingTask
+    );
   }
 
 

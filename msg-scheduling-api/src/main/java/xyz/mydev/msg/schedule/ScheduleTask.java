@@ -1,15 +1,14 @@
 package xyz.mydev.msg.schedule;
 
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.load.MessageLoader;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
+import xyz.mydev.msg.schedule.port.AbstractPorter;
 import xyz.mydev.msg.schedule.port.Porter;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 
 /**
@@ -20,6 +19,8 @@ import java.util.concurrent.locks.Lock;
  * 并发调度：
  * 当1和2多实例下并发时，启动优于调度。启动间需要争抢锁，调度间需要争抢锁。
  * 调度需要在无应用启动时进入调度逻辑。
+ * <p>
+ * TODO 简化设计：将计算开始结束时间的依赖替换为开始和结束时间本身，在构建task时，就进行设置。
  *
  * @author ZSP
  */
@@ -32,54 +33,37 @@ public class ScheduleTask implements Runnable, TaskTimeType {
   private final String targetTableName;
   private final Porter<? super StringMessage> porter;
   private final MessageLoader<? extends StringMessage> messageLoader;
-  /**
-   * TODO 可能和targetTableName不匹配
-   * 二选一
-   * 1. 外层调用保证
-   * 2. 设计上避免
-   */
+
   private final CheckpointService checkpointService;
 
   private final ScheduleTimeEvaluator scheduleTimeEvaluator;
 
-  private final AtomicBoolean appStarted;
-
   private final TaskTimeTypeEnum taskTimeType;
 
-
-  @Setter
-  private boolean invokeWhenAppStart;
+  /**
+   * 标识是否是启动任务
+   */
+  private final boolean isStartingTask;
 
   public ScheduleTask(String targetTableName,
-                      Porter<? super StringMessage> porter,
+                      AbstractPorter<? super StringMessage> porter,
                       MessageLoader<? extends StringMessage> messageLoader,
                       CheckpointService checkpointService,
                       ScheduleTimeEvaluator scheduleTimeEvaluator,
-
-                      AtomicBoolean appStarted,
                       TaskTimeTypeEnum taskTimeType,
-                      boolean invokeWhenAppStart) {
+                      boolean isStartingTask) {
 
     this.targetTableName = targetTableName;
     this.porter = porter;
     this.messageLoader = messageLoader;
     this.checkpointService = checkpointService;
     this.scheduleTimeEvaluator = scheduleTimeEvaluator;
-    this.appStarted = appStarted;
     this.taskTimeType = taskTimeType;
-    this.invokeWhenAppStart = invokeWhenAppStart;
+    this.isStartingTask = isStartingTask;
   }
 
   @Override
   public void run() {
-
-    // 非启动任务需要关注启动标志，仅当启动完毕后才可以执行
-    if (!invokeWhenAppStart) {
-      if (!appStarted.get()) {
-        log.warn("app is starting, skip this task");
-        return;
-      }
-    }
 
     log.info("task type: {}", getTaskTimeType());
 
@@ -108,9 +92,6 @@ public class ScheduleTask implements Runnable, TaskTimeType {
     } else {
       log.info("there is a task invoking by other app instance, so skip this one");
     }
-
-    // 执行完一次后，就变更为非启动任务
-    invokeWhenAppStart = false;
   }
 
 

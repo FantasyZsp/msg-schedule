@@ -23,6 +23,7 @@ public interface MessageLoader<T extends StringMessage> {
 
   /**
    * 获取一把调度锁
+   * 默认根据被调度的表表名即可控制，考虑到对调度时段的分离，尤其是启动任务和定时任务的冲突，实现者可以在表名基础上追加当前调度的时间批次，从而允许不同时段的任务并发。
    *
    * @param targetTableName 目标表
    * @return 调度锁，用于控制调度与读写并发

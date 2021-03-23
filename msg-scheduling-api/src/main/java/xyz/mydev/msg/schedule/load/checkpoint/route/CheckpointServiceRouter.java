@@ -13,30 +13,28 @@ import java.util.Map;
  */
 public interface CheckpointServiceRouter extends Router<String, CheckpointService> {
 
-
   Collection<CheckpointService> getCheckpointServicePool();
 
-  default Map<String, CheckpointService> initRouter() {
+  void setRouteHolder(Map<String, CheckpointService> map);
 
+  Map<String, CheckpointService> getRouteHolder();
+
+  default void initRouter() {
     Collection<CheckpointService> checkpointServicePool = getCheckpointServicePool();
-
     Map<String, CheckpointService> map = new HashMap<>(checkpointServicePool.size());
     checkpointServicePool.forEach(cp -> {
-
-
       List<String> tableNames = cp.getTableNames();
-
       for (String tableName : tableNames) {
         map.put(tableName, cp);
       }
-
-
     });
-    return map;
+    setRouteHolder(map);
   }
 
   @Override
-  CheckpointService get(String key);
+  default CheckpointService get(String key) {
+    return getRouteHolder().get(key);
+  }
 
 
 }
