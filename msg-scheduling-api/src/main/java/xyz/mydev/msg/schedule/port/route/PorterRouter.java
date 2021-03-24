@@ -9,7 +9,7 @@ import xyz.mydev.msg.schedule.port.AbstractPorter;
  *
  * @author ZSP
  */
-public interface PortRouter<T extends StringMessage> extends Router<String, AbstractPorter<T>> {
+public interface PorterRouter<T extends StringMessage> extends Router<String, AbstractPorter<T>> {
 
   default AbstractPorter<T> resolveByMessage(T msg) {
     return get(msg.getTargetTableName());

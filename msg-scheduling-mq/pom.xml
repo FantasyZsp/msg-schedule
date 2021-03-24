@@ -6,11 +6,19 @@
     <artifactId>msg-scheduling</artifactId>
     <groupId>xyz.mydev</groupId>
     <version>${revision}</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>msg-scheduling-autoconfig</artifactId>
+  <artifactId>msg-scheduling-mq</artifactId>
+  <version>${revision}</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>xyz.mydev</groupId>
+      <artifactId>msg-scheduling-api</artifactId>
+      <version>${revision}</version>
+    </dependency>
+  </dependencies>
 
 
 </project>

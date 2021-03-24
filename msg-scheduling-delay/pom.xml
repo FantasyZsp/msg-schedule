@@ -16,6 +16,8 @@
     <module>msg-scheduling-delay-api</module>
     <module>msg-scheduling-delay-port</module>
     <module>msg-scheduling-delay-repository-mybatis</module>
+    <module>msg-scheduling-delay-autoconfig</module>
+    <module>msg-scheduling-delay-starter</module>
   </modules>
 
   <packaging>pom</packaging>
