@@ -9,7 +9,21 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>msg-scheduling-delay-repository-mybatis</artifactId>
+  <artifactId>msg-scheduling-delay-autoconfig</artifactId>
+
+  <dependencies>
+    <dependency>
+      <groupId>xyz.mydev</groupId>
+      <artifactId>msg-scheduling-delay-port</artifactId>
+      <version>${revision}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>xyz.mydev</groupId>
+      <artifactId>msg-scheduling-delay-repository-mybatis</artifactId>
+      <version>${revision}</version>
+    </dependency>
+  </dependencies>
 
 
 </project>

@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.load.MessageLoader;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
-import xyz.mydev.msg.schedule.port.AbstractPorter;
 import xyz.mydev.msg.schedule.port.Porter;
 
 import java.time.LocalDateTime;
@@ -47,7 +46,7 @@ public class ScheduleTask implements Runnable, TaskTimeType {
   private final boolean isStartingTask;
 
   public ScheduleTask(String targetTableName,
-                      AbstractPorter<? super StringMessage> porter,
+                      Porter<? super StringMessage> porter,
                       MessageLoader<? extends StringMessage> messageLoader,
                       CheckpointService checkpointService,
                       ScheduleTimeEvaluator scheduleTimeEvaluator,

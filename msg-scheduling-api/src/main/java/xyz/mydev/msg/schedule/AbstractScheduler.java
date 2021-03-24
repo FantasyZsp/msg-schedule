@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.load.MessageLoader;
 import xyz.mydev.msg.schedule.load.checkpoint.route.CheckpointServiceRouter;
-import xyz.mydev.msg.schedule.port.route.PortRouter;
+import xyz.mydev.msg.schedule.port.route.PorterRouter;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractScheduler {
   private final Collection<String> scheduledTables;
   private final ScheduleTimeEvaluator scheduleTimeEvaluator;
-  private final PortRouter<? super StringMessage> portRouter;
+  private final PorterRouter porterRouter;
   private final MessageLoader<? extends StringMessage> messageLoader;
   private final CheckpointServiceRouter checkpointServiceRouter;
 
@@ -32,12 +32,12 @@ public abstract class AbstractScheduler {
 
   public AbstractScheduler(Collection<String> scheduledTables,
                            ScheduleTimeEvaluator scheduleTimeEvaluator,
-                           PortRouter<? super StringMessage> portRouter,
+                           PorterRouter porterRouter,
                            MessageLoader<? extends StringMessage> messageLoader,
                            CheckpointServiceRouter checkpointServiceRouter) {
     this.scheduledTables = scheduledTables;
     this.scheduleTimeEvaluator = scheduleTimeEvaluator;
-    this.portRouter = portRouter;
+    this.porterRouter = porterRouter;
     this.messageLoader = messageLoader;
 
     // TODO 个性化配置线程池
@@ -74,7 +74,7 @@ public abstract class AbstractScheduler {
 
   private ScheduleTask buildTask(String tableName, boolean isStartingTask) {
     return new ScheduleTask(tableName,
-      Objects.requireNonNull(portRouter.get(tableName)),
+      Objects.requireNonNull(porterRouter.get(tableName)),
       messageLoader,
       Objects.requireNonNull(checkpointServiceRouter.get(tableName)),
       scheduleTimeEvaluator,
