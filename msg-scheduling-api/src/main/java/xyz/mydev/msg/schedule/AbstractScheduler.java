@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractScheduler {
   private final Collection<String> scheduledTables;
   private final ScheduleTimeEvaluator scheduleTimeEvaluator;
-  private final PorterRouter<? super StringMessage> porterRouter;
+  private final PorterRouter porterRouter;
   private final MessageLoader<? extends StringMessage> messageLoader;
   private final CheckpointServiceRouter checkpointServiceRouter;
 
@@ -32,7 +32,7 @@ public abstract class AbstractScheduler {
 
   public AbstractScheduler(Collection<String> scheduledTables,
                            ScheduleTimeEvaluator scheduleTimeEvaluator,
-                           PorterRouter<? super StringMessage> porterRouter,
+                           PorterRouter porterRouter,
                            MessageLoader<? extends StringMessage> messageLoader,
                            CheckpointServiceRouter checkpointServiceRouter) {
     this.scheduledTables = scheduledTables;
