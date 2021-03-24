@@ -9,28 +9,12 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
+  <packaging>pom</packaging>
+
   <artifactId>msg-scheduling-checkpoint</artifactId>
 
-
-  <dependencies>
-    <dependency>
-      <groupId>xyz.mydev</groupId>
-      <artifactId>msg-scheduling-core</artifactId>
-      <version>${revision}</version>
-    </dependency>
-
-    <!--redis lock-->
-    <dependency>
-      <groupId>com.sishu</groupId>
-      <artifactId>redis-lock-starter</artifactId>
-      <version>${redis_lock_version}</version>
-    </dependency>
-
-    <!--spring体系-->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-configuration-processor</artifactId>
-    </dependency>
-  </dependencies>
+  <modules>
+    <module>msg-scheduling-checkpoint-redis</module>
+  </modules>
 
 </project>
