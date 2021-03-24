@@ -1,5 +1,6 @@
 package xyz.mydev.msg.schedule;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.load.MessageLoader;
@@ -24,6 +25,7 @@ import java.util.concurrent.locks.Lock;
  * @author ZSP
  */
 @Slf4j
+@Getter
 public class ScheduleTask implements Runnable, TaskTimeType {
 
   /**
@@ -64,23 +66,29 @@ public class ScheduleTask implements Runnable, TaskTimeType {
   @Override
   public void run() {
 
-    log.info("task type: {}, isStartingTask: {}", getTaskTimeType(), isStartingTask);
+    log.info("task type: {}, isStartingTask: {}", getTaskTimeType(), isStartingTask());
 
-    Lock scheduleLock = messageLoader.getScheduleLock(targetTableName);
+    LocalDateTime now = LocalDateTime.now();
+
+    LocalDateTime[] localDateTimes = getTime(now);
+    LocalDateTime startTime = localDateTimes[0];
+    LocalDateTime endTime = localDateTimes[1];
+
+    Lock scheduleLock = messageLoader.getScheduleLock(buildLoadLockName(endTime));
 
     if (scheduleLock.tryLock()) {
       try {
 
-        List<? extends StringMessage> msgListWillSend = load(targetTableName);
+        List<? extends StringMessage> msgListWillSend = load(now, startTime, endTime);
 
         log.info("invoke transfer {} msg", msgListWillSend.size());
 
         transfer(msgListWillSend);
 
-        log.info("invoke schedule business success");
+        log.info("invoke transfer success");
 
       } catch (Throwable ex) {
-        log.error("schedule business ex", ex);
+        log.error("schedule load business ex", ex);
       } finally {
         try {
           scheduleLock.unlock();
@@ -101,30 +109,29 @@ public class ScheduleTask implements Runnable, TaskTimeType {
   }
 
 
+  private List<? extends StringMessage> load(LocalDateTime now,
+                                             LocalDateTime startTime,
+                                             LocalDateTime endTime) {
+
+
+    log.info("task type [{}], working at [{}] ,formatted at [{}], end at [{}]", getTaskTimeType(), now, startTime, endTime);
+    return messageLoader.load(getTargetTableName(), startTime, endTime);
+  }
+
+
   /**
-   * 加载目标表消息
-   * 时段的产生，依赖于各个表的配置。一般有下面的类型：
-   * <p>
-   * 延时类
-   * 1. checkpoint -> formatted now plus interval
-   * 2. formatted now -> plus interval
-   * 即时类
-   * 1. checkpoint -> formatted now plus interval
-   * 2. formatted now -> plus interval
+   * TODO 关于 表加载时间范围的外部化配置与策略类实现
    */
-  private List<? extends StringMessage> load(String targetTableName) {
-    LocalDateTime now = LocalDateTime.now();
+  public LocalDateTime[] getTime(LocalDateTime now) {
     LocalDateTime startTime;
     LocalDateTime endTime;
+    TaskTimeTypeEnum taskTimeType = getTaskTimeType();
     long intervalSeconds = scheduleTimeEvaluator.intervalSeconds();
 
-    TaskTimeTypeEnum taskTimeType = getTaskTimeType();
-
-    // TODO 关于 表加载时间范围的外部化配置与策略类实现
     // checkpoint -> formatted now plus interval
     if (TaskTimeTypeEnum.CheckpointTimeTask.equals(taskTimeType)) {
 
-      startTime = checkpointService.readCheckpoint(targetTableName);
+      startTime = checkpointService.readCheckpoint(getTargetTableName());
       endTime = scheduleTimeEvaluator.formatTimeWithDefaultInterval(now).plusSeconds(intervalSeconds);
 
     } else {
@@ -133,13 +140,16 @@ public class ScheduleTask implements Runnable, TaskTimeType {
       endTime = startTime.plusSeconds(intervalSeconds);
     }
 
-    log.info("task type [{}], working at [{}] ,formatted at [{}], end at [{}]", taskTimeType, now, startTime, endTime);
-    return messageLoader.load(targetTableName, startTime, endTime);
+    return new LocalDateTime[]{startTime, endTime};
+
   }
 
-
-  @Override
-  public TaskTimeTypeEnum getTaskTimeType() {
-    return taskTimeType;
+  /**
+   * 锁key:  ld:tableName:endTimeSequence
+   * endTimeSequence格式: 当天间隔顺序号，从0开始。如30分钟，那么结束时间 1:00对应的就是2 = 60/30
+   */
+  String buildLoadLockName(LocalDateTime endTime) {
+    // todo 拿到格式化时间序号
+    return "ld:" + getTargetTableName() + ":" + endTime;
   }
 }

@@ -1,5 +1,6 @@
 package xyz.mydev.msg.schedule.load;
 
+import org.redisson.api.RedissonClient;
 import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
@@ -7,22 +8,19 @@ import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryR
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * @author ZSP
+ */
 public class DefaultMessageLoader<T extends StringMessage> implements MessageLoader<T> {
 
   private final MessageRepositoryRouter<T> messageRepositoryRouter;
-  private final Lock lock;
+  private final RedissonClient redissonClient;
 
-  protected DefaultMessageLoader(MessageRepositoryRouter<T> messageRepositoryRouter) {
+  protected DefaultMessageLoader(MessageRepositoryRouter<T> messageRepositoryRouter,
+                                 RedissonClient redissonClient) {
     this.messageRepositoryRouter = messageRepositoryRouter;
-    this.lock = new ReentrantLock();
-  }
-
-  public DefaultMessageLoader(MessageRepositoryRouter<T> messageRepositoryRouter,
-                              Lock lock) {
-    this.messageRepositoryRouter = messageRepositoryRouter;
-    this.lock = lock;
+    this.redissonClient = redissonClient;
   }
 
   @Override
@@ -32,7 +30,7 @@ public class DefaultMessageLoader<T extends StringMessage> implements MessageLoa
   }
 
   @Override
-  public Lock getScheduleLock(String targetTableName) {
-    return lock;
+  public Lock getScheduleLock(String tablaNameWithScheduleEndTime) {
+    return redissonClient.getLock(tablaNameWithScheduleEndTime);
   }
 }

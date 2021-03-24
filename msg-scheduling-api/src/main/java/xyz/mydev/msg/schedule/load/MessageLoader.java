@@ -18,6 +18,7 @@ public interface MessageLoader<T extends StringMessage> {
    * @param targetTableName 目标表
    * @param startTime       开始时间
    * @param endTime         结束时间
+   * @return 需要调度投递的消息，一般消息表中会维护消息状态。
    */
   List<T> load(String targetTableName, LocalDateTime startTime, LocalDateTime endTime);
 
