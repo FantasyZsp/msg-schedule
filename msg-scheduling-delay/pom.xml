@@ -10,13 +10,12 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>delay-msg-scheduling</artifactId>
+  <artifactId>msg-scheduling-delay</artifactId>
   <version>${revision}</version>
 
   <packaging>pom</packaging>
 
   <properties>
-    <redis_lock_version>1.2.0</redis_lock_version>
   </properties>
 
 

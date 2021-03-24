@@ -8,6 +8,7 @@
     <module>msg-scheduling-api</module>
     <module>msg-scheduling-core</module>
     <module>msg-scheduling-checkpoint</module>
+    <module>msg-scheduling-loader</module>
     <module>msg-scheduling-autoconfig</module>
     <module>msg-scheduling-delay</module>
     <module>msg-scheduling-tx</module>
@@ -30,6 +31,8 @@
     <revision>1.0.0</revision>
     <java.version>11</java.version>
 
+    <redis_lock_version>1.2.0</redis_lock_version>
+
     <maven_flatten_version>1.1.0</maven_flatten_version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -48,12 +51,12 @@
 
   <repositories>
     <repository>
-      <id>ali</id>
-      <url>https://maven.aliyun.com/nexus/content/groups/public/</url>
-    </repository>
-    <repository>
       <id>ss</id>
       <url>http://192.168.2.112:8081/repository/maven-public/</url>
+    </repository>
+    <repository>
+      <id>ali</id>
+      <url>https://maven.aliyun.com/nexus/content/groups/public/</url>
     </repository>
   </repositories>
 

@@ -1,10 +1,12 @@
-package xyz.mydev.msg.schedule.load.checkpoint;
+package xyz.mydev.msg.schedule.load.checkpoint.redis;
 
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
+import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
+import xyz.mydev.msg.schedule.load.checkpoint.CheckpointUpdateStrategy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

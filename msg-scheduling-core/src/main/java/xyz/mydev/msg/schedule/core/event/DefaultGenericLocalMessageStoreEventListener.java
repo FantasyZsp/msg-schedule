@@ -1,7 +1,6 @@
 package xyz.mydev.msg.schedule.core.event;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.event.TransactionalEventListener;
 import xyz.mydev.msg.schedule.LocalMessageStoreEventListener;
 import xyz.mydev.msg.schedule.bean.StringMessage;
@@ -19,9 +18,8 @@ public class DefaultGenericLocalMessageStoreEventListener {
   }
 
   /**
-   * TODO @Async 替换为可配置的线程池
+   * 异步化依赖于后续流程是否启用线程池
    */
-  @Async
   @TransactionalEventListener
   public void onGenericLocalMessageStoreEvent(GenericLocalMessageStoreEvent<StringMessage> event) {
     log.info("receive info : {}", event.getLocalMessage());

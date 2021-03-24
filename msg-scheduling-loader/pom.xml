@@ -9,7 +9,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>msg-scheduling-checkpoint</artifactId>
+  <artifactId>msg-scheduling-loader</artifactId>
 
 
   <dependencies>
@@ -19,7 +19,7 @@
       <version>${revision}</version>
     </dependency>
 
-    <!--redis lock-->
+    <!-- redis lock -->
     <dependency>
       <groupId>com.sishu</groupId>
       <artifactId>redis-lock-starter</artifactId>

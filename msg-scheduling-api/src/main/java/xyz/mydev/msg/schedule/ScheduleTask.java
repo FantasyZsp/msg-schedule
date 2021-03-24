@@ -20,7 +20,6 @@ import java.util.concurrent.locks.Lock;
  * 当1和2多实例下并发时，启动优于调度。启动间需要争抢锁，调度间需要争抢锁。
  * 调度需要在无应用启动时进入调度逻辑。
  * <p>
- * TODO 简化设计：将计算开始结束时间的依赖替换为开始和结束时间本身，在构建task时，就进行设置。
  *
  * @author ZSP
  */
@@ -65,7 +64,7 @@ public class ScheduleTask implements Runnable, TaskTimeType {
   @Override
   public void run() {
 
-    log.info("task type: {}", getTaskTimeType());
+    log.info("task type: {}, isStartingTask: {}", getTaskTimeType(), isStartingTask);
 
     Lock scheduleLock = messageLoader.getScheduleLock(targetTableName);
 
