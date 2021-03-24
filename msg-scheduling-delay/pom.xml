@@ -12,6 +12,11 @@
 
   <artifactId>msg-scheduling-delay</artifactId>
   <version>${revision}</version>
+  <modules>
+    <module>msg-scheduling-delay-api</module>
+    <module>msg-scheduling-delay-port</module>
+    <module>msg-scheduling-delay-repository-mybatis</module>
+  </modules>
 
   <packaging>pom</packaging>
 
