@@ -2,11 +2,14 @@ package xyz.mydev.msg.schedule;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import xyz.mydev.msg.schedule.bean.Message;
+import xyz.mydev.msg.schedule.bean.SerializableMessage;
 import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.load.MessageLoader;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 import xyz.mydev.msg.schedule.port.Porter;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -31,7 +34,7 @@ public class ScheduleTask implements Runnable, TaskTimeType {
    * 一个任务专为一个表而服务
    */
   private final String targetTableName;
-  private final Porter<? super StringMessage> porter;
+  private final Porter<SerializableMessage<? extends Serializable>> porter;
   private final MessageLoader<? extends StringMessage> messageLoader;
 
   private final CheckpointService checkpointService;
@@ -46,7 +49,7 @@ public class ScheduleTask implements Runnable, TaskTimeType {
   private final boolean isStartingTask;
 
   public ScheduleTask(String targetTableName,
-                      Porter<? super StringMessage> porter,
+                      Porter<SerializableMessage<? extends Serializable>> porter,
                       MessageLoader<? extends StringMessage> messageLoader,
                       CheckpointService checkpointService,
                       ScheduleTimeEvaluator scheduleTimeEvaluator,
@@ -104,6 +107,7 @@ public class ScheduleTask implements Runnable, TaskTimeType {
   private void transfer(List<? extends StringMessage> msgListWillSend) {
     for (StringMessage stringMessage : msgListWillSend) {
       porter.transfer(stringMessage);
+      porter.transfer((Message) null);
     }
   }
 
