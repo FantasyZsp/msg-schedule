@@ -11,7 +11,7 @@ public interface TimeCalculator {
    * @param now
    * @return
    */
-  default LocalDateTime formatTimeIntervals(LocalDateTime now, int intervals) {
+  static LocalDateTime formatTimeIntervals(LocalDateTime now, int intervals) {
     int minute = now.getMinute();
     return formatTime(minute, intervals, now);
   }
@@ -65,7 +65,7 @@ public interface TimeCalculator {
   }
 
 
-  default LocalDateTime formatTime(int minute, int intervals, LocalDateTime now) {
+  static LocalDateTime formatTime(int minute, int intervals, LocalDateTime now) {
     int resultMinute = minute / intervals * intervals;
     return now.withMinute(resultMinute).withSecond(0).withNano(0);
   }
@@ -92,8 +92,8 @@ public interface TimeCalculator {
    * @param intervals
    * @return
    */
-  default boolean shouldPutDirect(LocalDateTime taskExecuteTime, int intervals) {
 
+  default boolean shouldPutDirect(LocalDateTime taskExecuteTime, int intervals) {
 
     LocalDateTime now = LocalDateTime.now();
     if (!taskExecuteTime.isAfter(now)) {
