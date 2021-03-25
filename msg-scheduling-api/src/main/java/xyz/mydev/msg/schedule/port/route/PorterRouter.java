@@ -15,4 +15,13 @@ public interface PorterRouter extends Router<String, Porter<? super StringMessag
     return get(msg.getTargetTableName());
   }
 
+  @Override
+  default Porter<? super StringMessage> get(String key) {
+    return null;
+  }
+
+  @Override
+  default void put(String key, Porter<? super StringMessage> val) {
+
+  }
 }

@@ -6,8 +6,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.common.util.CallerRunsPolicy;
 import xyz.mydev.msg.common.util.PrefixNameThreadFactory;
-import xyz.mydev.msg.schedule.bean.StringMessage;
+import xyz.mydev.msg.schedule.bean.SerializableMessage;
 
+import java.io.Serializable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Getter
 @Setter
-public class DefaultPorter<E extends StringMessage> extends AbstractPorter<E> {
+public class DefaultPorter<E extends SerializableMessage<? extends Serializable>> extends AbstractPorter<E> {
 
   private ExecutorService portExecutor;
   private ExecutorService transferExecutor;
