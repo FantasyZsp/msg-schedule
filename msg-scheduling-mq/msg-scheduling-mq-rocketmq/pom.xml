@@ -3,26 +3,20 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <artifactId>msg-scheduling</artifactId>
+    <artifactId>msg-scheduling-mq</artifactId>
     <groupId>xyz.mydev</groupId>
-    <version>${revision}</version>
+    <version>1.0.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>msg-scheduling-mq</artifactId>
-  <packaging>pom</packaging>
-  <version>${revision}</version>
-  <modules>
-    <module>msg-scheduling-mq-rocketmq</module>
-  </modules>
+  <artifactId>msg-scheduling-mq-rocketmq</artifactId>
+
 
   <dependencies>
     <dependency>
-      <groupId>xyz.mydev</groupId>
-      <artifactId>msg-scheduling-api</artifactId>
-      <version>${revision}</version>
+      <groupId>org.apache.rocketmq</groupId>
+      <artifactId>rocketmq-spring-boot-starter</artifactId>
+      <version>2.2.0</version>
     </dependency>
   </dependencies>
-
-
 </project>
