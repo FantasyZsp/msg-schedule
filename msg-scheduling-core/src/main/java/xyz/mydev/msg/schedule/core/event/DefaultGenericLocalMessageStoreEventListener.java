@@ -11,9 +11,9 @@ import xyz.mydev.msg.schedule.bean.StringMessage;
 @Slf4j
 public class DefaultGenericLocalMessageStoreEventListener {
 
-  private final LocalMessageStoreEventListener<String, StringMessage> localMessageStoreEventListener;
+  private final LocalMessageStoreEventListener<StringMessage> localMessageStoreEventListener;
 
-  public DefaultGenericLocalMessageStoreEventListener(LocalMessageStoreEventListener<String, StringMessage> localMessageStoreEventListener) {
+  public DefaultGenericLocalMessageStoreEventListener(LocalMessageStoreEventListener<StringMessage> localMessageStoreEventListener) {
     this.localMessageStoreEventListener = localMessageStoreEventListener;
   }
 

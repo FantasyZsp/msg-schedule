@@ -1,6 +1,6 @@
 package xyz.mydev.msg.schedule.port.route;
 
-import xyz.mydev.msg.common.route.Router;
+import xyz.mydev.msg.common.TableKeyPair;
 import xyz.mydev.msg.schedule.bean.SerializableMessage;
 import xyz.mydev.msg.schedule.port.Porter;
 
@@ -11,9 +11,16 @@ import java.io.Serializable;
  *
  * @author ZSP
  */
-public interface PorterRouter extends Router<String, Porter<SerializableMessage<? extends Serializable>>> {
+public interface PorterRouter {
 
-  default <E extends SerializableMessage<? extends Serializable>> Porter<? extends SerializableMessage<? extends Serializable>> resolveByMessage(E msg) {
-    return get(msg.getTargetTableName());
+  @SuppressWarnings("unchecked")
+  default <T extends SerializableMessage<? extends Serializable>> Porter<T> resolveByMessage(T msg) {
+    return (Porter<T>) get(TableKeyPair.of(msg.getTargetTableName(), msg.getClass()));
+  }
+
+  <T > Porter<T> get(TableKeyPair<T> of);
+
+  default <T extends SerializableMessage<? extends Serializable>> Porter<T> getByKey(TableKeyPair<T> keyPair) {
+    return get(keyPair);
   }
 }

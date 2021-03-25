@@ -1,13 +1,13 @@
 package xyz.mydev.msg.schedule;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.mydev.msg.schedule.bean.StringMessage;
+import xyz.mydev.msg.common.TableKeyPair;
 import xyz.mydev.msg.schedule.load.MessageLoader;
 import xyz.mydev.msg.schedule.load.checkpoint.route.CheckpointServiceRouter;
 import xyz.mydev.msg.schedule.port.route.PorterRouter;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -21,27 +21,29 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public abstract class AbstractScheduler {
-  private final Collection<String> scheduledTables;
+  private final Map<String, Class<?>> scheduledTablesClassMap;
+
   private final ScheduleTimeEvaluator scheduleTimeEvaluator;
   private final PorterRouter porterRouter;
-  private final MessageLoader<? extends StringMessage> messageLoader;
+  private final MessageLoader messageLoader;
   private final CheckpointServiceRouter checkpointServiceRouter;
 
 
   private final ScheduledExecutorService scheduledExecutorService;
 
-  public AbstractScheduler(Collection<String> scheduledTables,
+  public AbstractScheduler(Map<String, Class<?>> scheduledTablesClassMap,
                            ScheduleTimeEvaluator scheduleTimeEvaluator,
                            PorterRouter porterRouter,
-                           MessageLoader<? extends StringMessage> messageLoader,
+                           MessageLoader messageLoader,
                            CheckpointServiceRouter checkpointServiceRouter) {
-    this.scheduledTables = scheduledTables;
+    this.scheduledTablesClassMap = scheduledTablesClassMap;
+
     this.scheduleTimeEvaluator = scheduleTimeEvaluator;
     this.porterRouter = porterRouter;
     this.messageLoader = messageLoader;
 
     // TODO 个性化配置线程池
-    this.scheduledExecutorService = Executors.newScheduledThreadPool(scheduledTables.size(), r -> new Thread(r, "Scheduler"));
+    this.scheduledExecutorService = Executors.newScheduledThreadPool(scheduledTablesClassMap.size(), r -> new Thread(r, "Scheduler"));
     this.checkpointServiceRouter = checkpointServiceRouter;
   }
 
@@ -49,12 +51,13 @@ public abstract class AbstractScheduler {
 
     LocalDateTime snapshotTime = LocalDateTime.now();
 
-    for (String tableName : scheduledTables) {
-
-      Runnable startingTask = buildTask(tableName, true);
+    for (Map.Entry<String, Class<?>> entry : scheduledTablesClassMap.entrySet()) {
+      String tableName = entry.getKey();
+      Class<?> targetClass = entry.getValue();
+      Runnable startingTask = buildTask(tableName, true, targetClass);
       scheduledExecutorService.execute(startingTask);
 
-      Runnable scheduleTask = buildTask(tableName, false);
+      Runnable scheduleTask = buildTask(tableName, false, targetClass);
       // TODO 根据外部化配置，拿到当前表的调度间隔
       long period = 30;
       long initialDelay = calculateInitialDelay(snapshotTime, tableName);
@@ -72,9 +75,10 @@ public abstract class AbstractScheduler {
     return 0;
   }
 
-  private ScheduleTask buildTask(String tableName, boolean isStartingTask) {
-    return new ScheduleTask(tableName,
-      Objects.requireNonNull(porterRouter.get(tableName)),
+  private <T> ScheduleTask<T> buildTask(String tableName, boolean isStartingTask, Class<T> targetClass) {
+    return new ScheduleTask<>(tableName,
+      targetClass,
+      porterRouter.get(TableKeyPair.of(tableName, targetClass)),
       messageLoader,
       Objects.requireNonNull(checkpointServiceRouter.get(tableName)),
       scheduleTimeEvaluator,

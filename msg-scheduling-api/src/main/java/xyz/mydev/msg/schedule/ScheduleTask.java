@@ -2,14 +2,10 @@ package xyz.mydev.msg.schedule;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import xyz.mydev.msg.schedule.bean.Message;
-import xyz.mydev.msg.schedule.bean.SerializableMessage;
-import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.load.MessageLoader;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 import xyz.mydev.msg.schedule.port.Porter;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -28,14 +24,15 @@ import java.util.concurrent.locks.Lock;
  */
 @Slf4j
 @Getter
-public class ScheduleTask implements Runnable, TaskTimeType {
+public class ScheduleTask<T> implements Runnable, TaskTimeType {
 
   /**
    * 一个任务专为一个表而服务
    */
   private final String targetTableName;
-  private final Porter<SerializableMessage<? extends Serializable>> porter;
-  private final MessageLoader<? extends StringMessage> messageLoader;
+  private final Class<T> targetClass;
+  private final Porter<T> porter;
+  private final MessageLoader messageLoader;
 
   private final CheckpointService checkpointService;
 
@@ -49,14 +46,16 @@ public class ScheduleTask implements Runnable, TaskTimeType {
   private final boolean isStartingTask;
 
   public ScheduleTask(String targetTableName,
-                      Porter<SerializableMessage<? extends Serializable>> porter,
-                      MessageLoader<? extends StringMessage> messageLoader,
+                      Class<T> targetClass,
+                      Porter<T> porter,
+                      MessageLoader messageLoader,
                       CheckpointService checkpointService,
                       ScheduleTimeEvaluator scheduleTimeEvaluator,
                       TaskTimeTypeEnum taskTimeType,
                       boolean isStartingTask) {
 
     this.targetTableName = targetTableName;
+    this.targetClass = targetClass;
     this.porter = porter;
     this.messageLoader = messageLoader;
     this.checkpointService = checkpointService;
@@ -81,7 +80,7 @@ public class ScheduleTask implements Runnable, TaskTimeType {
     if (scheduleLock.tryLock()) {
       try {
 
-        List<? extends StringMessage> msgListWillSend = load(now, startTime, endTime);
+        List<T> msgListWillSend = load(now, startTime, endTime, targetClass);
 
         log.info("invoke transfer {} msg", msgListWillSend.size());
 
@@ -104,21 +103,20 @@ public class ScheduleTask implements Runnable, TaskTimeType {
   }
 
 
-  private void transfer(List<? extends StringMessage> msgListWillSend) {
-    for (StringMessage stringMessage : msgListWillSend) {
+  private void transfer(List<T> msgListWillSend) {
+    for (T stringMessage : msgListWillSend) {
       porter.transfer(stringMessage);
-      porter.transfer((Message) null);
     }
   }
 
 
-  private List<? extends StringMessage> load(LocalDateTime now,
-                                             LocalDateTime startTime,
-                                             LocalDateTime endTime) {
+  private List<T> load(LocalDateTime now,
+                       LocalDateTime startTime,
+                       LocalDateTime endTime, Class<?> targetClass) {
 
 
     log.info("task type [{}], working at [{}] ,formatted at [{}], end at [{}]", getTaskTimeType(), now, startTime, endTime);
-    return messageLoader.load(getTargetTableName(), startTime, endTime);
+    return messageLoader.load(getTargetTableName(), startTime, endTime, this.targetClass);
   }
 
 

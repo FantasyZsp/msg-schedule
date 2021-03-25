@@ -1,6 +1,5 @@
 package xyz.mydev.msg.schedule.load;
 
-import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
 
@@ -12,20 +11,20 @@ import java.util.function.Function;
 /**
  * @author ZSP
  */
-public class DefaultMessageLoader<T extends StringMessage> implements MessageLoader<T> {
+public class DefaultMessageLoader implements MessageLoader {
 
-  private final MessageRepositoryRouter<T> messageRepositoryRouter;
+  private final MessageRepositoryRouter messageRepositoryRouter;
   private final Function<String, Lock> lockFunction;
 
-  protected DefaultMessageLoader(MessageRepositoryRouter<T> messageRepositoryRouter,
+  protected DefaultMessageLoader(MessageRepositoryRouter messageRepositoryRouter,
                                  Function<String, Lock> lockFunction) {
     this.messageRepositoryRouter = messageRepositoryRouter;
     this.lockFunction = lockFunction;
   }
 
   @Override
-  public List<T> load(String targetTableName, LocalDateTime startTime, LocalDateTime endTime) {
-    MessageRepository<T> messageRepository = messageRepositoryRouter.get(targetTableName);
+  public <T> List<T> load(String targetTableName, LocalDateTime startTime, LocalDateTime endTime, Class<T> targetClass) {
+    MessageRepository messageRepository = messageRepositoryRouter.get(targetTableName);
     return messageRepository.findWillSendBetween(startTime, endTime);
   }
 

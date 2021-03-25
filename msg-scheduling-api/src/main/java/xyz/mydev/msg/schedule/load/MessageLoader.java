@@ -1,7 +1,5 @@
 package xyz.mydev.msg.schedule.load;
 
-import xyz.mydev.msg.schedule.bean.StringMessage;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -11,7 +9,7 @@ import java.util.concurrent.locks.Lock;
  *
  * @author ZSP
  */
-public interface MessageLoader<T extends StringMessage> {
+public interface MessageLoader {
   /**
    * 从指定时间加载消息
    *
@@ -20,7 +18,7 @@ public interface MessageLoader<T extends StringMessage> {
    * @param endTime         结束时间
    * @return 需要调度投递的消息，一般消息表中会维护消息状态。
    */
-  List<T> load(String targetTableName, LocalDateTime startTime, LocalDateTime endTime);
+  <T> List<T> load(String targetTableName, LocalDateTime startTime, LocalDateTime endTime, Class<T> targetClass);
 
   /**
    * 获取一把调度锁
