@@ -1,11 +1,15 @@
 package xyz.mydev.msg.schedule.properties;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @author zhaosp
  */
-@Data
+@Getter
+@Setter
+@ToString
 public class ExecutorProperties {
   private int minThread;
   private int maxThread;

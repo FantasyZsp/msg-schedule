@@ -20,10 +20,4 @@ public class SchedulerProperties {
 
   private TableRouteProperties route;
 
-
-  public void init() {
-
-  }
-
-
 }

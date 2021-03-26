@@ -2,6 +2,7 @@ package xyz.mydev.msg.schedule.properties;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * 配置表的调度时必要的参数
@@ -10,6 +11,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@ToString
 public class TableScheduleProperties {
   private String tableName;
   private int checkpointInterval = 15;
