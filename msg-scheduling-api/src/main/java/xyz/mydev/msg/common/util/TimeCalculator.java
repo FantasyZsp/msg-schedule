@@ -2,6 +2,7 @@ package xyz.mydev.msg.common.util;
 
 import java.time.LocalDateTime;
 
+@Deprecated(forRemoval = true)
 public interface TimeCalculator {
 
 

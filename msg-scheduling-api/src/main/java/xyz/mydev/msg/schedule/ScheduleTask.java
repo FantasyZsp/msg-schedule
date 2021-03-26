@@ -103,16 +103,16 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
   }
 
 
-  private void transfer(List<T> msgListWillSend) {
+  protected void transfer(List<T> msgListWillSend) {
     for (T stringMessage : msgListWillSend) {
       porter.transfer(stringMessage);
     }
   }
 
 
-  private List<T> load(LocalDateTime now,
-                       LocalDateTime startTime,
-                       LocalDateTime endTime, Class<T> targetClass) {
+  protected List<T> load(LocalDateTime now,
+                         LocalDateTime startTime,
+                         LocalDateTime endTime, Class<T> targetClass) {
 
 
     log.info("task type [{}], working at [{}] ,formatted at [{}], end at [{}]", getTaskTimeType(), now, startTime, endTime);
@@ -120,37 +120,29 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
   }
 
 
-  /**
-   * TODO 关于 表加载时间范围的外部化配置与策略类实现
-   */
-  public LocalDateTime[] getTime(LocalDateTime now) {
+  protected LocalDateTime[] getTime(LocalDateTime now) {
     LocalDateTime startTime;
     LocalDateTime endTime;
     TaskTimeTypeEnum taskTimeType = getTaskTimeType();
-    long intervalSeconds = scheduleTimeEvaluator.intervalSeconds();
+    int intervalMinutes = scheduleTimeEvaluator.getTableIntervalMinutes(targetTableName);
 
     // checkpoint -> formatted now plus interval
     if (TaskTimeTypeEnum.CheckpointTimeTask.equals(taskTimeType)) {
-
       startTime = checkpointService.readCheckpoint(getTargetTableName());
-      endTime = scheduleTimeEvaluator.formatTimeWithDefaultInterval(now).plusSeconds(intervalSeconds);
-
+      endTime = scheduleTimeEvaluator.formatTimeWithInterval(now, intervalMinutes).plusMinutes(intervalMinutes);
     } else {
       // formatted now -> plus interval
-      startTime = scheduleTimeEvaluator.formatTimeWithDefaultInterval(now);
-      endTime = startTime.plusSeconds(intervalSeconds);
+      startTime = scheduleTimeEvaluator.formatTimeWithInterval(now, intervalMinutes);
+      endTime = startTime.plusSeconds(intervalMinutes);
     }
-
     return new LocalDateTime[]{startTime, endTime};
-
   }
 
   /**
    * 锁key:  ld:tableName:endTimeSequence
    * endTimeSequence格式: 当天间隔顺序号，从0开始。如30分钟，那么结束时间 1:00对应的就是2 = 60/30
    */
-  String buildLoadLockName(LocalDateTime endTime) {
-    // todo 拿到格式化时间序号
-    return "ld:" + getTargetTableName() + ":" + endTime;
+  protected String buildLoadLockName(LocalDateTime correctedEndTime) {
+    return "ld:" + targetTableName + ":" + scheduleTimeEvaluator.intervalSequenceNo(targetTableName, correctedEndTime);
   }
 }
