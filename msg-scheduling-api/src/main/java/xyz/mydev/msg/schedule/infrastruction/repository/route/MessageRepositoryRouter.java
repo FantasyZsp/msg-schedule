@@ -8,15 +8,11 @@ import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
  */
 public interface MessageRepositoryRouter {
 
-  <T extends StringMessage> MessageRepository<T> get(String msgTableName, Class<T> targetClass);
-
   <T extends StringMessage> MessageRepository<T> get(String msgTableName);
 
-
-  @SuppressWarnings("unchecked")
   default <T extends StringMessage> MessageRepository<T> resolveByMessage(T msg) {
-    return (MessageRepository<T>) get(msg.getTargetTableName(), msg.getClass());
+    return get(msg.getTargetTableName());
   }
 
-
+  <T extends StringMessage> void put(String tableName, MessageRepository<T> messageRepository);
 }

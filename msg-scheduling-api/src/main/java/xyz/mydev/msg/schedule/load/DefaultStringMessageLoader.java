@@ -1,6 +1,5 @@
 package xyz.mydev.msg.schedule.load;
 
-import xyz.mydev.msg.schedule.bean.Message;
 import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
@@ -37,7 +36,4 @@ public class DefaultStringMessageLoader implements MessageLoader {
     return lockFunction.apply(tablaNameWithScheduleEndTime);
   }
 
-  abstract class DM implements Message {
-
-  }
 }
