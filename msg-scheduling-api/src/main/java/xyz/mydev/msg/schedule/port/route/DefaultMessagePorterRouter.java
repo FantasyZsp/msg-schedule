@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author ZSP
  */
 
-public class DelayMessagePorterRouter implements PorterRouter {
+public class DefaultMessagePorterRouter implements PorterRouter {
 
   /**
    * tableKeyPair -> porter
