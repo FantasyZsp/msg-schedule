@@ -112,11 +112,11 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
 
   private List<T> load(LocalDateTime now,
                        LocalDateTime startTime,
-                       LocalDateTime endTime, Class<?> targetClass) {
+                       LocalDateTime endTime, Class<T> targetClass) {
 
 
     log.info("task type [{}], working at [{}] ,formatted at [{}], end at [{}]", getTaskTimeType(), now, startTime, endTime);
-    return messageLoader.load(getTargetTableName(), startTime, endTime, this.targetClass);
+    return messageLoader.load(getTargetTableName(), startTime, endTime, targetClass);
   }
 
 

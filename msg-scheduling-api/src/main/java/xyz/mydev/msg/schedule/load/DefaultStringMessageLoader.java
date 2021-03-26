@@ -1,5 +1,7 @@
 package xyz.mydev.msg.schedule.load;
 
+import xyz.mydev.msg.schedule.bean.Message;
+import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
 
@@ -11,25 +13,31 @@ import java.util.function.Function;
 /**
  * @author ZSP
  */
-public class DefaultMessageLoader implements MessageLoader {
+public class DefaultStringMessageLoader implements MessageLoader {
 
   private final MessageRepositoryRouter messageRepositoryRouter;
   private final Function<String, Lock> lockFunction;
 
-  protected DefaultMessageLoader(MessageRepositoryRouter messageRepositoryRouter,
-                                 Function<String, Lock> lockFunction) {
+  protected DefaultStringMessageLoader(MessageRepositoryRouter messageRepositoryRouter,
+                                       Function<String, Lock> lockFunction) {
     this.messageRepositoryRouter = messageRepositoryRouter;
     this.lockFunction = lockFunction;
   }
 
+
+  @SuppressWarnings("unchecked")
   @Override
   public <T> List<T> load(String targetTableName, LocalDateTime startTime, LocalDateTime endTime, Class<T> targetClass) {
-    MessageRepository messageRepository = messageRepositoryRouter.get(targetTableName);
-    return messageRepository.findWillSendBetween(startTime, endTime);
+    MessageRepository<? extends StringMessage> messageRepository = messageRepositoryRouter.get(targetTableName);
+    return (List<T>) messageRepository.findWillSendBetween(startTime, endTime);
   }
 
   @Override
   public Lock getScheduleLock(String tablaNameWithScheduleEndTime) {
     return lockFunction.apply(tablaNameWithScheduleEndTime);
+  }
+
+  abstract class DM implements Message {
+
   }
 }

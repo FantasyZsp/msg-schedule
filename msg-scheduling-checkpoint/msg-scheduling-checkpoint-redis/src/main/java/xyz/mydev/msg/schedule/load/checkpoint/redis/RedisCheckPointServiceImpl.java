@@ -3,7 +3,6 @@ package xyz.mydev.msg.schedule.load.checkpoint.redis;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
-import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointUpdateStrategy;
@@ -47,10 +46,10 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
    * hor ZSP
    */
   private final List<String> tableNames;
-  private final MessageRepositoryRouter<? extends StringMessage> messageRepositoryRouter;
+  private final MessageRepositoryRouter messageRepositoryRouter;
 
   public RedisCheckPointServiceImpl(RedissonClient redissonClient,
-                                    MessageRepositoryRouter<? extends StringMessage> repositoryRouter,
+                                    MessageRepositoryRouter repositoryRouter,
                                     Collection<String> tableNames) {
     Objects.requireNonNull(redissonClient);
     this.messageRepositoryRouter = Objects.requireNonNull(repositoryRouter);

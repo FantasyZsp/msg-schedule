@@ -13,11 +13,11 @@ import java.util.Objects;
 public class MessageStoreService {
 
   private final LocalMessageStoreEventPublisher publisher;
-  private final MessageRepositoryRouter<? super StringMessage> messageRepositoryRouter;
+  private final MessageRepositoryRouter messageRepositoryRouter;
 
 
   public MessageStoreService(LocalMessageStoreEventPublisher publisher,
-                             MessageRepositoryRouter<? super StringMessage> messageRepositoryRouter) {
+                             MessageRepositoryRouter messageRepositoryRouter) {
     this.publisher = publisher;
     this.messageRepositoryRouter = messageRepositoryRouter;
   }

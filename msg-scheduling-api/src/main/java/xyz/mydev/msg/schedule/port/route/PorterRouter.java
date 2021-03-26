@@ -18,9 +18,14 @@ public interface PorterRouter {
     return (Porter<T>) get(TableKeyPair.of(msg.getTargetTableName(), msg.getClass()));
   }
 
-  <T > Porter<T> get(TableKeyPair<T> of);
+  <T> Porter<T> get(TableKeyPair<T> of);
+
+  <T> void put(TableKeyPair<T> key, Porter<T> val);
+
 
   default <T extends SerializableMessage<? extends Serializable>> Porter<T> getByKey(TableKeyPair<T> keyPair) {
     return get(keyPair);
   }
+
+
 }
