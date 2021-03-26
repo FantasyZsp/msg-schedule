@@ -11,16 +11,18 @@ import lombok.ToString;
 @Setter
 @ToString
 public class SchedulerProperties {
-  ExecutorProperties scheduleExecutor;
-  ExecutorProperties portExecutor;
-  ExecutorProperties checkpointExecutor;
-  TableScheduleProperties defaultScheduleInterval;
 
-  TableRouteProperties route;
+  private ExecutorProperties scheduleExecutor;
+  private ExecutorProperties portExecutor;
+  private ExecutorProperties checkpointExecutor;
+
+  private TableScheduleProperties defaultScheduleInterval;
+
+  private TableRouteProperties route;
 
 
-  public TableScheduleProperties get(String targetTableName) {
-    return route.getTables().getOrDefault(targetTableName, defaultScheduleInterval);
+  public void init() {
+
   }
 
 

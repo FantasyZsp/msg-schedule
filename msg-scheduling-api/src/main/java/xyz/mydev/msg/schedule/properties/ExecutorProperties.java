@@ -9,4 +9,6 @@ import lombok.Data;
 public class ExecutorProperties {
   private int minThread;
   private int maxThread;
+  private boolean dependOnTableSize = true;
+
 }

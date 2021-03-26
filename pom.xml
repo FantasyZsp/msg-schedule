@@ -28,7 +28,7 @@
 
 
   <properties>
-    <revision>1.0.0</revision>
+    <revision>0.1.0</revision>
     <java.version>11</java.version>
 
     <redis_lock_version>1.2.0</redis_lock_version>
