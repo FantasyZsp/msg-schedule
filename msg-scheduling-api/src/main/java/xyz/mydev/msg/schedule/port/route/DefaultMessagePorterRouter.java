@@ -29,4 +29,9 @@ public class DefaultMessagePorterRouter implements PorterRouter {
   public <T> void put(TableKeyPair<T> key, Porter<T> porter) {
     porters.put(key, porter);
   }
+
+  @Override
+  public void putAny(TableKeyPair<?> key, Porter<?> val) {
+    porters.put(key, val);
+  }
 }

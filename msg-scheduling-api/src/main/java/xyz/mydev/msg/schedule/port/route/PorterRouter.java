@@ -22,6 +22,8 @@ public interface PorterRouter {
 
   <T> void put(TableKeyPair<T> key, Porter<T> val);
 
+  void putAny(TableKeyPair<?> key, Porter<?> val);
+
 
   default <T extends SerializableMessage<? extends Serializable>> Porter<T> getByKey(TableKeyPair<T> keyPair) {
     return get(keyPair);

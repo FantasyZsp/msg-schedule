@@ -10,8 +10,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import xyz.mydev.msg.common.TableKeyPair;
 import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.delay.autoconfig.properties.SchedulerProperties;
+import xyz.mydev.msg.schedule.delay.autoconfig.properties.TableScheduleProperties;
+import xyz.mydev.msg.schedule.delay.port.DefaultDelayMessagePorter;
 import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.DefaultMessageRepositoryRouter;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
@@ -25,6 +28,7 @@ import xyz.mydev.msg.schedule.port.Porter;
 import xyz.mydev.msg.schedule.port.route.DefaultMessagePorterRouter;
 import xyz.mydev.msg.schedule.port.route.PorterRouter;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -94,12 +98,20 @@ public class DelayMessageScheduleAutoConfiguration {
 
   /**
    * TODO Porter需要重构
+   * 支持用户为某个表自定义porter
    */
   @Bean
   @ConditionalOnMissingBean
   public PorterRouter messagePorterRouter() {
     DefaultMessagePorterRouter router = new DefaultMessagePorterRouter();
 
+    Map<String, TableScheduleProperties> delayTableNames = schedulerProperties.getRoute().getTables().getDelay();
+    for (Map.Entry<String, TableScheduleProperties> delay : delayTableNames.entrySet()) {
+      TableScheduleProperties value = delay.getValue();
+      TableKeyPair<?> tableKeyPair = TableKeyPair.of(value.getTableName(), value.getTableEntityClass());
+      Porter<?> build = DefaultDelayMessagePorter.build(tableKeyPair.getTargetClass());
+      router.putAny(tableKeyPair, build);
+    }
     return router;
   }
 

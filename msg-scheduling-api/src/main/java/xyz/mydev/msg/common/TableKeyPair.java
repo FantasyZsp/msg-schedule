@@ -34,4 +34,12 @@ public class TableKeyPair<T> {
   public int hashCode() {
     return Objects.hash(tableName, targetClass);
   }
+
+  public String getTableName() {
+    return tableName;
+  }
+
+  public Class<T> getTargetClass() {
+    return targetClass;
+  }
 }
