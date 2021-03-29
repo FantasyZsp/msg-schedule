@@ -17,8 +17,8 @@ public class DefaultStringMessageLoader implements MessageLoader {
   private final MessageRepositoryRouter messageRepositoryRouter;
   private final Function<String, Lock> lockFunction;
 
-  protected DefaultStringMessageLoader(MessageRepositoryRouter messageRepositoryRouter,
-                                       Function<String, Lock> lockFunction) {
+  public DefaultStringMessageLoader(MessageRepositoryRouter messageRepositoryRouter,
+                                    Function<String, Lock> lockFunction) {
     this.messageRepositoryRouter = messageRepositoryRouter;
     this.lockFunction = lockFunction;
   }

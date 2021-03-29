@@ -6,16 +6,18 @@ import org.redisson.api.RedissonClient;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointUpdateStrategy;
+import xyz.mydev.msg.schedule.load.checkpoint.DefaultCheckpointUpdateStrategy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -40,12 +42,8 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
   private final Map<String, Lock> scheduleLockPool = new ConcurrentHashMap<>();
   private final RedissonClient redissonClient;
 
-  /**
-   * immutable
-   * <p>
-   * hor ZSP
-   */
-  private final List<String> tableNames;
+
+  private Set<String> tableNames;
   private final MessageRepositoryRouter messageRepositoryRouter;
 
   public RedisCheckPointServiceImpl(RedissonClient redissonClient,
@@ -54,14 +52,21 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
     Objects.requireNonNull(redissonClient);
     this.messageRepositoryRouter = Objects.requireNonNull(repositoryRouter);
     this.redissonClient = redissonClient;
-    this.tableNames = List.copyOf(tableNames);
+    this.tableNames = new HashSet<>(tableNames);
+  }
 
-    // 初始化
-    // TODO 考虑重构到初始化方法
+  public RedisCheckPointServiceImpl(RedissonClient redissonClient,
+                                    MessageRepositoryRouter repositoryRouter) {
+    Objects.requireNonNull(redissonClient);
+    this.messageRepositoryRouter = Objects.requireNonNull(repositoryRouter);
+    this.redissonClient = redissonClient;
+    this.tableNames = new HashSet<>();
+  }
+
+  public void init() {
     initCpHolderPool();
     initWriteLockPool();
     initScheduleLockPool();
-
   }
 
   private void initScheduleLockPool() {
@@ -86,7 +91,7 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
     }
   }
 
-  private final CheckpointUpdater updater = new CheckpointUpdater(this);
+  private final CheckpointUpdateStrategy updater = new DefaultCheckpointUpdateStrategy(this);
 
 
   /**
@@ -203,64 +208,12 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
   }
 
   @Override
-  public List<String> getTableNames() {
+  public Set<String> getTableNames() {
     return tableNames;
   }
 
   @Override
   public CheckpointUpdateStrategy getUpdateStrategy(String targetTableName) {
     return updater;
-  }
-
-  /**
-   * 封装更新的任务，利用线程池进行调度。
-   * 每张表对应一个任务，但 CheckPointUpdater 可以只有一个。
-   *
-   * @author ZSP
-   */
-  static class CheckpointUpdater implements CheckpointUpdateStrategy {
-
-    private final CheckpointService checkPointService;
-
-    CheckpointUpdater(CheckpointService checkPointService) {
-      this.checkPointService = checkPointService;
-    }
-
-    @Override
-    public void updateCheckpoint(String targetTableName) {
-
-      Lock scheduleLock = checkPointService.getScheduleLock(targetTableName);
-
-      boolean enableSchedule = scheduleLock.tryLock();
-
-      if (!enableSchedule) {
-        log.info("schedule to update checkpoint by other app");
-      }
-
-      if (enableSchedule) {
-        try {
-          Lock writeLock = checkPointService.getReadWriteLock(targetTableName).writeLock();
-
-          // 调度任务拿到的检查点一定是可靠的、最新的，阻塞写入
-          writeLock.lock();
-          try {
-            LocalDateTime next = checkPointService.loadNextCheckpoint(targetTableName);
-            checkPointService.writeCheckpoint(targetTableName, next);
-            log.info("update checkpoint success for {} , {}", targetTableName, next);
-          } finally {
-            writeLock.unlock();
-          }
-
-        } catch (Throwable ex) {
-          log.error("update checkpoint failed", ex);
-        } finally {
-          scheduleLock.unlock();
-        }
-      }
-
-
-    }
-
-
   }
 }

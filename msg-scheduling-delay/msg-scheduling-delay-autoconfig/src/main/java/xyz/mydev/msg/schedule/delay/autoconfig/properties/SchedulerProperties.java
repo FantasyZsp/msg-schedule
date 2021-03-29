@@ -1,14 +1,17 @@
-package xyz.mydev.msg.schedule.properties;
+package xyz.mydev.msg.schedule.delay.autoconfig.properties;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import xyz.mydev.msg.common.DelayMessageTag;
 import xyz.mydev.msg.schedule.bean.BaseMessage;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author zhaosp
@@ -17,6 +20,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @Slf4j
+@ConfigurationProperties(prefix = "msg-schedule.scheduler")
 public class SchedulerProperties {
 
   private static final int DEFAULT_CHECKPOINT_INTERVALS = 15;
@@ -27,9 +31,9 @@ public class SchedulerProperties {
   private ExecutorProperties portExecutor;
   private ExecutorProperties checkpointExecutor;
 
-  private TableScheduleProperties defaultScheduleInterval;
+  private TableScheduleProperties defaultScheduleInterval = new TableScheduleProperties();
 
-  private TableRouteProperties route;
+  private TableRouteProperties route = new TableRouteProperties();
 
   public void init() {
 
@@ -130,6 +134,21 @@ public class SchedulerProperties {
 
     Objects.requireNonNull(tableScheduleProperties.getCheckpointInterval());
     Objects.requireNonNull(tableScheduleProperties.getLoadInterval());
+  }
+
+  public Set<String> getScheduledTableNames() {
+    Set<String> tableNameSet = new HashSet<>();
+    tableNameSet.addAll(route.getTables().delay.keySet());
+    tableNameSet.addAll(route.getTables().instant.keySet());
+    return tableNameSet;
+  }
+
+  public Set<String> getDelayTableNames() {
+    return new HashSet<>(route.getTables().delay.keySet());
+  }
+
+  public Set<String> getInstantTableNames() {
+    return new HashSet<>(route.getTables().instant.keySet());
   }
 
 }

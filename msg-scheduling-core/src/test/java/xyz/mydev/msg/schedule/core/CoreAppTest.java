@@ -17,7 +17,7 @@ public class CoreAppTest {
 
     new SpringApplicationBuilder(CoreAppTest.class)
       .profiles("msg-schedule")
-      .web(WebApplicationType.SERVLET)
+      .web(WebApplicationType.NONE)
       .run(args);
 
   }

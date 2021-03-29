@@ -40,7 +40,7 @@ public class DefaultCheckpointUpdateStrategy implements CheckpointUpdateStrategy
         try {
           LocalDateTime next = checkpointService.loadNextCheckpoint(targetTableName);
           checkpointService.writeCheckpoint(targetTableName, next);
-          log.info("update checkpoint success , {}", next);
+          log.info("update checkpoint success for {} , {}", targetTableName, next);
         } finally {
           writeLock.unlock();
         }

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import xyz.mydev.msg.schedule.properties.SchedulerProperties;
+import xyz.mydev.msg.schedule.delay.autoconfig.properties.SchedulerProperties;
 
 /**
  * TODO spring内置的获取配置文件内容的类

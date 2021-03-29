@@ -23,6 +23,18 @@
       <artifactId>msg-scheduling-delay-repository-mybatis</artifactId>
       <version>${revision}</version>
     </dependency>
+
+    <dependency>
+      <groupId>xyz.mydev</groupId>
+      <artifactId>msg-scheduling-checkpoint-redis</artifactId>
+      <version>${revision}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>xyz.mydev</groupId>
+      <artifactId>msg-scheduling-mq-rocketmq</artifactId>
+      <version>${revision}</version>
+    </dependency>
   </dependencies>
 
 
