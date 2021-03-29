@@ -26,6 +26,7 @@ import xyz.mydev.msg.schedule.port.route.DefaultMessagePorterRouter;
 import xyz.mydev.msg.schedule.port.route.PorterRouter;
 
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * 根据外部化配置，自动装配需要的组件
@@ -68,12 +69,19 @@ public class DelayMessageScheduleAutoConfiguration {
   @ConditionalOnMissingBean
   public CheckpointServiceRouter checkpointServiceRouter() {
     DefaultCheckpointServiceRouter router = new DefaultCheckpointServiceRouter();
+    // put user custom
     checkpointServiceObjectProvider.ifAvailable(router::put);
-    RedisCheckPointServiceImpl redisCheckPointService = new RedisCheckPointServiceImpl(Objects.requireNonNull(redissonClientObjectProvider.getIfAvailable()), messageRepositoryRouter());
-    for (String scheduledTables : schedulerProperties.getScheduledTableNames()) {
-      router.putIfAbsent(scheduledTables, redisCheckPointService);
+    // put default for remaining
+    Set<String> all = schedulerProperties.getScheduledTableNames();
+    all.removeAll(router.tableNameSet());
+
+    if (!all.isEmpty()) {
+      RedisCheckPointServiceImpl redisCheckPointService = new RedisCheckPointServiceImpl(Objects.requireNonNull(redissonClientObjectProvider.getIfAvailable()), messageRepositoryRouter());
+      for (String scheduledTables : all) {
+        router.putIfAbsent(scheduledTables, redisCheckPointService);
+      }
+      redisCheckPointService.init();
     }
-    redisCheckPointService.init();
     return router;
   }
 
