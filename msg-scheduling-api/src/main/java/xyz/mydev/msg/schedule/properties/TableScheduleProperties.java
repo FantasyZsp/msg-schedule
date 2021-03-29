@@ -14,10 +14,10 @@ import lombok.ToString;
 @ToString
 public class TableScheduleProperties {
   private String tableName;
-  private int checkpointInterval = 15;
-  private int loadInterval = 30;
+  private Integer checkpointInterval = 15;
+  private Integer loadInterval = 30;
 
   private Class<?> tableEntityClass;
-  private boolean isDelay;
-  private boolean useDefaultConfig = false;
+  private Boolean isDelay;
+  private Boolean useDefaultConfig = false;
 }

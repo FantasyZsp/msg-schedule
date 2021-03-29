@@ -1,5 +1,6 @@
 msg-schedule:
   scheduler: # 调度组件
+    enable: true
     # 线程池配置
     schedule-executor: # 定时调度用，每个表都对应一个task供定时调度，所以线程数最好不小于独立调度的表个数
       min-thread: 2 # 需要调度的表个数
@@ -22,6 +23,7 @@ msg-schedule:
           delayMsgTableA: # 消息表名，仓储层将实现接口与此对应(不一定就是db表名，仅为了区分)
             checkpoint-interval: 15 # 15分钟维护一次
             load-interval: 30 # 30分钟调度一次；对于延时消息，预加载30分钟的内容或检查点到格式化时间的内容；对于事务消息，前置检查30分钟的消息或检查点到当前时间
+            table-entity-class: xyz.mydev.msg.schedule.core.CoreAppTest.TmpDelayMsg
         instant:
           txMsgTableB:
             checkpoint-interval: 15
@@ -29,6 +31,7 @@ msg-schedule:
             table-entity-class: xyz.mydev.msg.schedule.core.CoreAppTest.PersonMessage
           txMsgTableC:
             use-default-config: true # 指定使用默认配置
+            table-entity-class: xyz.mydev.msg.schedule.core.CoreAppTest.PersonMessage
   #          msgTableC:
   #          msgTableD:
   message-queue: # 配置平台实现
