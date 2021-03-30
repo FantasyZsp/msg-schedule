@@ -13,11 +13,6 @@ import java.io.Serializable;
  */
 public interface PorterRouter {
 
-  @SuppressWarnings("unchecked")
-  default <T extends SerializableMessage<? extends Serializable>> Porter<T> resolveByMessage(T msg) {
-    return (Porter<T>) get(TableKeyPair.of(msg.getTargetTableName(), msg.getClass()));
-  }
-
   <T> Porter<T> get(TableKeyPair<T> of);
 
   <T> void put(TableKeyPair<T> key, Porter<T> val);

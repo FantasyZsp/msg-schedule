@@ -28,7 +28,7 @@ public class DefaultDelayMessagePorter<T extends DelayMessage> extends DefaultPo
                                                                                   TransferQueue<E> transferQueue,
                                                                                   TransferTaskFactory<E> transferTaskFactory,
                                                                                   PortTaskFactory<E> portTaskFactory) {
-    return new DefaultDelayMessagePorter<E>(targetTableName, tableEntityClass, transferQueue, transferTaskFactory, portTaskFactory);
+    return new DefaultDelayMessagePorter<>(targetTableName, tableEntityClass, transferQueue, transferTaskFactory, portTaskFactory);
   }
 
   @Override
