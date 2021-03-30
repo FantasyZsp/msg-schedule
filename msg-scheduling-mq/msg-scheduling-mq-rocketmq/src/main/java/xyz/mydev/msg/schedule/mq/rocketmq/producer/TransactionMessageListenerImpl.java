@@ -7,7 +7,6 @@ import org.apache.rocketmq.client.producer.LocalTransactionState;
 import org.apache.rocketmq.client.producer.TransactionListener;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageExt;
-import org.springframework.stereotype.Component;
 import xyz.mydev.msg.common.Constants;
 import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
@@ -16,13 +15,10 @@ import xyz.mydev.msg.schedule.mq.error.record.MsgSendErrorCodeEnum;
 import xyz.mydev.msg.schedule.mq.error.record.RocketMqMsgSendFailureHandler;
 
 /**
- * 延时消息的发送事务处理
- *
  * @author zhaosp
  */
-@Component
 @Slf4j
-public class DelayMessageTransactionListenerImpl implements TransactionListener {
+public class TransactionMessageListenerImpl implements TransactionListener {
 
   private final MessageRepositoryRouter messageRepositoryRouter;
   private final RocketMqMsgSendFailureHandler rocketMqMsgSendFailureHandler;
@@ -33,8 +29,8 @@ public class DelayMessageTransactionListenerImpl implements TransactionListener 
    */
   private static final AtomicLongMap<String> MSG_CHECK_TIMES_MAP = AtomicLongMap.create();
 
-  public DelayMessageTransactionListenerImpl(MessageRepositoryRouter messageRepositoryRouter,
-                                             RocketMqMsgSendFailureHandler rocketMqMsgSendFailureHandler) {
+  public TransactionMessageListenerImpl(MessageRepositoryRouter messageRepositoryRouter,
+                                        RocketMqMsgSendFailureHandler rocketMqMsgSendFailureHandler) {
     this.messageRepositoryRouter = messageRepositoryRouter;
     this.rocketMqMsgSendFailureHandler = rocketMqMsgSendFailureHandler;
   }

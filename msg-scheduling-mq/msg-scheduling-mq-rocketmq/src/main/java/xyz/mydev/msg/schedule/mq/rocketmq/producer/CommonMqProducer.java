@@ -29,10 +29,10 @@ public class CommonMqProducer implements InitializingBean {
 
   @Getter
   private TransactionMQProducer producer;
-  private final DelayMessageTransactionListenerImpl delayMessageTransactionListener;
+  private final TransactionMessageListenerImpl delayMessageTransactionListener;
 
 
-  private CommonMqProducer(DelayMessageTransactionListenerImpl delayMessageTransactionListener,
+  private CommonMqProducer(TransactionMessageListenerImpl delayMessageTransactionListener,
                            RocketMQProperties rocketMQProperties) {
 
     this.delayMessageTransactionListener = delayMessageTransactionListener;

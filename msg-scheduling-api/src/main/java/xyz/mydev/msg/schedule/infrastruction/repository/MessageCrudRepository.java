@@ -12,17 +12,11 @@ public interface MessageCrudRepository<E, ID, CP> {
 
   int insert(E entity);
 
-  int update(E entity);
-
   boolean updateStatus(String id, int status);
 
   boolean updateToSent(ID id);
 
-  List<E> findLimitSizeWillSendBetween(CP startTime, CP endTime, int limitSize);
-
   List<E> findWillSendBetween(CP startTime, CP endTime);
-
-  long countWillSendBetween(CP startTime, CP endTime);
 
   Optional<CP> findCheckpoint();
 
@@ -34,6 +28,5 @@ public interface MessageCrudRepository<E, ID, CP> {
    */
   Optional<CP> findNextCheckpointAfter(CP oldCheckPoint);
 
-  boolean existById(String id);
 
 }
