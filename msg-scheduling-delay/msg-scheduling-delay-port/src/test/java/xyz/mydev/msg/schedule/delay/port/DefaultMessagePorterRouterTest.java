@@ -14,9 +14,9 @@ class DefaultMessagePorterRouterTest {
 
   @Test
   void testGeneric() {
-    DefaultPorter<StringMessage> test = new DefaultPorter<>("1", null, null, null);
-    DefaultPorter<DelayMessage> test2 = new DefaultPorter<>("2", null, null, null);
-    DelayMessagePorter<DelayMessage> test3 = new DelayMessagePorter<>("3", null, null, null);
+    DefaultPorter<StringMessage> test = new DefaultPorter<>("1", null, null, null, null);
+    DefaultPorter<DelayMessage> test2 = new DefaultPorter<>("2", null, null, null, null);
+    DefaultDelayMessagePorter<DelayMessage> test3 = new DefaultDelayMessagePorter<>("3", null, null, null, null);
     DefaultMessagePorterRouter router = new DefaultMessagePorterRouter();
     router.put(TableKeyPair.of("test", StringMessage.class), test);
     router.put(TableKeyPair.of("test2", DelayMessage.class), test2);

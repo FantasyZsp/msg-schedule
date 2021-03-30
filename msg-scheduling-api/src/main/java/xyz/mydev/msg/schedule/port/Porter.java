@@ -11,6 +11,10 @@ import java.util.concurrent.ExecutorService;
  */
 public interface Porter<E> {
 
+  String getTargetTableName();
+
+  Class<E> getTableEntityClass();
+
   ExecutorService getTransferExecutor();
 
   @NotNull

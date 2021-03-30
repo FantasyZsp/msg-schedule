@@ -28,16 +28,20 @@ public class DefaultPorter<E extends SerializableMessage<? extends Serializable>
   private ExecutorService portExecutor;
   private ExecutorService transferExecutor;
 
-  private final TransferTaskFactory<E> transferTaskFactory;
-  private final PortTaskFactory<E> portTaskFactory;
-
-  public DefaultPorter(String name,
+  public DefaultPorter(String targetTableName,
+                       Class<E> tableEntityClass,
                        TransferQueue<E> transferQueue,
                        TransferTaskFactory<E> transferTaskFactory,
                        PortTaskFactory<E> portTaskFactory) {
-    super(name, transferQueue);
-    this.transferTaskFactory = transferTaskFactory;
-    this.portTaskFactory = portTaskFactory;
+    super(targetTableName, tableEntityClass, transferQueue, transferTaskFactory, portTaskFactory);
+  }
+
+  public static <E extends SerializableMessage<? extends Serializable>> Porter<E> build(String targetTableName,
+                                                                                        Class<E> tableEntityClass,
+                                                                                        TransferQueue<E> transferQueue,
+                                                                                        TransferTaskFactory<E> transferTaskFactory,
+                                                                                        PortTaskFactory<E> portTaskFactory) {
+    return new DefaultPorter<>(targetTableName, tableEntityClass, transferQueue, transferTaskFactory, portTaskFactory);
   }
 
   @Override

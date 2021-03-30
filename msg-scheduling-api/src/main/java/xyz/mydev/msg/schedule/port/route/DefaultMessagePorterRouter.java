@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author ZSP
  */
-
 public class DefaultMessagePorterRouter implements PorterRouter {
 
   /**
@@ -33,5 +32,16 @@ public class DefaultMessagePorterRouter implements PorterRouter {
   @Override
   public void putAny(TableKeyPair<?> key, Porter<?> val) {
     porters.put(key, val);
+  }
+
+  public void putIfAbsent(TableKeyPair<?> key, Porter<?> val) {
+    porters.putIfAbsent(key, val);
+  }
+
+  @Override
+  public String toString() {
+    return "DefaultMessagePorterRouter{" +
+      "porters=" + porters +
+      '}';
   }
 }

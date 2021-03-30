@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 @Data
 public class DelayMessage implements Message, DelayMessageTag {
 
-  public static final String TARGET_TABLE_NAME = "delay_message";
-  public static final Boolean IS_DELAY = true;
-  public static final Boolean IS_TX = true;
+  public String targetTableName;
+  public Boolean isDelay = true;
+  public Boolean isTx = true;
 
   private String id;
   private String platformMsgId;
@@ -32,16 +32,16 @@ public class DelayMessage implements Message, DelayMessageTag {
 
   @Override
   public String getTargetTableName() {
-    return TARGET_TABLE_NAME;
+    return targetTableName;
   }
 
   @Override
   public Boolean isDelay() {
-    return IS_DELAY;
+    return isDelay;
   }
 
   @Override
   public Boolean isTx() {
-    return IS_TX;
+    return isTx;
   }
 }

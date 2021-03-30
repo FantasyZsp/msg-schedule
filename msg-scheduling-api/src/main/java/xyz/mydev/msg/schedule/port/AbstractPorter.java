@@ -14,18 +14,35 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Getter
+@Setter
 public abstract class AbstractPorter<E> extends Thread implements Porter<E> {
 
+  private final String targetTableName;
+  private final Class<E> tableEntityClass;
+  private PortExceptionHandle portExceptionHandle;
   private final TransferQueue<E> transferQueue;
 
-  public AbstractPorter(String name,
+  private PortTaskFactory<E> portTaskFactory;
+  private TransferTaskFactory<E> transferTaskFactory;
+
+  public AbstractPorter(String targetTableName,
+                        Class<E> tableEntityClass,
                         TransferQueue<E> transferQueue) {
-    super(name);
-    this.transferQueue = transferQueue;
+    this(targetTableName, tableEntityClass, transferQueue, null, null);
   }
 
-  @Setter
-  private PortExceptionHandle portExceptionHandle;
+  public AbstractPorter(String targetTableName,
+                        Class<E> tableEntityClass,
+                        TransferQueue<E> transferQueue,
+                        TransferTaskFactory<E> transferTaskFactory,
+                        PortTaskFactory<E> portTaskFactory) {
+    super("pt-" + targetTableName);
+    this.transferQueue = transferQueue;
+    this.targetTableName = targetTableName;
+    this.tableEntityClass = tableEntityClass;
+    this.portTaskFactory = portTaskFactory;
+    this.transferTaskFactory = transferTaskFactory;
+  }
 
   /**
    * 这里并没有在模板流程里解决掉消费的可靠性，如果需要，子类请覆盖此方法。
@@ -86,5 +103,13 @@ public abstract class AbstractPorter<E> extends Thread implements Porter<E> {
   public static class PortExceptionHandle {
     public void handleException(Throwable ignored) {
     }
+  }
+
+  @Override
+  public String toString() {
+    return "AbstractPorter{" +
+      "targetTableName='" + targetTableName + '\'' +
+      ", tableEntityClass=" + tableEntityClass +
+      '}';
   }
 }

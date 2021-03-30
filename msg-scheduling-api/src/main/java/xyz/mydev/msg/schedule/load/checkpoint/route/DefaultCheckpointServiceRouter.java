@@ -27,7 +27,6 @@ public class DefaultCheckpointServiceRouter implements CheckpointServiceRouter {
   public void putIfAbsent(String tableName, CheckpointService checkpointService) {
     holder.putIfAbsent(tableName, checkpointService);
     checkpointService.getTableNames().add(tableName);
-
   }
 
   @Override

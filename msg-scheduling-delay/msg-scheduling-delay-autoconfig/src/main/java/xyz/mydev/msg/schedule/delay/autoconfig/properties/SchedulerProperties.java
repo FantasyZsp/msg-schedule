@@ -5,8 +5,8 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import xyz.mydev.msg.common.DelayMessageTag;
 import xyz.mydev.msg.schedule.bean.BaseMessage;
+import xyz.mydev.msg.schedule.delay.infrastruction.repository.bean.DelayMessage;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -121,7 +121,7 @@ public class SchedulerProperties {
     }
 
     if (isDelay) {
-      boolean extendsDelayMessageTag = DelayMessageTag.class.isAssignableFrom(tableScheduleProperties.getTableEntityClass());
+      boolean extendsDelayMessageTag = DelayMessage.class.isAssignableFrom(tableScheduleProperties.getTableEntityClass());
       if (!extendsDelayMessageTag) {
         throw new IllegalArgumentException("delay msg class must extends DelayMessageTag");
       }
