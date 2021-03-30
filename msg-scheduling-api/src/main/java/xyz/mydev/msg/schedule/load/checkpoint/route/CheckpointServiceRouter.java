@@ -10,6 +10,12 @@ import java.util.Set;
  */
 public interface CheckpointServiceRouter extends Router<String, CheckpointService> {
 
+  /**
+   * 将检查服务及其负责调度的表注册到 router中
+   * 实现方可以考虑对重复的处理
+   *
+   * @param checkpointService 检查服务
+   */
   void put(CheckpointService checkpointService);
 
   void putIfAbsent(String tableName, CheckpointService checkpointService);

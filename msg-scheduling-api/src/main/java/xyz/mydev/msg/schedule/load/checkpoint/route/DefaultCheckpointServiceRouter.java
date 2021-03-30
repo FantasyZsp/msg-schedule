@@ -19,7 +19,7 @@ public class DefaultCheckpointServiceRouter implements CheckpointServiceRouter {
   @Override
   public void put(CheckpointService checkpointService) {
     for (String tableName : checkpointService.getTableNames()) {
-      holder.put(tableName, checkpointService);
+      holder.putIfAbsent(tableName, checkpointService);
     }
   }
 

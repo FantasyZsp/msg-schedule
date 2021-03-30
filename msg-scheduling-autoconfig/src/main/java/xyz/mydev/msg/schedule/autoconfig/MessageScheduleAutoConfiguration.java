@@ -13,6 +13,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.CollectionUtils;
 import xyz.mydev.msg.common.TableKeyPair;
 import xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties;
 import xyz.mydev.msg.schedule.autoconfig.properties.TableScheduleProperties;
@@ -84,17 +85,23 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
   public CheckpointServiceRouter checkpointServiceRouter() {
     DefaultCheckpointServiceRouter router = new DefaultCheckpointServiceRouter();
     // put user custom
-    checkpointServiceObjectProvider.ifAvailable(router::put);
+    checkpointServiceObjectProvider.ifAvailable(cp -> {
+
+      if (CollectionUtils.isEmpty(cp.getTableNames())) {
+        throw new IllegalArgumentException("user custom cp tableNames must not be empty");
+      }
+      router.put(cp);
+
+    });
     // put default for remaining
     Set<String> all = schedulerProperties.getScheduledTableNames();
     all.removeAll(router.tableNameSet());
 
     if (!all.isEmpty()) {
       RedisCheckPointServiceImpl redisCheckPointService = new RedisCheckPointServiceImpl(redissonClient, messageRepositoryRouter());
-      for (String scheduledTables : all) {
-        router.putIfAbsent(scheduledTables, redisCheckPointService);
-      }
+      redisCheckPointService.getTableNames().addAll(all);
       redisCheckPointService.init();
+      router.put(redisCheckPointService);
     }
     return router;
   }
