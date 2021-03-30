@@ -8,10 +8,10 @@
     <module>msg-scheduling-api</module>
     <module>msg-scheduling-core</module>
     <module>msg-scheduling-checkpoint</module>
-    <module>msg-scheduling-delay</module>
-    <module>msg-scheduling-tx</module>
     <module>msg-scheduling-example</module>
     <module>msg-scheduling-mq</module>
+    <module>msg-scheduling-port</module>
+    <module>msg-scheduling-autoconfig</module>
   </modules>
 
 
