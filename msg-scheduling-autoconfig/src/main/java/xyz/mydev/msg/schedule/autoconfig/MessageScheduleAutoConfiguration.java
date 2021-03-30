@@ -1,9 +1,10 @@
-package xyz.mydev.msg.schedule.delay.autoconfig;
+package xyz.mydev.msg.schedule.autoconfig;
 
 import com.sishu.redis.lock.annotation.RedisLockAnnotationSupportAutoConfig;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -13,10 +14,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import xyz.mydev.msg.common.TableKeyPair;
+import xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties;
+import xyz.mydev.msg.schedule.autoconfig.properties.TableScheduleProperties;
 import xyz.mydev.msg.schedule.bean.DelayMessage;
 import xyz.mydev.msg.schedule.bean.StringMessage;
-import xyz.mydev.msg.schedule.delay.autoconfig.properties.SchedulerProperties;
-import xyz.mydev.msg.schedule.delay.autoconfig.properties.TableScheduleProperties;
 import xyz.mydev.msg.schedule.delay.port.DefaultDelayMessagePorter;
 import xyz.mydev.msg.schedule.delay.port.RedisDelayTransferQueue;
 import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
@@ -48,7 +49,7 @@ import java.util.Set;
 @AutoConfigureAfter({RedisLockAnnotationSupportAutoConfig.class})
 @ConditionalOnProperty(value = "msg-schedule.scheduler.enable", havingValue = "true")
 @EnableConfigurationProperties({SchedulerProperties.class})
-public class DelayMessageScheduleAutoConfiguration {
+public class MessageScheduleAutoConfiguration implements InitializingBean {
 
   private final ObjectProvider<MessageRepository<? extends StringMessage>> provider;
   private final ObjectProvider<CheckpointService> checkpointServiceObjectProvider;
@@ -56,11 +57,11 @@ public class DelayMessageScheduleAutoConfiguration {
   private final SchedulerProperties schedulerProperties;
   private final RedissonClient redissonClient;
 
-  public DelayMessageScheduleAutoConfiguration(SchedulerProperties schedulerProperties,
-                                               ObjectProvider<MessageRepository<? extends StringMessage>> provider,
-                                               ObjectProvider<CheckpointService> checkpointServiceObjectProvider,
-                                               ObjectProvider<Porter<?>> porterObjectProvider,
-                                               RedissonClient redissonClient) {
+  public MessageScheduleAutoConfiguration(SchedulerProperties schedulerProperties,
+                                          ObjectProvider<MessageRepository<? extends StringMessage>> provider,
+                                          ObjectProvider<CheckpointService> checkpointServiceObjectProvider,
+                                          ObjectProvider<Porter<?>> porterObjectProvider,
+                                          RedissonClient redissonClient) {
     this.provider = provider;
     this.schedulerProperties = schedulerProperties;
     this.porterObjectProvider = porterObjectProvider;
@@ -68,7 +69,7 @@ public class DelayMessageScheduleAutoConfiguration {
     this.checkpointServiceObjectProvider = checkpointServiceObjectProvider;
   }
 
-  private static final Logger log = LoggerFactory.getLogger(DelayMessageScheduleAutoConfiguration.class);
+  private static final Logger log = LoggerFactory.getLogger(MessageScheduleAutoConfiguration.class);
 
   @Bean
   @ConditionalOnMissingBean
@@ -117,12 +118,19 @@ public class DelayMessageScheduleAutoConfiguration {
     Map<String, TableScheduleProperties> delayTableNames = schedulerProperties.getRoute().getTables().getDelay();
 
     delayTableNames.forEach((key, tableScheduleProperty) -> {
-      TableKeyPair<?> tableKeyPair = TableKeyPair.of(tableScheduleProperty.getTableName(), tableScheduleProperty.getTableEntityClass());
+
+      Class<?> tableEntityClass = tableScheduleProperty.getTableEntityClass();
+      String tableName = tableScheduleProperty.getTableName();
+
+      if (!DelayMessage.class.isAssignableFrom(tableEntityClass)) {
+        throw new IllegalArgumentException("delay msg class must extends DelayMessage");
+      }
+
+      TableKeyPair<?> tableKeyPair = TableKeyPair.of(tableName, tableEntityClass);
       // TODO 构建 PortTaskFactory
-      RedisDelayTransferQueue<DelayMessage> transferQueue = new RedisDelayTransferQueue<>(redissonClient, tableScheduleProperty.getTableName());
+      RedisDelayTransferQueue<DelayMessage> transferQueue = new RedisDelayTransferQueue<>(redissonClient, tableName);
       TransferDirectlyTaskFactory<DelayMessage> transferDirectlyTaskFactory = new TransferDirectlyTaskFactory<>(transferQueue);
-
-
+      @SuppressWarnings("unchecked")
       Porter<?> build =
         DefaultDelayMessagePorter.buildDefaultDelayMessagePorter(tableKeyPair.getTableName(),
           (Class<DelayMessage>) tableKeyPair.getTargetClass(),
@@ -140,7 +148,7 @@ public class DelayMessageScheduleAutoConfiguration {
       // TODO 构建 transferQueue、TransferTaskFactory、PortTaskFactory
       RedisDelayTransferQueue<DelayMessage> transferQueue = new RedisDelayTransferQueue<>(redissonClient, tableScheduleProperty.getTableName());
       TransferDirectlyTaskFactory<DelayMessage> transferDirectlyTaskFactory = new TransferDirectlyTaskFactory<>(transferQueue);
-
+      @SuppressWarnings("unchecked")
       Porter<?> build =
         DefaultPorter.build(tableKeyPair.getTableName(),
           (Class<DelayMessage>) tableKeyPair.getTargetClass(),
@@ -154,4 +162,8 @@ public class DelayMessageScheduleAutoConfiguration {
     return router;
   }
 
+  @Override
+  public void afterPropertiesSet() throws Exception {
+    schedulerProperties.init();
+  }
 }

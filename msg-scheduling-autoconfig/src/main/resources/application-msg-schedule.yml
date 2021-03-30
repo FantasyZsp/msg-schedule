@@ -23,15 +23,15 @@ msg-schedule:
           delayMsgTableA: # 消息表名，仓储层将实现接口与此对应(不一定就是db表名，仅为了区分)
             checkpoint-interval: 15 # 15分钟维护一次
             load-interval: 30 # 30分钟调度一次；对于延时消息，预加载30分钟的内容或检查点到格式化时间的内容；对于事务消息，前置检查30分钟的消息或检查点到当前时间
-            table-entity-class: xyz.mydev.msg.schedule.core.CoreAppTest.TmpDelayMsg
+            table-entity-class: xyz.mydev.msg.schedule.CoreAppTest.TmpDelayMsg
         instant:
           txMsgTableB:
             checkpoint-interval: 15
             load-interval: 15
-            table-entity-class: xyz.mydev.msg.schedule.core.CoreAppTest.PersonMessage
+            table-entity-class: xyz.mydev.msg.schedule.CoreAppTest.PersonMessage
           txMsgTableC:
             use-default-config: true # 指定使用默认配置
-            table-entity-class: xyz.mydev.msg.schedule.core.CoreAppTest.PersonMessage
+            table-entity-class: xyz.mydev.msg.schedule.CoreAppTest.PersonMessage
   #          msgTableC:
   #          msgTableD:
   message-queue: # 配置平台实现
@@ -43,3 +43,10 @@ msg-schedule:
           group: common-producer-group
           name-server: "nameServer"
           instance-name: "instance-name"
+redis-lock:
+  enable: true
+redisson:
+  address: redis://${spring.redis.host:127.0.0.1}:${spring.redis.port:6379}
+  database: ${spring.redis.database:1}
+  connection-pool-size: 32
+  mode: single

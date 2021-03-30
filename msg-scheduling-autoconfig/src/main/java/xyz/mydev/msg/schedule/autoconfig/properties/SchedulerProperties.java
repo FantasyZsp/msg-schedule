@@ -1,4 +1,4 @@
-package xyz.mydev.msg.schedule.delay.autoconfig.properties;
+package xyz.mydev.msg.schedule.autoconfig.properties;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -52,7 +52,6 @@ public class SchedulerProperties {
     // 从配置中加载
     // 检查必要的配置
     initDefault(defaultScheduleInterval);
-
 
     TableRouteProperties.TableConfigProperties tables = route.getTables();
 
@@ -123,7 +122,7 @@ public class SchedulerProperties {
     if (isDelay) {
       boolean extendsDelayMessageTag = DelayMessage.class.isAssignableFrom(tableScheduleProperties.getTableEntityClass());
       if (!extendsDelayMessageTag) {
-        throw new IllegalArgumentException("delay msg class must extends DelayMessageTag");
+        throw new IllegalArgumentException("delay msg class must extends DelayMessage");
       }
     }
 

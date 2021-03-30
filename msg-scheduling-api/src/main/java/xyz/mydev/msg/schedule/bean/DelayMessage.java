@@ -7,6 +7,8 @@ import xyz.mydev.msg.common.DelayMessageTag;
  */
 
 public interface DelayMessage extends Message, DelayMessageTag {
-
-
+  @Override
+  default Boolean isDelay() {
+    return true;
+  }
 }

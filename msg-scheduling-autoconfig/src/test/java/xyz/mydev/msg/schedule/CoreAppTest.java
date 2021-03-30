@@ -1,10 +1,10 @@
-package xyz.mydev.msg.schedule.core;
+package xyz.mydev.msg.schedule;
 
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import xyz.mydev.msg.common.DelayMessageTag;
-import xyz.mydev.msg.schedule.bean.Message;
+import xyz.mydev.msg.schedule.bean.DelayMessage;
+import xyz.mydev.msg.schedule.bean.InstantMessage;
 
 import java.time.LocalDateTime;
 
@@ -23,7 +23,7 @@ public class CoreAppTest {
   }
 
 
-  public static class PersonMessage implements Message {
+  public static class PersonMessage implements InstantMessage {
 
     @Override
     public String getTraceId() {
@@ -91,7 +91,7 @@ public class CoreAppTest {
     }
   }
 
-  public static class TmpDelayMsg implements Message, DelayMessageTag {
+  public static class TmpDelayMsg implements DelayMessage {
 
     @Override
     public String getTraceId() {
