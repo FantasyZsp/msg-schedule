@@ -10,8 +10,6 @@ import xyz.mydev.msg.schedule.load.MessageLoader;
 import xyz.mydev.msg.schedule.port.route.PorterRouter;
 
 /**
- * TODO spring内置的获取配置文件内容的类
- *
  * @author ZSP
  */
 @ActiveProfiles("msg-schedule")

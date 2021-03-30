@@ -13,6 +13,7 @@
   <packaging>pom</packaging>
   <version>${revision}</version>
   <modules>
+    <module>msg-scheduling-mq-api</module>
     <module>msg-scheduling-mq-rocketmq</module>
   </modules>
 

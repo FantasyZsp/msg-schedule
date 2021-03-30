@@ -32,17 +32,10 @@ msg-schedule:
           txMsgTableC:
             use-default-config: true # 指定使用默认配置
             table-entity-class: xyz.mydev.msg.schedule.CoreAppTest.PersonMessage
-  #          msgTableC:
-  #          msgTableD:
-  message-queue: # 配置平台实现
-    rocketmq:
-      name-server: "nameServer"
-      producers:
-        common-producer:
-          # common topic，具体业务使用tags
-          group: common-producer-group
-          name-server: "nameServer"
-          instance-name: "instance-name"
+rocketmq:
+  name-server: "localhost:9876"
+  producer:
+    group: msg-schedule-pg
 redis-lock:
   enable: true
 redisson:

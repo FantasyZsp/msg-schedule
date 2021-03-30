@@ -9,18 +9,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>msg-scheduling-mq-rocketmq</artifactId>
+  <artifactId>msg-scheduling-mq-api</artifactId>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.rocketmq</groupId>
-      <artifactId>rocketmq-spring-boot-starter</artifactId>
-      <version>2.2.0</version>
-    </dependency>
-    <dependency>
-      <groupId>xyz.mydev</groupId>
-      <artifactId>msg-scheduling-mq-api</artifactId>
-      <version>${revision}</version>
-    </dependency>
-  </dependencies>
+
 </project>

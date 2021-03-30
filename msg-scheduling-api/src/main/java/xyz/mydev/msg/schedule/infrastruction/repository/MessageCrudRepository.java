@@ -8,11 +8,15 @@ import java.util.Optional;
  */
 public interface MessageCrudRepository<E, ID, CP> {
 
-  Optional<E> selectById(ID id);
+  E selectById(ID id);
 
   int insert(E entity);
 
   int update(E entity);
+
+  boolean updateStatus(String id, int status);
+
+  boolean updateToSent(ID id);
 
   List<E> findLimitSizeWillSendBetween(CP startTime, CP endTime, int limitSize);
 

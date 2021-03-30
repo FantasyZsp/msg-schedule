@@ -18,4 +18,12 @@ public class Constants {
     int RABBITMQ = 2;
     int KAFKA = 3;
   }
+
+  public interface MsgPropertiesKey {
+    String TABLE_NAME = "tableName";
+    String BUSINESS_ID = "userBusinessId";
+    String SYS_CONTEXT = "userSystemContext";
+    String TRACE_ID = "userTraceId";
+    String TRACE_VERSION = "userTraceVersion";
+  }
 }
