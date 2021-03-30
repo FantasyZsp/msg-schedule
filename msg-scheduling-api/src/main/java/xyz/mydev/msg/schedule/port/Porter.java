@@ -6,6 +6,15 @@ import java.util.concurrent.ExecutorService;
 /**
  * transfer and port elements
  * <p>
+ * transfer：
+ * 对于延时消息，一般需要transfer中转到TransferQueue处理倒计时逻辑；
+ * 对于即时消息，可以直接调用transfer投递到mq
+ * <p>
+ * port:
+ * 直接投递到mq。
+ * 对于即时消息来说，transfer和port的任务可能是完全一致的。
+ * <p>
+ * TODO 考虑去除泛型E
  *
  * @author ZSP
  */
