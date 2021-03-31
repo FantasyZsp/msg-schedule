@@ -25,11 +25,6 @@ public abstract class AbstractPorter<E> extends Thread implements Porter<E> {
   private TransferTaskFactory<E> transferTaskFactory;
 
   public AbstractPorter(String targetTableName,
-                        TransferQueue<E> transferQueue) {
-    this(targetTableName, transferQueue, null, null);
-  }
-
-  public AbstractPorter(String targetTableName,
                         TransferQueue<E> transferQueue,
                         TransferTaskFactory<E> transferTaskFactory,
                         PortTaskFactory<E> portTaskFactory) {
