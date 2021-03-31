@@ -2,6 +2,7 @@ package xyz.mydev.msg.schedule.mq.error.record;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import xyz.mydev.msg.common.Constants;
 import xyz.mydev.msg.schedule.IdGenerator;
 
@@ -23,6 +24,7 @@ import java.time.LocalDateTime;
  * @author ZSP
  */
 @Slf4j
+@Component
 public class RocketMqMsgSendFailureHandler {
   private final MqMessageErrorRecordService mqMessageErrorRecordService;
   private final IdGenerator idGenerator;

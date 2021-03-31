@@ -28,7 +28,6 @@ public class SchedulerProperties {
 
   private boolean enable;
   private ExecutorProperties scheduleExecutor;
-  private ExecutorProperties portExecutor;
   private ExecutorProperties checkpointExecutor;
 
   private TableScheduleProperties defaultScheduleInterval = new TableScheduleProperties();
@@ -64,11 +63,7 @@ public class SchedulerProperties {
    * 初始化执行器线程数的配置
    */
   private void initExecutorProperties() {
-
-
-    /**
-     * 未配置时按照实际调度的表的个数进行初始化
-     */
+    // 未配置时按照实际调度的表的个数进行初始化
     if (checkpointExecutor == null) {
       checkpointExecutor = new ExecutorProperties();
 //      checkpointExecutor.setMaxThread(1); // TODO

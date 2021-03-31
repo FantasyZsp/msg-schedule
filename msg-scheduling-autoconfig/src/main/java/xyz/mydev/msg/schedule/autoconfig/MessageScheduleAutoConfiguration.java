@@ -2,7 +2,6 @@ package xyz.mydev.msg.schedule.autoconfig;
 
 import com.sishu.redis.lock.annotation.RedisLockAnnotationSupportAutoConfig;
 import org.redisson.api.RedissonClient;
-import org.redisson.client.RedisClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -108,7 +107,7 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
 
   @Bean
   @ConditionalOnMissingBean
-  @ConditionalOnBean({MessageRepositoryRouter.class, RedisClient.class})
+  @ConditionalOnBean({MessageRepositoryRouter.class, RedissonClient.class})
   public MessageLoader messageLoader() {
     return new DefaultStringMessageLoader(messageRepositoryRouter, Objects.requireNonNull(redissonClient::getLock));
   }

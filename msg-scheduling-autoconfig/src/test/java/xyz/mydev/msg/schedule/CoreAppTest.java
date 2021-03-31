@@ -3,8 +3,11 @@ package xyz.mydev.msg.schedule;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.annotation.Bean;
 import xyz.mydev.msg.schedule.bean.DelayMessage;
 import xyz.mydev.msg.schedule.bean.InstantMessage;
+import xyz.mydev.msg.schedule.mq.error.record.MqMessageErrorRecord;
+import xyz.mydev.msg.schedule.mq.error.record.MqMessageErrorRecordDao;
 
 import java.time.LocalDateTime;
 
@@ -20,6 +23,21 @@ public class CoreAppTest {
       .web(WebApplicationType.NONE)
       .run(args);
 
+  }
+
+  @Bean
+  public static MqMessageErrorRecordDao test() {
+    return new MqMessageErrorRecordDao() {
+      @Override
+      public int deleteByPrimaryKey(String id) {
+        return 0;
+      }
+
+      @Override
+      public int insert(MqMessageErrorRecord record) {
+        return 0;
+      }
+    };
   }
 
 

@@ -7,6 +7,7 @@ import org.apache.rocketmq.client.producer.LocalTransactionState;
 import org.apache.rocketmq.client.producer.TransactionListener;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.springframework.stereotype.Component;
 import xyz.mydev.msg.common.Constants;
 import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
@@ -18,6 +19,7 @@ import xyz.mydev.msg.schedule.mq.error.record.RocketMqMsgSendFailureHandler;
  * @author zhaosp
  */
 @Slf4j
+@Component
 public class TransactionMessageListenerImpl implements TransactionListener {
 
   private final MessageRepositoryRouter messageRepositoryRouter;

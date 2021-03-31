@@ -2,11 +2,13 @@ package xyz.mydev.msg.schedule.mq.error.record;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 import xyz.mydev.msg.schedule.IdGenerator;
 
 /**
  * @author ZSP
  */
+@Service
 public class MqMessageErrorRecordService {
   private final MqMessageErrorRecordDao mqMessageErrorRecordDao;
   private final IdGenerator idGenerator;

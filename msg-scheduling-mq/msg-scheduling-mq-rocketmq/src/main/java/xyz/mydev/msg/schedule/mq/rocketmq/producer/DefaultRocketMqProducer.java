@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class DefaultRocketMqProducer implements MqProducer, InitializingBean {
 
-
   private final RocketMQProperties rocketMQProperties;
 
   @Getter

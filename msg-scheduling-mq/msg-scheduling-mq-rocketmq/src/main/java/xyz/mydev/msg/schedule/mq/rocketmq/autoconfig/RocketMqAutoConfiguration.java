@@ -8,9 +8,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.JdkIdGenerator;
 import xyz.mydev.msg.schedule.IdGenerator;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
+import xyz.mydev.msg.schedule.mq.error.record.InternalIdGenerator;
 import xyz.mydev.msg.schedule.mq.error.record.MqMessageErrorRecordService;
 import xyz.mydev.msg.schedule.mq.error.record.RocketMqMsgSendFailureHandler;
 import xyz.mydev.msg.schedule.mq.producer.MqProducer;
@@ -57,15 +57,6 @@ public class RocketMqAutoConfiguration {
   public IdGenerator idGenerator() {
     log.warn("Bad way to use InternalIdGenerator!!!");
     return new InternalIdGenerator();
-  }
-
-  private static class InternalIdGenerator implements IdGenerator {
-    JdkIdGenerator jdkIdGenerator = new JdkIdGenerator();
-
-    @Override
-    public String get() {
-      return jdkIdGenerator.generateId().toString();
-    }
   }
 
 
