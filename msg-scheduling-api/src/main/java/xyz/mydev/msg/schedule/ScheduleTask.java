@@ -30,7 +30,6 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
    * 一个任务专为一个表而服务
    */
   private final String targetTableName;
-  private final Class<T> targetClass;
   private final Porter<T> porter;
   private final MessageLoader messageLoader;
 
@@ -46,7 +45,6 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
   private final boolean isStartingTask;
 
   public ScheduleTask(String targetTableName,
-                      Class<T> targetClass,
                       Porter<T> porter,
                       MessageLoader messageLoader,
                       CheckpointService checkpointService,
@@ -55,7 +53,6 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
                       boolean isStartingTask) {
 
     this.targetTableName = targetTableName;
-    this.targetClass = targetClass;
     this.porter = porter;
     this.messageLoader = messageLoader;
     this.checkpointService = checkpointService;
@@ -80,7 +77,7 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
     if (scheduleLock.tryLock()) {
       try {
 
-        List<T> msgListWillSend = load(now, startTime, endTime, targetClass);
+        List<T> msgListWillSend = load(now, startTime, endTime);
 
         log.info("invoke transfer {} msg", msgListWillSend.size());
 
@@ -112,11 +109,11 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
 
   protected List<T> load(LocalDateTime now,
                          LocalDateTime startTime,
-                         LocalDateTime endTime, Class<T> targetClass) {
+                         LocalDateTime endTime) {
 
 
     log.info("task type [{}], working at [{}] ,formatted at [{}], end at [{}]", getTaskTimeType(), now, startTime, endTime);
-    return messageLoader.load(getTargetTableName(), startTime, endTime, targetClass);
+    return messageLoader.load(getTargetTableName(), startTime, endTime);
   }
 
 

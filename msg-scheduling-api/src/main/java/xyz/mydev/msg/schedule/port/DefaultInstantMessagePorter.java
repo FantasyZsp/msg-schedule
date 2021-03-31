@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 public class DefaultInstantMessagePorter implements Porter<InstantMessage> {
 
   private final String targetTableName;
-  private final Class<? extends InstantMessage> tableEntityClass;
   private final PortTaskFactory<InstantMessage> portTaskFactory;
   private final TransferTaskFactory<InstantMessage> transferTaskFactory;
   private final ExecutorService transferExecutor;
@@ -33,10 +32,8 @@ public class DefaultInstantMessagePorter implements Porter<InstantMessage> {
 
 
   public DefaultInstantMessagePorter(String targetTableName,
-                                     Class<? extends InstantMessage> tableEntityClass,
                                      TransferTaskFactory<InstantMessage> transferTaskFactory) {
     this.targetTableName = targetTableName;
-    this.tableEntityClass = tableEntityClass;
     this.transferTaskFactory = transferTaskFactory;
     this.portTaskFactory = new TransferTaskAdapter<>(transferTaskFactory);
     LinkedBlockingQueue<Runnable> linkedBlockingQueue = new LinkedBlockingQueue<>(2000);

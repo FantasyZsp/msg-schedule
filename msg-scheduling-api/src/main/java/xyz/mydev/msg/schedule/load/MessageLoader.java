@@ -18,7 +18,7 @@ public interface MessageLoader {
    * @param endTime         结束时间
    * @return 需要调度投递的消息，一般消息表中会维护消息状态。
    */
-  <T> List<T> load(String targetTableName, LocalDateTime startTime, LocalDateTime endTime, Class<T> targetClass);
+  <T> List<T> load(String targetTableName, LocalDateTime startTime, LocalDateTime endTime);
 
   /**
    * 获取一把调度锁

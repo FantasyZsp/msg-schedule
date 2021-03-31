@@ -1,7 +1,6 @@
 package xyz.mydev.msg.schedule;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.mydev.msg.common.TableKeyPair;
 import xyz.mydev.msg.schedule.bean.SerializableMessage;
 import xyz.mydev.msg.schedule.port.Porter;
 import xyz.mydev.msg.schedule.port.route.PorterRouter;
@@ -26,8 +25,7 @@ public class DefaultLocalMessageStoreEventListener<T extends SerializableMessage
 
     T localMessage = localMessageStoreEvent.getLocalMessage();
     String targetTableName = localMessage.getTargetTableName();
-    @SuppressWarnings("unchecked")
-    Porter<T> porter = (Porter<T>) router.get(TableKeyPair.of(targetTableName, localMessage.getClass()));
+    Porter<T> porter = router.get(targetTableName);
     if (porter != null) {
       porter.transfer(localMessage);
     } else {

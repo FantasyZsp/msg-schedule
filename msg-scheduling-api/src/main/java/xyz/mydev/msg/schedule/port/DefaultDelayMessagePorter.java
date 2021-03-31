@@ -28,11 +28,10 @@ public class DefaultDelayMessagePorter extends AbstractPorter<DelayMessage> {
   private ExecutorService transferExecutor;
 
   public DefaultDelayMessagePorter(String targetTableName,
-                                   Class<? extends DelayMessage> tableEntityClass,
                                    TransferQueue<DelayMessage> transferQueue,
                                    TransferTaskFactory<DelayMessage> transferTaskFactory,
                                    PortTaskFactory<DelayMessage> portTaskFactory) {
-    super(targetTableName, tableEntityClass, transferQueue, transferTaskFactory, portTaskFactory);
+    super(targetTableName, transferQueue, transferTaskFactory, portTaskFactory);
   }
 
   @Override

@@ -21,8 +21,6 @@ public interface Porter<E> {
 
   String getTargetTableName();
 
-  Class<? extends E> getTableEntityClass();
-
   ExecutorService getTransferExecutor();
 
   @NotNull

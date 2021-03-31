@@ -26,7 +26,7 @@ public class DefaultStringMessageLoader implements MessageLoader {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T> List<T> load(String targetTableName, LocalDateTime startTime, LocalDateTime endTime, Class<T> targetClass) {
+  public <T> List<T> load(String targetTableName, LocalDateTime startTime, LocalDateTime endTime) {
     MessageRepository<? extends StringMessage> messageRepository = messageRepositoryRouter.get(targetTableName);
     return (List<T>) messageRepository.findWillSendBetween(startTime, endTime);
   }
