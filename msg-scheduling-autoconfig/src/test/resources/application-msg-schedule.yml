@@ -6,9 +6,6 @@ msg-schedule:
       min-thread: 2 # 需要调度的表个数
       max-thread: 2 # 需要调度的表个数
       depend-on-table-size: true # 默认true，开启时其他配置无效，检查需要调度的表的个数，建立对应个数的线程
-    port-executor: # 执行中转(port函数)用。当调度器加载消息后，或者即时投递时，需要将具体的消息投递到对应的mq，担任了生产者发送消息的任务。所以线程数与对应的中转队列一致就好。
-      min-thread: 1 # 抽象中转队列的个数
-      max-thread: 1 # 抽象中转队列的个数
     checkpoint-executor:
       min-thread: 2 # 需要检查的表个数
       max-thread: 2 # 需要检查的表个数

@@ -36,6 +36,6 @@ class SchedulerPropertiesConfigurationTest {
 
   @Test
   void testClass() {
-    DefaultInstantMessagePorter defaultInstantMessagePorter = new DefaultInstantMessagePorter(null, CoreAppTest.PersonMessage.class, null, null);
+    DefaultInstantMessagePorter defaultInstantMessagePorter = new DefaultInstantMessagePorter(null, CoreAppTest.PersonMessage.class, null);
   }
 }

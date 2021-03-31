@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractPorter<E> extends Thread implements Porter<E> {
 
   private final String targetTableName;
-  private final Class<E> tableEntityClass;
+  private final Class<? extends E> tableEntityClass;
   private PortExceptionHandle portExceptionHandle;
   private final TransferQueue<E> transferQueue;
 
@@ -26,13 +26,13 @@ public abstract class AbstractPorter<E> extends Thread implements Porter<E> {
   private TransferTaskFactory<E> transferTaskFactory;
 
   public AbstractPorter(String targetTableName,
-                        Class<E> tableEntityClass,
+                        Class<? extends E> tableEntityClass,
                         TransferQueue<E> transferQueue) {
     this(targetTableName, tableEntityClass, transferQueue, null, null);
   }
 
   public AbstractPorter(String targetTableName,
-                        Class<E> tableEntityClass,
+                        Class<? extends E> tableEntityClass,
                         TransferQueue<E> transferQueue,
                         TransferTaskFactory<E> transferTaskFactory,
                         PortTaskFactory<E> portTaskFactory) {

@@ -4,10 +4,14 @@ package xyz.mydev.msg.schedule.port;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import xyz.mydev.msg.common.util.CallerRunsPolicy;
+import xyz.mydev.msg.common.util.PrefixNameThreadFactory;
 import xyz.mydev.msg.schedule.bean.InstantMessage;
 
-import javax.validation.constraints.NotNull;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 消息搬运工
@@ -21,39 +25,28 @@ import java.util.concurrent.ExecutorService;
 public class DefaultInstantMessagePorter implements Porter<InstantMessage> {
 
   private final String targetTableName;
-  private final Class<?> tableEntityClass;
+  private final Class<? extends InstantMessage> tableEntityClass;
   private final PortTaskFactory<InstantMessage> portTaskFactory;
   private final TransferTaskFactory<InstantMessage> transferTaskFactory;
+  private final ExecutorService transferExecutor;
+  private final ExecutorService portExecutor;
+
 
   public DefaultInstantMessagePorter(String targetTableName,
-                                     Class<?> tableEntityClass,
-                                     PortTaskFactory<InstantMessage> portTaskFactory,
+                                     Class<? extends InstantMessage> tableEntityClass,
                                      TransferTaskFactory<InstantMessage> transferTaskFactory) {
     this.targetTableName = targetTableName;
     this.tableEntityClass = tableEntityClass;
-    this.portTaskFactory = portTaskFactory;
     this.transferTaskFactory = transferTaskFactory;
-  }
+    this.portTaskFactory = new TransferTaskAdapter<>(transferTaskFactory);
+    LinkedBlockingQueue<Runnable> linkedBlockingQueue = new LinkedBlockingQueue<>(2000);
+    this.transferExecutor = new ThreadPoolExecutor(1, 2, 1, TimeUnit.HOURS,
+      linkedBlockingQueue,
+      new PrefixNameThreadFactory(targetTableName + "-port"),
+      new CallerRunsPolicy(linkedBlockingQueue)
+    );
 
-
-  @Override
-  public ExecutorService getTransferExecutor() {
-    return null;
-  }
-
-  @Override
-  public @NotNull TransferTaskFactory<InstantMessage> getTransferTaskFactory() {
-    return transferTaskFactory;
-  }
-
-  @Override
-  public ExecutorService getPortExecutor() {
-    return null;
-  }
-
-  @Override
-  public @NotNull PortTaskFactory<InstantMessage> getPortTaskFactory() {
-    return portTaskFactory;
+    this.portExecutor = transferExecutor;
   }
 
   @Override
@@ -66,13 +59,22 @@ public class DefaultInstantMessagePorter implements Porter<InstantMessage> {
 
   }
 
-  @Override
-  public void transfer(InstantMessage instantMessage) {
 
+  private static class TransferTaskAdapter<E> implements PortTaskFactory<E> {
+    private final TransferTaskFactory<E> transferTaskFactory;
+
+    public TransferTaskAdapter(TransferTaskFactory<E> transferTaskFactory) {
+      this.transferTaskFactory = transferTaskFactory;
+    }
+
+    @Override
+    public Runnable newTask(E e) {
+      return transferTaskFactory.newTransferTask(e);
+    }
   }
 
   @Override
-  public void port(InstantMessage instantMessage) {
-
+  public Class<? extends InstantMessage> getTableEntityClass() {
+    return tableEntityClass;
   }
 }

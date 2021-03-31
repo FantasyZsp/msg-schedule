@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class CallerRunsPolicy implements RejectedExecutionHandler {
 
-  private static final AtomicInteger BUSY = new AtomicInteger(0);
+  private final AtomicInteger BUSY = new AtomicInteger(0);
   private final Queue<?> queue;
 
   public CallerRunsPolicy(Queue<?> queue) {

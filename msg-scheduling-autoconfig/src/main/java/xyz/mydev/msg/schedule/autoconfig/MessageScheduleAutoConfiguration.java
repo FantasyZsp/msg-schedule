@@ -20,7 +20,6 @@ import xyz.mydev.msg.schedule.autoconfig.properties.TableScheduleProperties;
 import xyz.mydev.msg.schedule.bean.DelayMessage;
 import xyz.mydev.msg.schedule.bean.InstantMessage;
 import xyz.mydev.msg.schedule.bean.StringMessage;
-import xyz.mydev.msg.schedule.delay.port.DefaultDelayMessagePorter;
 import xyz.mydev.msg.schedule.delay.port.RedisDelayTransferQueue;
 import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.DefaultMessageRepositoryRouter;
@@ -31,6 +30,7 @@ import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 import xyz.mydev.msg.schedule.load.checkpoint.redis.RedisCheckPointServiceImpl;
 import xyz.mydev.msg.schedule.load.checkpoint.route.CheckpointServiceRouter;
 import xyz.mydev.msg.schedule.load.checkpoint.route.DefaultCheckpointServiceRouter;
+import xyz.mydev.msg.schedule.port.DefaultDelayMessagePorter;
 import xyz.mydev.msg.schedule.port.DefaultInstantMessagePorter;
 import xyz.mydev.msg.schedule.port.Porter;
 import xyz.mydev.msg.schedule.port.TransferDirectlyTaskFactory;
@@ -118,37 +118,18 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
   @ConditionalOnMissingBean
   public PorterRouter messagePorterRouter() {
     DefaultMessagePorterRouter router = new DefaultMessagePorterRouter();
-
     // put user custom
     porterObjectProvider.ifAvailable(porter ->
       router.putAny(TableKeyPair.of(porter.getTargetTableName(), porter.getTableEntityClass()), porter));
 
-    // put yml config for delay
-    Map<String, TableScheduleProperties> delayTableNames = schedulerProperties.getRoute().getTables().getDelay();
+    registerYmlDelayPorter(router);
+    registerYmlInstantPorter(router);
+    log.debug("DefaultMessagePorterRouter init result: {}", router);
 
-    delayTableNames.forEach((key, tableScheduleProperty) -> {
+    return router;
+  }
 
-      Class<?> tableEntityClass = tableScheduleProperty.getTableEntityClass();
-      String tableName = tableScheduleProperty.getTableName();
-
-      if (!DelayMessage.class.isAssignableFrom(tableEntityClass)) {
-        throw new IllegalArgumentException("delay msg class must implements DelayMessage");
-      }
-
-      TableKeyPair<?> tableKeyPair = TableKeyPair.of(tableName, tableEntityClass);
-      // TODO 构建 PortTaskFactory
-      RedisDelayTransferQueue<DelayMessage> transferQueue = new RedisDelayTransferQueue<>(redissonClient, tableName);
-      TransferDirectlyTaskFactory<DelayMessage> transferDirectlyTaskFactory = new TransferDirectlyTaskFactory<>(transferQueue);
-      @SuppressWarnings("unchecked")
-      Porter<DelayMessage> build =
-        DefaultDelayMessagePorter.buildDefaultDelayMessagePorter(tableKeyPair.getTableName(),
-          (Class<DelayMessage>) tableKeyPair.getTargetClass(),
-          transferQueue,
-          transferDirectlyTaskFactory,
-          null);
-      router.putIfAbsent(tableKeyPair, build);
-    });
-
+  private void registerYmlInstantPorter(DefaultMessagePorterRouter router) {
     // put yml config for instant
     Map<String, TableScheduleProperties> instantTableNames = schedulerProperties.getRoute().getTables().getInstant();
 
@@ -160,17 +141,45 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
         throw new IllegalArgumentException("instant msg class must implements InstantMessage");
       }
 
-      TableKeyPair<?> tableKeyPair = TableKeyPair.of(tableName, tableEntityClass);
+      @SuppressWarnings("unchecked")
+      Class<? extends InstantMessage> targetTableEntityClass = (Class<? extends InstantMessage>) tableEntityClass;
       // TODO 构建 TransferTaskFactory
-      DefaultInstantMessagePorter defaultInstantMessagePorter = new DefaultInstantMessagePorter(tableName, tableEntityClass, null, null);
+      DefaultInstantMessagePorter defaultInstantMessagePorter = new DefaultInstantMessagePorter(tableName, targetTableEntityClass, null);
+      defaultInstantMessagePorter.init();
 
+      TableKeyPair<? extends InstantMessage> tableKeyPair = TableKeyPair.of(tableName, targetTableEntityClass);
       router.putIfAbsent(tableKeyPair, defaultInstantMessagePorter);
     });
+  }
 
+  private void registerYmlDelayPorter(DefaultMessagePorterRouter router) {
+    // put yml config for delay
+    Map<String, TableScheduleProperties> delayTableNames = schedulerProperties.getRoute().getTables().getDelay();
 
-    log.info("DefaultMessagePorterRouter init result: {}", router);
+    delayTableNames.forEach((key, tableScheduleProperty) -> {
 
-    return router;
+      Class<?> tableEntityClass = tableScheduleProperty.getTableEntityClass();
+      String tableName = tableScheduleProperty.getTableName();
+
+      if (!DelayMessage.class.isAssignableFrom(tableEntityClass)) {
+        throw new IllegalArgumentException("delay msg class must implements DelayMessage");
+      }
+      @SuppressWarnings("unchecked")
+      Class<? extends DelayMessage> targetTableEntityClass = (Class<? extends DelayMessage>) tableEntityClass;
+
+      TableKeyPair<? extends DelayMessage> tableKeyPair = TableKeyPair.of(tableName, targetTableEntityClass);
+      // TODO 构建 PortTaskFactory
+      RedisDelayTransferQueue<DelayMessage> transferQueue = new RedisDelayTransferQueue<>(redissonClient, tableName);
+      TransferDirectlyTaskFactory<DelayMessage> transferDirectlyTaskFactory = new TransferDirectlyTaskFactory<>(transferQueue);
+      Porter<DelayMessage> delayMessagePorter =
+        new DefaultDelayMessagePorter(tableName,
+          targetTableEntityClass,
+          transferQueue,
+          transferDirectlyTaskFactory,
+          null);
+      delayMessagePorter.init();
+      router.putIfAbsent(tableKeyPair, delayMessagePorter);
+    });
   }
 
   @Override

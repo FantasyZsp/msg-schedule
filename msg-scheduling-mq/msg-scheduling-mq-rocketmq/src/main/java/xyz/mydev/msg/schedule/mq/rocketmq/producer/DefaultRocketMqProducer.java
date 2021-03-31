@@ -10,11 +10,11 @@ import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.spring.autoconfigure.RocketMQProperties;
 import org.springframework.beans.factory.InitializingBean;
 import xyz.mydev.msg.common.Constants;
+import xyz.mydev.msg.schedule.mq.producer.MqProducer;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * @author ZSP
  */
 @Slf4j
-public class CommonMqProducer implements InitializingBean {
+public class DefaultRocketMqProducer implements MqProducer, InitializingBean {
 
 
   private final RocketMQProperties rocketMQProperties;
@@ -32,11 +32,11 @@ public class CommonMqProducer implements InitializingBean {
   private final TransactionMessageListenerImpl delayMessageTransactionListener;
 
 
-  private CommonMqProducer(TransactionMessageListenerImpl delayMessageTransactionListener,
-                           RocketMQProperties rocketMQProperties) {
+  private DefaultRocketMqProducer(TransactionMessageListenerImpl delayMessageTransactionListener,
+                                  RocketMQProperties rocketMqProperties) {
 
     this.delayMessageTransactionListener = delayMessageTransactionListener;
-    this.rocketMQProperties = rocketMQProperties;
+    this.rocketMQProperties = rocketMqProperties;
   }
 
   public TransactionSendResult sendMessage(Message message, Object argument) {
@@ -53,6 +53,7 @@ public class CommonMqProducer implements InitializingBean {
   }
 
 
+  @Override
   public TransactionSendResult sendMessage(xyz.mydev.msg.schedule.bean.Message msg) {
     if (log.isDebugEnabled()) {
       log.debug("sending msg: {}  ", msg);
@@ -79,15 +80,14 @@ public class CommonMqProducer implements InitializingBean {
 
   private void startProducer() throws MQClientException {
     int count = Math.min(Runtime.getRuntime().availableProcessors() / 2, 4);
-    ExecutorService executorService = new ThreadPoolExecutor(count, count + 1, 30, TimeUnit.MINUTES,
-      new ArrayBlockingQueue<>(2000), new ThreadFactory() {
-      @Override
-      public Thread newThread(Runnable r) {
-        Thread thread = new Thread(r);
-        thread.setName(rocketMQProperties.getProducer().getGroup() + "-check-thread");
-        return thread;
-      }
-    });
+    ExecutorService executorService =
+      new ThreadPoolExecutor(count, count + 1, 30, TimeUnit.MINUTES,
+        new ArrayBlockingQueue<>(2000),
+        r -> {
+          Thread thread = new Thread(r);
+          thread.setName(rocketMQProperties.getProducer().getGroup() + "-ct");
+          return thread;
+        });
     this.producer.setExecutorService(executorService);
     producer.start();
   }
