@@ -4,7 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import xyz.mydev.msg.schedule.ScheduledTableRegistry;
+import xyz.mydev.msg.schedule.TableScheduleProperties;
 import xyz.mydev.msg.schedule.bean.BaseMessage;
 import xyz.mydev.msg.schedule.bean.DelayMessage;
 
@@ -55,7 +58,7 @@ public class SchedulerProperties {
     TableRouteProperties.TableConfigProperties tables = route.getTables();
 
     initRouteTables(tables);
-//    initExecutorProperties(); // TODO 考察实际的应用方式
+    initExecutorProperties();
 
   }
 
@@ -66,7 +69,10 @@ public class SchedulerProperties {
     // 未配置时按照实际调度的表的个数进行初始化
     if (checkpointExecutor == null) {
       checkpointExecutor = new ExecutorProperties();
-//      checkpointExecutor.setMaxThread(1); // TODO
+    }
+
+    if (scheduleExecutor == null) {
+      scheduleExecutor = new ExecutorProperties();
     }
 
   }
@@ -74,7 +80,7 @@ public class SchedulerProperties {
   private void initRouteTables(TableRouteProperties.TableConfigProperties tables) {
     // init delay
     Map<String, TableScheduleProperties> delay = tables.getDelay();
-    if (delay != null && delay.size() > 0) {
+    if (MapUtils.isNotEmpty(delay)) {
       for (Map.Entry<String, TableScheduleProperties> delayConfigEntry : delay.entrySet()) {
         String delayTableName = delayConfigEntry.getKey();
         TableScheduleProperties delayTableProperty = delayConfigEntry.getValue();
@@ -84,7 +90,7 @@ public class SchedulerProperties {
 
     // init instant
     Map<String, TableScheduleProperties> instant = tables.getInstant();
-    if (instant != null && instant.size() > 0) {
+    if (MapUtils.isNotEmpty(instant)) {
       for (Map.Entry<String, TableScheduleProperties> delayConfigEntry : instant.entrySet()) {
         String delayTableName = delayConfigEntry.getKey();
         TableScheduleProperties delayTableProperty = delayConfigEntry.getValue();
@@ -128,6 +134,8 @@ public class SchedulerProperties {
 
     Objects.requireNonNull(tableScheduleProperties.getCheckpointInterval());
     Objects.requireNonNull(tableScheduleProperties.getLoadInterval());
+    // register
+    ScheduledTableRegistry.addTable(tableName, tableScheduleProperties, ScheduledTableRegistry.REGISTER_WAY_YML);
   }
 
   public Set<String> getScheduledTableNames() {

@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * @author ZSP
  */
-public interface CheckpointServiceRouter extends Router<String, CheckpointService> {
+public interface CheckpointServiceRouter extends Router<String, CheckpointService>, Iterable<CheckpointService> {
 
   /**
    * 将检查服务及其负责调度的表注册到 router中
@@ -21,5 +21,7 @@ public interface CheckpointServiceRouter extends Router<String, CheckpointServic
   void putIfAbsent(String tableName, CheckpointService checkpointService);
 
   Set<String> tableNameSet();
+
+  int size();
 
 }

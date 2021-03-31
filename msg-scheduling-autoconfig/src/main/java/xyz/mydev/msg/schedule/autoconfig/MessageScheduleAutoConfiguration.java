@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.CollectionUtils;
 import xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties;
-import xyz.mydev.msg.schedule.autoconfig.properties.TableScheduleProperties;
+import xyz.mydev.msg.schedule.TableScheduleProperties;
 import xyz.mydev.msg.schedule.bean.DelayMessage;
 import xyz.mydev.msg.schedule.bean.InstantMessage;
 import xyz.mydev.msg.schedule.delay.port.RedisDelayTransferQueue;

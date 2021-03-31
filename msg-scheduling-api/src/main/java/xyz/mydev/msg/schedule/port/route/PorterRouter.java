@@ -7,10 +7,12 @@ import xyz.mydev.msg.schedule.port.Porter;
  *
  * @author ZSP
  */
-public interface PorterRouter {
+public interface PorterRouter extends Iterable<Porter<?>> {
 
   <T> Porter<T> get(String targetTableName);
 
   void put(String key, Porter<?> val);
+
+  int size();
 
 }

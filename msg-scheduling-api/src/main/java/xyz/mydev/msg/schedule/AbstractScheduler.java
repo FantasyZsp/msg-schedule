@@ -3,10 +3,10 @@ package xyz.mydev.msg.schedule;
 import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.schedule.load.MessageLoader;
 import xyz.mydev.msg.schedule.load.checkpoint.route.CheckpointServiceRouter;
+import xyz.mydev.msg.schedule.port.Porter;
 import xyz.mydev.msg.schedule.port.route.PorterRouter;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public abstract class AbstractScheduler {
-  private final Map<String, Class<?>> scheduledTablesClassMap;
 
   private final ScheduleTimeEvaluator scheduleTimeEvaluator;
   private final PorterRouter porterRouter;
@@ -30,28 +29,37 @@ public abstract class AbstractScheduler {
 
   private final ScheduledExecutorService scheduledExecutorService;
 
-  public AbstractScheduler(Map<String, Class<?>> scheduledTablesClassMap,
-                           ScheduleTimeEvaluator scheduleTimeEvaluator,
+  public AbstractScheduler(ScheduleTimeEvaluator scheduleTimeEvaluator,
                            PorterRouter porterRouter,
                            MessageLoader messageLoader,
                            CheckpointServiceRouter checkpointServiceRouter) {
-    this.scheduledTablesClassMap = scheduledTablesClassMap;
 
     this.scheduleTimeEvaluator = scheduleTimeEvaluator;
     this.porterRouter = porterRouter;
     this.messageLoader = messageLoader;
 
     // TODO 个性化配置线程池
-    this.scheduledExecutorService = Executors.newScheduledThreadPool(scheduledTablesClassMap.size(), r -> new Thread(r, "Scheduler"));
+    this.scheduledExecutorService = Executors.newScheduledThreadPool(porterRouter.size(), r -> new Thread(r, "Scheduler"));
     this.checkpointServiceRouter = checkpointServiceRouter;
   }
 
+
+  public AbstractScheduler(ScheduleTimeEvaluator scheduleTimeEvaluator,
+                           PorterRouter porterRouter,
+                           MessageLoader messageLoader,
+                           CheckpointServiceRouter checkpointServiceRouter,
+                           ScheduledExecutorService scheduledExecutorService) {
+    this.scheduleTimeEvaluator = scheduleTimeEvaluator;
+    this.porterRouter = porterRouter;
+    this.messageLoader = messageLoader;
+    this.checkpointServiceRouter = checkpointServiceRouter;
+    this.scheduledExecutorService = scheduledExecutorService;
+  }
+
   public void start() {
-
     LocalDateTime snapshotTime = LocalDateTime.now();
-
-    for (Map.Entry<String, Class<?>> entry : scheduledTablesClassMap.entrySet()) {
-      String tableName = entry.getKey();
+    for (Porter<?> porter : porterRouter) {
+      String tableName = porter.getTargetTableName();
       Runnable startingTask = buildTask(tableName, true);
       scheduledExecutorService.execute(startingTask);
 

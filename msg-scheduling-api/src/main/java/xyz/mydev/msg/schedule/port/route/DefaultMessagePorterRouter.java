@@ -2,6 +2,7 @@ package xyz.mydev.msg.schedule.port.route;
 
 import xyz.mydev.msg.schedule.port.Porter;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,6 +30,11 @@ public class DefaultMessagePorterRouter implements PorterRouter {
     porters.put(key, val);
   }
 
+  @Override
+  public int size() {
+    return porters.size();
+  }
+
   public void putIfAbsent(String key, Porter<?> val) {
     porters.putIfAbsent(key, val);
   }
@@ -38,5 +44,10 @@ public class DefaultMessagePorterRouter implements PorterRouter {
     return "DefaultMessagePorterRouter{" +
       "porters=" + porters +
       '}';
+  }
+
+  @Override
+  public Iterator<Porter<?>> iterator() {
+    return porters.values().iterator();
   }
 }

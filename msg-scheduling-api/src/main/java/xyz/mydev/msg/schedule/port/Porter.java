@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutorService;
  */
 public interface Porter<E> {
 
+  @NotNull
   String getTargetTableName();
 
   ExecutorService getTransferExecutor();
@@ -49,6 +50,8 @@ public interface Porter<E> {
       getPortExecutor().execute(portTask);
     }
   }
+
+
 
   void init();
 

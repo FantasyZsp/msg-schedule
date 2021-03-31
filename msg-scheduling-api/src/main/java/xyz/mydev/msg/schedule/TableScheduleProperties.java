@@ -1,4 +1,4 @@
-package xyz.mydev.msg.schedule.autoconfig.properties;
+package xyz.mydev.msg.schedule;
 
 import lombok.Getter;
 import lombok.Setter;

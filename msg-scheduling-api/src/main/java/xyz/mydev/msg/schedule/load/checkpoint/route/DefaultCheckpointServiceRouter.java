@@ -3,6 +3,7 @@ package xyz.mydev.msg.schedule.load.checkpoint.route;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,9 +36,18 @@ public class DefaultCheckpointServiceRouter implements CheckpointServiceRouter {
   }
 
   @Override
+  public int size() {
+    return holder.size();
+  }
+
+  @Override
   public CheckpointService get(String key) {
     return holder.get(key);
   }
 
 
+  @Override
+  public Iterator<CheckpointService> iterator() {
+    return holder.values().iterator();
+  }
 }
