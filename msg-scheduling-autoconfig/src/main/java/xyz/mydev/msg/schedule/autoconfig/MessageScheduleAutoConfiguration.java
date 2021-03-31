@@ -18,6 +18,7 @@ import xyz.mydev.msg.common.TableKeyPair;
 import xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties;
 import xyz.mydev.msg.schedule.autoconfig.properties.TableScheduleProperties;
 import xyz.mydev.msg.schedule.bean.DelayMessage;
+import xyz.mydev.msg.schedule.bean.InstantMessage;
 import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.delay.port.DefaultDelayMessagePorter;
 import xyz.mydev.msg.schedule.delay.port.RedisDelayTransferQueue;
@@ -30,7 +31,7 @@ import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 import xyz.mydev.msg.schedule.load.checkpoint.redis.RedisCheckPointServiceImpl;
 import xyz.mydev.msg.schedule.load.checkpoint.route.CheckpointServiceRouter;
 import xyz.mydev.msg.schedule.load.checkpoint.route.DefaultCheckpointServiceRouter;
-import xyz.mydev.msg.schedule.port.DefaultPorter;
+import xyz.mydev.msg.schedule.port.DefaultInstantMessagePorter;
 import xyz.mydev.msg.schedule.port.Porter;
 import xyz.mydev.msg.schedule.port.TransferDirectlyTaskFactory;
 import xyz.mydev.msg.schedule.port.route.DefaultMessagePorterRouter;
@@ -42,6 +43,7 @@ import java.util.Set;
 
 /**
  * 根据外部化配置，自动装配需要的组件
+ * TODO 依赖MQ配置
  *
  * @author ZSP
  */
@@ -130,7 +132,7 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
       String tableName = tableScheduleProperty.getTableName();
 
       if (!DelayMessage.class.isAssignableFrom(tableEntityClass)) {
-        throw new IllegalArgumentException("delay msg class must extends DelayMessage");
+        throw new IllegalArgumentException("delay msg class must implements DelayMessage");
       }
 
       TableKeyPair<?> tableKeyPair = TableKeyPair.of(tableName, tableEntityClass);
@@ -138,7 +140,7 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
       RedisDelayTransferQueue<DelayMessage> transferQueue = new RedisDelayTransferQueue<>(redissonClient, tableName);
       TransferDirectlyTaskFactory<DelayMessage> transferDirectlyTaskFactory = new TransferDirectlyTaskFactory<>(transferQueue);
       @SuppressWarnings("unchecked")
-      Porter<?> build =
+      Porter<DelayMessage> build =
         DefaultDelayMessagePorter.buildDefaultDelayMessagePorter(tableKeyPair.getTableName(),
           (Class<DelayMessage>) tableKeyPair.getTargetClass(),
           transferQueue,
@@ -151,16 +153,18 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
     Map<String, TableScheduleProperties> instantTableNames = schedulerProperties.getRoute().getTables().getInstant();
 
     instantTableNames.forEach((key, tableScheduleProperty) -> {
-      TableKeyPair<?> tableKeyPair = TableKeyPair.of(tableScheduleProperty.getTableName(), tableScheduleProperty.getTableEntityClass());
-      // TODO 构建 transferQueue、TransferTaskFactory、PortTaskFactory
-      RedisDelayTransferQueue<DelayMessage> transferQueue = new RedisDelayTransferQueue<>(redissonClient, tableScheduleProperty.getTableName());
-      TransferDirectlyTaskFactory<DelayMessage> transferDirectlyTaskFactory = new TransferDirectlyTaskFactory<>(transferQueue);
-      @SuppressWarnings("unchecked")
-      Porter<?> build =
-        DefaultPorter.build(tableKeyPair.getTableName(),
-          (Class<DelayMessage>) tableKeyPair.getTargetClass(),
-          transferQueue, transferDirectlyTaskFactory, null);
-      router.putIfAbsent(tableKeyPair, build);
+      Class<?> tableEntityClass = tableScheduleProperty.getTableEntityClass();
+      String tableName = tableScheduleProperty.getTableName();
+
+      if (!InstantMessage.class.isAssignableFrom(tableEntityClass)) {
+        throw new IllegalArgumentException("instant msg class must implements InstantMessage");
+      }
+
+      TableKeyPair<?> tableKeyPair = TableKeyPair.of(tableName, tableEntityClass);
+      // TODO 构建 TransferTaskFactory
+      DefaultInstantMessagePorter defaultInstantMessagePorter = new DefaultInstantMessagePorter(tableName, tableEntityClass, null, null);
+
+      router.putIfAbsent(tableKeyPair, defaultInstantMessagePorter);
     });
 
 

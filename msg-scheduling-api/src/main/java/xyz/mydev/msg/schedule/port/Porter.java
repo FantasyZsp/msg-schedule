@@ -14,7 +14,6 @@ import java.util.concurrent.ExecutorService;
  * 直接投递到mq。
  * 对于即时消息来说，transfer和port的任务可能是完全一致的。
  * <p>
- * TODO 考虑去除泛型E
  *
  * @author ZSP
  */
@@ -22,7 +21,7 @@ public interface Porter<E> {
 
   String getTargetTableName();
 
-  Class<E> getTableEntityClass();
+  Class<? extends E> getTableEntityClass();
 
   ExecutorService getTransferExecutor();
 
