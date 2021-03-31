@@ -43,7 +43,7 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
   private final RedissonClient redissonClient;
 
 
-  private Set<String> tableNames;
+  private final Set<String> tableNames;
   private final MessageRepositoryRouter messageRepositoryRouter;
 
   public RedisCheckPointServiceImpl(RedissonClient redissonClient,

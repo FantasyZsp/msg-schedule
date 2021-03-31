@@ -2,6 +2,7 @@ package xyz.mydev.msg.schedule.autoconfig;
 
 import com.sishu.redis.lock.annotation.RedisLockAnnotationSupportAutoConfig;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.RedisClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -19,10 +20,7 @@ import xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties;
 import xyz.mydev.msg.schedule.autoconfig.properties.TableScheduleProperties;
 import xyz.mydev.msg.schedule.bean.DelayMessage;
 import xyz.mydev.msg.schedule.bean.InstantMessage;
-import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.delay.port.RedisDelayTransferQueue;
-import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
-import xyz.mydev.msg.schedule.infrastruction.repository.route.DefaultMessageRepositoryRouter;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
 import xyz.mydev.msg.schedule.load.DefaultStringMessageLoader;
 import xyz.mydev.msg.schedule.load.MessageLoader;
@@ -30,10 +28,14 @@ import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 import xyz.mydev.msg.schedule.load.checkpoint.redis.RedisCheckPointServiceImpl;
 import xyz.mydev.msg.schedule.load.checkpoint.route.CheckpointServiceRouter;
 import xyz.mydev.msg.schedule.load.checkpoint.route.DefaultCheckpointServiceRouter;
+import xyz.mydev.msg.schedule.mq.producer.MqProducer;
+import xyz.mydev.msg.schedule.mq.rocketmq.autoconfig.RocketMqAutoConfiguration;
+import xyz.mydev.msg.schedule.port.DefaultDelayMessagePortTaskFactory;
 import xyz.mydev.msg.schedule.port.DefaultDelayMessagePorter;
+import xyz.mydev.msg.schedule.port.DefaultDelayMessageTransferTaskFactory;
 import xyz.mydev.msg.schedule.port.DefaultInstantMessagePorter;
+import xyz.mydev.msg.schedule.port.DefaultInstantMessageTransferTaskFactory;
 import xyz.mydev.msg.schedule.port.Porter;
-import xyz.mydev.msg.schedule.port.TransferDirectlyTaskFactory;
 import xyz.mydev.msg.schedule.port.route.DefaultMessagePorterRouter;
 import xyz.mydev.msg.schedule.port.route.PorterRouter;
 
@@ -43,44 +45,40 @@ import java.util.Set;
 
 /**
  * 根据外部化配置，自动装配需要的组件
- * TODO 依赖MQ配置
+ * <p>
+ * TODO 分离对RocketMqAutoConfiguration的依赖，提供中间层，统一自动装配消息中间件
  *
  * @author ZSP
  */
 @Configuration
-@ConditionalOnBean({RedissonClient.class})
-@AutoConfigureAfter({RedisLockAnnotationSupportAutoConfig.class})
+@AutoConfigureAfter({MessageRepositoryConfiguration.class, RedisLockAnnotationSupportAutoConfig.class, RocketMqAutoConfiguration.class})
+@ConditionalOnBean({RedissonClient.class, MqProducer.class})
 @ConditionalOnProperty(value = "msg-schedule.scheduler.enable", havingValue = "true")
 @EnableConfigurationProperties({SchedulerProperties.class})
 public class MessageScheduleAutoConfiguration implements InitializingBean {
 
-  private final ObjectProvider<MessageRepository<? extends StringMessage>> provider;
+  private final MessageRepositoryRouter messageRepositoryRouter;
   private final ObjectProvider<CheckpointService> checkpointServiceObjectProvider;
   private final ObjectProvider<Porter<?>> porterObjectProvider;
   private final SchedulerProperties schedulerProperties;
+  private final MqProducer mqProducer;
   private final RedissonClient redissonClient;
 
   public MessageScheduleAutoConfiguration(SchedulerProperties schedulerProperties,
-                                          ObjectProvider<MessageRepository<? extends StringMessage>> provider,
+                                          MessageRepositoryRouter messageRepositoryRouter,
                                           ObjectProvider<CheckpointService> checkpointServiceObjectProvider,
                                           ObjectProvider<Porter<?>> porterObjectProvider,
-                                          RedissonClient redissonClient) {
-    this.provider = provider;
+                                          MqProducer mqProducer, RedissonClient redissonClient) {
+    this.messageRepositoryRouter = messageRepositoryRouter;
     this.schedulerProperties = schedulerProperties;
     this.porterObjectProvider = porterObjectProvider;
+    this.mqProducer = mqProducer;
     this.redissonClient = redissonClient;
     this.checkpointServiceObjectProvider = checkpointServiceObjectProvider;
   }
 
   private static final Logger log = LoggerFactory.getLogger(MessageScheduleAutoConfiguration.class);
 
-  @Bean
-  @ConditionalOnMissingBean
-  public MessageRepositoryRouter messageRepositoryRouter() {
-    DefaultMessageRepositoryRouter router = new DefaultMessageRepositoryRouter();
-    provider.ifAvailable(repository -> router.put(repository.getTableName(), repository));
-    return router;
-  }
 
   @Bean
   @ConditionalOnMissingBean
@@ -100,7 +98,7 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
     all.removeAll(router.tableNameSet());
 
     if (!all.isEmpty()) {
-      RedisCheckPointServiceImpl redisCheckPointService = new RedisCheckPointServiceImpl(redissonClient, messageRepositoryRouter());
+      RedisCheckPointServiceImpl redisCheckPointService = new RedisCheckPointServiceImpl(redissonClient, messageRepositoryRouter);
       redisCheckPointService.getTableNames().addAll(all);
       redisCheckPointService.init();
       router.put(redisCheckPointService);
@@ -110,10 +108,14 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
 
   @Bean
   @ConditionalOnMissingBean
+  @ConditionalOnBean({MessageRepositoryRouter.class, RedisClient.class})
   public MessageLoader messageLoader() {
-    return new DefaultStringMessageLoader(messageRepositoryRouter(), Objects.requireNonNull(redissonClient::getLock));
+    return new DefaultStringMessageLoader(messageRepositoryRouter, Objects.requireNonNull(redissonClient::getLock));
   }
 
+  /**
+   * TODO bean注册与初始化逻辑分开
+   */
   @Bean
   @ConditionalOnMissingBean
   public PorterRouter messagePorterRouter() {
@@ -143,8 +145,7 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
 
       @SuppressWarnings("unchecked")
       Class<? extends InstantMessage> targetTableEntityClass = (Class<? extends InstantMessage>) tableEntityClass;
-      // TODO 构建 TransferTaskFactory
-      DefaultInstantMessagePorter defaultInstantMessagePorter = new DefaultInstantMessagePorter(tableName, targetTableEntityClass, null);
+      DefaultInstantMessagePorter defaultInstantMessagePorter = new DefaultInstantMessagePorter(tableName, targetTableEntityClass, new DefaultInstantMessageTransferTaskFactory(mqProducer));
       defaultInstantMessagePorter.init();
 
       TableKeyPair<? extends InstantMessage> tableKeyPair = TableKeyPair.of(tableName, targetTableEntityClass);
@@ -168,15 +169,15 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
       Class<? extends DelayMessage> targetTableEntityClass = (Class<? extends DelayMessage>) tableEntityClass;
 
       TableKeyPair<? extends DelayMessage> tableKeyPair = TableKeyPair.of(tableName, targetTableEntityClass);
-      // TODO 构建 PortTaskFactory
       RedisDelayTransferQueue<DelayMessage> transferQueue = new RedisDelayTransferQueue<>(redissonClient, tableName);
-      TransferDirectlyTaskFactory<DelayMessage> transferDirectlyTaskFactory = new TransferDirectlyTaskFactory<>(transferQueue);
+
+      DefaultDelayMessageTransferTaskFactory<DelayMessage> defaultDelayMessageTransferTaskFactory = new DefaultDelayMessageTransferTaskFactory<>(transferQueue);
       Porter<DelayMessage> delayMessagePorter =
         new DefaultDelayMessagePorter(tableName,
           targetTableEntityClass,
           transferQueue,
-          transferDirectlyTaskFactory,
-          null);
+          defaultDelayMessageTransferTaskFactory,
+          new DefaultDelayMessagePortTaskFactory(mqProducer, transferQueue));
       delayMessagePorter.init();
       router.putIfAbsent(tableKeyPair, delayMessagePorter);
     });

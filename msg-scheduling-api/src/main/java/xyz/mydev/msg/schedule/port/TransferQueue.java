@@ -3,6 +3,9 @@ package xyz.mydev.msg.schedule.port;
 import java.util.Queue;
 
 /**
+ * 基于委派实现中转队列
+ * xyz.mydev.msg.schedule.port.TransferQueue#getTargetQueue() 给出了具体的实现
+ *
  * @author ZSP
  */
 public interface TransferQueue<E> {
@@ -16,7 +19,7 @@ public interface TransferQueue<E> {
   boolean remove(E e);
 
   /**
-   * 目标就绪队列
+   * 目标队列
    */
   Queue<E> getTargetQueue();
 

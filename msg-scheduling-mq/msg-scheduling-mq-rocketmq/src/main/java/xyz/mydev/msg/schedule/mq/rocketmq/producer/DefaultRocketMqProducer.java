@@ -29,32 +29,32 @@ public class DefaultRocketMqProducer implements MqProducer, InitializingBean {
 
   @Getter
   private TransactionMQProducer producer;
-  private final TransactionMessageListenerImpl delayMessageTransactionListener;
+  private final TransactionMessageListenerImpl transactionMessageListener;
 
 
-  private DefaultRocketMqProducer(TransactionMessageListenerImpl delayMessageTransactionListener,
-                                  RocketMQProperties rocketMqProperties) {
+  public DefaultRocketMqProducer(TransactionMessageListenerImpl transactionMessageListener,
+                                 RocketMQProperties rocketMqProperties) {
 
-    this.delayMessageTransactionListener = delayMessageTransactionListener;
+    this.transactionMessageListener = transactionMessageListener;
     this.rocketMQProperties = rocketMqProperties;
   }
 
-  public TransactionSendResult sendMessage(Message message, Object argument) {
+  private TransactionSendResult sendMessage(Message message) {
     TransactionSendResult sendResult = null;
     try {
-      sendResult = this.producer.sendMessageInTransaction(message, argument);
+      sendResult = this.producer.sendMessageInTransaction(message, message.getProperty(Constants.MsgPropertiesKey.BUSINESS_ID));
     } catch (Exception e) {
-      log.error("delay meg send error: {} ,error info: [{}]", message, e);
+      log.error("msg send error: {} ,error info: [{}]", message, e);
     }
 
-    log.info("delay msg send result: [{}] ", sendResult);
+    log.info("msg send result: [{}] ", sendResult);
 
     return sendResult;
   }
 
 
   @Override
-  public TransactionSendResult sendMessage(xyz.mydev.msg.schedule.bean.Message msg) {
+  public TransactionSendResult sendWithTx(xyz.mydev.msg.schedule.bean.Message msg) {
     if (log.isDebugEnabled()) {
       log.debug("sending msg: {}  ", msg);
     }
@@ -64,17 +64,16 @@ public class DefaultRocketMqProducer implements MqProducer, InitializingBean {
     Message message = new Message(msg.getTopic(), msg.getTag(), msgId, body);
     message.putUserProperty(Constants.MsgPropertiesKey.TABLE_NAME, msg.getTargetTableName());
     message.putUserProperty(Constants.MsgPropertiesKey.BUSINESS_ID, msg.getBusinessId());
-    message.putUserProperty(Constants.MsgPropertiesKey.BUSINESS_ID, msg.getBusinessId());
     message.putUserProperty(Constants.MsgPropertiesKey.TRACE_ID, msg.getTraceId());
     message.putUserProperty(Constants.MsgPropertiesKey.TRACE_VERSION, msg.getTraceVersion());
-    return sendMessage(message, null);
+    return sendMessage(message);
   }
 
 
   @Override
   public void afterPropertiesSet() throws Exception {
     this.producer = new TransactionMQProducer(rocketMQProperties.getProducer().getGroup());
-    this.producer.setTransactionListener(delayMessageTransactionListener);
+    this.producer.setTransactionListener(transactionMessageListener);
     this.producer.setNamesrvAddr(rocketMQProperties.getNameServer());
   }
 

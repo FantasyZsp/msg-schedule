@@ -5,11 +5,11 @@ import javax.validation.constraints.NotNull;
 /**
  * @author ZSP
  */
-public class TransferDirectlyTaskFactory<E> implements TransferTaskFactory<E> {
+public class DefaultDelayMessageTransferTaskFactory<E> implements TransferTaskFactory<E> {
 
   TransferQueue<E> transferQueue;
 
-  public TransferDirectlyTaskFactory(TransferQueue<E> transferQueue) {
+  public DefaultDelayMessageTransferTaskFactory(TransferQueue<E> transferQueue) {
     this.transferQueue = transferQueue;
   }
 

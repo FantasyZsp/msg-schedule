@@ -60,21 +60,4 @@ public class DefaultInstantMessagePorter implements Porter<InstantMessage> {
   }
 
 
-  private static class TransferTaskAdapter<E> implements PortTaskFactory<E> {
-    private final TransferTaskFactory<E> transferTaskFactory;
-
-    public TransferTaskAdapter(TransferTaskFactory<E> transferTaskFactory) {
-      this.transferTaskFactory = transferTaskFactory;
-    }
-
-    @Override
-    public Runnable newTask(E e) {
-      return transferTaskFactory.newTransferTask(e);
-    }
-  }
-
-  @Override
-  public Class<? extends InstantMessage> getTableEntityClass() {
-    return tableEntityClass;
-  }
 }

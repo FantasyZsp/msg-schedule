@@ -17,10 +17,5 @@
       <artifactId>rocketmq-spring-boot-starter</artifactId>
       <version>2.2.0</version>
     </dependency>
-    <dependency>
-      <groupId>xyz.mydev</groupId>
-      <artifactId>msg-scheduling-mq-api</artifactId>
-      <version>${revision}</version>
-    </dependency>
   </dependencies>
 </project>

@@ -3,12 +3,12 @@ package xyz.mydev.msg.schedule.autoconfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
-import xyz.mydev.msg.schedule.CoreAppTest;
 import xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
 import xyz.mydev.msg.schedule.load.MessageLoader;
-import xyz.mydev.msg.schedule.port.DefaultInstantMessagePorter;
+import xyz.mydev.msg.schedule.mq.producer.MqProducer;
 import xyz.mydev.msg.schedule.port.route.PorterRouter;
 
 /**
@@ -27,6 +27,10 @@ class SchedulerPropertiesConfigurationTest {
 
   @Autowired
   private MessageRepositoryRouter messageRepositoryRouter;
+  @Autowired
+  private MqProducer mqProducer;
+  @Autowired
+  private ApplicationContext applicationContext;
 
 
   @Test
@@ -36,6 +40,6 @@ class SchedulerPropertiesConfigurationTest {
 
   @Test
   void testClass() {
-    DefaultInstantMessagePorter defaultInstantMessagePorter = new DefaultInstantMessagePorter(null, CoreAppTest.PersonMessage.class, null);
   }
+
 }

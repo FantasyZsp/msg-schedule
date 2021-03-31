@@ -30,7 +30,7 @@ msg-schedule:
             use-default-config: true # 指定使用默认配置
             table-entity-class: xyz.mydev.msg.schedule.CoreAppTest.PersonMessage
 rocketmq:
-  name-server: "localhost:9876"
+  name-server: "local-vm:9876"
   producer:
     group: msg-schedule-pg
 redis-lock:

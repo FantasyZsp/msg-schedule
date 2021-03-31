@@ -23,18 +23,17 @@ public class TransactionMessageListenerImpl implements TransactionListener {
   private final MessageRepositoryRouter messageRepositoryRouter;
   private final RocketMqMsgSendFailureHandler rocketMqMsgSendFailureHandler;
 
-  /**
-   * id: check times
-   * TODO 调整为redis，并加入过期处理防止OOM
-   */
-  private static final AtomicLongMap<String> MSG_CHECK_TIMES_MAP = AtomicLongMap.create();
-
   public TransactionMessageListenerImpl(MessageRepositoryRouter messageRepositoryRouter,
                                         RocketMqMsgSendFailureHandler rocketMqMsgSendFailureHandler) {
     this.messageRepositoryRouter = messageRepositoryRouter;
     this.rocketMqMsgSendFailureHandler = rocketMqMsgSendFailureHandler;
   }
 
+  /**
+   * id: check times
+   * TODO 调整为redis，并加入过期处理防止OOM
+   */
+  private static final AtomicLongMap<String> MSG_CHECK_TIMES_MAP = AtomicLongMap.create();
   private final static int MAX_CHECK_TIMES = 10;
 
 

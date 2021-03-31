@@ -7,6 +7,6 @@ import xyz.mydev.msg.schedule.bean.Message;
  */
 public interface MqProducer {
 
-  Object sendMessage(Message message);
+  Object sendWithTx(Message message);
 
 }
