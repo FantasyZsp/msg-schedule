@@ -14,8 +14,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.CollectionUtils;
-import xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties;
+import xyz.mydev.msg.schedule.ScheduledTableRegistry;
 import xyz.mydev.msg.schedule.TableScheduleProperties;
+import xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties;
 import xyz.mydev.msg.schedule.bean.DelayMessage;
 import xyz.mydev.msg.schedule.bean.InstantMessage;
 import xyz.mydev.msg.schedule.delay.port.RedisDelayTransferQueue;
@@ -120,8 +121,15 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
   public PorterRouter messagePorterRouter() {
     DefaultMessagePorterRouter router = new DefaultMessagePorterRouter();
     // put user custom
-    porterObjectProvider.ifAvailable(porter ->
-      router.put(porter.getTargetTableName(), porter));
+    porterObjectProvider.ifAvailable(porter -> {
+
+      TableScheduleProperties properties = porter.getTableScheduleProperties();
+      if (properties == null) {
+        throw new IllegalStateException("customized porter's tableScheduleProperties must be not null");
+      }
+      router.put(porter.getTargetTableName(), porter);
+      ScheduledTableRegistry.registerTableByBean(porter.getTargetTableName(), properties);
+    });
 
     registerYmlDelayPorter(router);
     registerYmlInstantPorter(router);
@@ -142,10 +150,12 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
         throw new IllegalArgumentException("instant msg class must implements InstantMessage");
       }
 
-      DefaultInstantMessagePorter defaultInstantMessagePorter = new DefaultInstantMessagePorter(tableName, new DefaultInstantMessageTransferTaskFactory(mqProducer));
-      defaultInstantMessagePorter.init();
+      DefaultInstantMessagePorter porter = new DefaultInstantMessagePorter(tableName, new DefaultInstantMessageTransferTaskFactory(mqProducer));
+      porter.init();
 
-      router.putIfAbsent(tableName, defaultInstantMessagePorter);
+      router.putIfAbsent(tableName, porter);
+      ScheduledTableRegistry.registerTableByConfig(tableName, tableScheduleProperty);
+
     });
   }
 
@@ -165,13 +175,14 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
       RedisDelayTransferQueue<DelayMessage> transferQueue = new RedisDelayTransferQueue<>(redissonClient, tableName);
 
       DefaultDelayMessageTransferTaskFactory<DelayMessage> defaultDelayMessageTransferTaskFactory = new DefaultDelayMessageTransferTaskFactory<>(transferQueue);
-      Porter<DelayMessage> delayMessagePorter =
+      Porter<DelayMessage> porter =
         new DefaultDelayMessagePorter(tableName,
           transferQueue,
           defaultDelayMessageTransferTaskFactory,
           new DefaultDelayMessagePortTaskFactory(mqProducer, transferQueue));
-      delayMessagePorter.init();
-      router.putIfAbsent(tableName, delayMessagePorter);
+      porter.init();
+      router.putIfAbsent(tableName, porter);
+      ScheduledTableRegistry.registerTableByConfig(tableName, tableScheduleProperty);
     });
   }
 

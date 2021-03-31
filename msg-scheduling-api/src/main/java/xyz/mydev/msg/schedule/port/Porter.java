@@ -1,5 +1,8 @@
 package xyz.mydev.msg.schedule.port;
 
+import xyz.mydev.msg.schedule.TableScheduleProperties;
+
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.util.concurrent.ExecutorService;
 
@@ -14,6 +17,8 @@ import java.util.concurrent.ExecutorService;
  * 直接投递到mq。
  * 对于即时消息来说，transfer和port的任务可能是完全一致的。
  * <p>
+ * 约束：
+ * 如果需要往IOC容器注册bean，那么必须保证{@code getTableScheduleProperties()}返回的是非空
  *
  * @author ZSP
  */
@@ -21,6 +26,15 @@ public interface Porter<E> {
 
   @NotNull
   String getTargetTableName();
+
+  /**
+   * 如果需要往IOC容器注册bean，那么必须保证返回的是非空且能够通过{@link TableScheduleProperties#validate}校验
+   * 通过yml配置的组件不需要事先此项，但必须在yml中声明必要属性，一般是结合default配置项，通过{@link TableScheduleProperties#validate}校验
+   */
+  @Nullable
+  default TableScheduleProperties getTableScheduleProperties() {
+    return null;
+  }
 
   ExecutorService getTransferExecutor();
 
@@ -50,7 +64,6 @@ public interface Porter<E> {
       getPortExecutor().execute(portTask);
     }
   }
-
 
 
   void init();

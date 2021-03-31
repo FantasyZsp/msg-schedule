@@ -135,7 +135,7 @@ public class SchedulerProperties {
     Objects.requireNonNull(tableScheduleProperties.getCheckpointInterval());
     Objects.requireNonNull(tableScheduleProperties.getLoadInterval());
     // register
-    ScheduledTableRegistry.addTable(tableName, tableScheduleProperties, ScheduledTableRegistry.REGISTER_WAY_YML);
+    ScheduledTableRegistry.registerTableByConfig(tableName, tableScheduleProperties);
   }
 
   public Set<String> getScheduledTableNames() {

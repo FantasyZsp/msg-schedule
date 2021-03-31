@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 在yml中配置的条目，在自动装配完毕后，会注册到此。
  * <p>
  * * TODO SPI机制
+ * TODO 获取这个注册中心可以注册任何组件，而不必使用Router
  *
  * @author ZSP
  */
@@ -26,8 +27,12 @@ public class ScheduledTableRegistry implements Iterable<ScheduledTableRegistry.T
 
   private static final Map<String, TableSchedulePropertiesWrapper> REGISTRY = new ConcurrentHashMap<>();
 
-  public static void addTable(String tableName, TableScheduleProperties tableScheduleProperties, int registerWay) {
-    REGISTRY.put(tableName, TableSchedulePropertiesWrapper.adapt(tableScheduleProperties, registerWay));
+  public static void registerTableByConfig(String tableName, TableScheduleProperties tableScheduleProperties) {
+    REGISTRY.put(tableName, TableSchedulePropertiesWrapper.adapt(tableScheduleProperties.validate(), REGISTER_WAY_YML));
+  }
+
+  public static void registerTableByBean(String tableName, TableScheduleProperties tableScheduleProperties) {
+    REGISTRY.put(tableName, TableSchedulePropertiesWrapper.adapt(tableScheduleProperties.validate(), REGISTER_WAY_BEAN));
   }
 
   public static void removeTable(String tableName) {

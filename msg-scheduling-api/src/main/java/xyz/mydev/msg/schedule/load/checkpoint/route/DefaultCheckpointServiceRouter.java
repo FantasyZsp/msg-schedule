@@ -2,10 +2,10 @@ package xyz.mydev.msg.schedule.load.checkpoint.route;
 
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author ZSP
@@ -15,7 +15,7 @@ public class DefaultCheckpointServiceRouter implements CheckpointServiceRouter {
   /**
    * tableName -> CheckpointService
    */
-  private final Map<String, CheckpointService> holder = new HashMap<>();
+  private final Map<String, CheckpointService> holder = new ConcurrentHashMap<>();
 
   @Override
   public void put(CheckpointService checkpointService) {
