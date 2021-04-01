@@ -1,0 +1,142 @@
+{
+  "groups": [
+    {
+      "name": "msg-schedule.scheduler",
+      "type": "xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties"
+    },
+    {
+      "name": "msg-schedule.scheduler.checkpoint-executor",
+      "type": "xyz.mydev.msg.schedule.autoconfig.properties.ExecutorProperties",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties",
+      "sourceMethod": "getCheckpointExecutor()"
+    },
+    {
+      "name": "msg-schedule.scheduler.default-schedule-interval",
+      "type": "xyz.mydev.msg.schedule.TableScheduleProperties",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties",
+      "sourceMethod": "getDefaultScheduleInterval()"
+    },
+    {
+      "name": "msg-schedule.scheduler.route",
+      "type": "xyz.mydev.msg.schedule.autoconfig.properties.TableRouteProperties",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties",
+      "sourceMethod": "getRoute()"
+    },
+    {
+      "name": "msg-schedule.scheduler.route.tables",
+      "type": "xyz.mydev.msg.schedule.autoconfig.properties.TableRouteProperties$TableConfigProperties",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.TableRouteProperties",
+      "sourceMethod": "getTables()"
+    },
+    {
+      "name": "msg-schedule.scheduler.schedule-executor",
+      "type": "xyz.mydev.msg.schedule.autoconfig.properties.ExecutorProperties",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties",
+      "sourceMethod": "getScheduleExecutor()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "msg-schedule.scheduler.checkpoint-executor.depend-on-table-size",
+      "type": "java.lang.Boolean",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.ExecutorProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "msg-schedule.scheduler.checkpoint-executor.max-thread",
+      "type": "java.lang.Integer",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.ExecutorProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "msg-schedule.scheduler.checkpoint-executor.min-thread",
+      "type": "java.lang.Integer",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.ExecutorProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "msg-schedule.scheduler.default-schedule-interval.checkpoint-interval",
+      "type": "java.lang.Integer",
+      "sourceType": "xyz.mydev.msg.schedule.TableScheduleProperties"
+    },
+    {
+      "name": "msg-schedule.scheduler.default-schedule-interval.is-delay",
+      "type": "java.lang.Boolean",
+      "sourceType": "xyz.mydev.msg.schedule.TableScheduleProperties"
+    },
+    {
+      "name": "msg-schedule.scheduler.default-schedule-interval.load-interval",
+      "type": "java.lang.Integer",
+      "sourceType": "xyz.mydev.msg.schedule.TableScheduleProperties"
+    },
+    {
+      "name": "msg-schedule.scheduler.default-schedule-interval.table-entity-class",
+      "type": "java.lang.Class<?>",
+      "sourceType": "xyz.mydev.msg.schedule.TableScheduleProperties"
+    },
+    {
+      "name": "msg-schedule.scheduler.default-schedule-interval.table-name",
+      "type": "java.lang.String",
+      "sourceType": "xyz.mydev.msg.schedule.TableScheduleProperties"
+    },
+    {
+      "name": "msg-schedule.scheduler.default-schedule-interval.use-default-config",
+      "type": "java.lang.Boolean",
+      "sourceType": "xyz.mydev.msg.schedule.TableScheduleProperties"
+    },
+    {
+      "name": "msg-schedule.scheduler.delay-table-names",
+      "type": "java.util.Set<java.lang.String>",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties"
+    },
+    {
+      "name": "msg-schedule.scheduler.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "msg-schedule.scheduler.instant-table-names",
+      "type": "java.util.Set<java.lang.String>",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties"
+    },
+    {
+      "name": "msg-schedule.scheduler.route.load-from-repository-api",
+      "type": "java.lang.Boolean",
+      "description": "当配置为true时，将会从当前类路径或者容器中收集实现了 MessageRepository 的接口，其关联的信息作为调度表信息",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.TableRouteProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "msg-schedule.scheduler.route.tables.delay",
+      "type": "java.util.Map<java.lang.String,xyz.mydev.msg.schedule.TableScheduleProperties>",
+      "description": "tableName -> properties",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.TableRouteProperties$TableConfigProperties"
+    },
+    {
+      "name": "msg-schedule.scheduler.route.tables.instant",
+      "type": "java.util.Map<java.lang.String,xyz.mydev.msg.schedule.TableScheduleProperties>",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.TableRouteProperties$TableConfigProperties"
+    },
+    {
+      "name": "msg-schedule.scheduler.schedule-executor.depend-on-table-size",
+      "type": "java.lang.Boolean",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.ExecutorProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "msg-schedule.scheduler.schedule-executor.max-thread",
+      "type": "java.lang.Integer",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.ExecutorProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "msg-schedule.scheduler.schedule-executor.min-thread",
+      "type": "java.lang.Integer",
+      "sourceType": "xyz.mydev.msg.schedule.autoconfig.properties.ExecutorProperties",
+      "defaultValue": 0
+    }
+  ],
+  "hints": []
+}

@@ -122,7 +122,6 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
     DefaultMessagePorterRouter router = new DefaultMessagePorterRouter();
     // put user custom
     porterObjectProvider.ifAvailable(porter -> {
-
       TableScheduleProperties properties = porter.getTableScheduleProperties();
       if (properties == null) {
         throw new IllegalStateException("customized porter's tableScheduleProperties must be not null");
