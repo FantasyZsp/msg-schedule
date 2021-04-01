@@ -13,11 +13,19 @@ import java.util.concurrent.locks.Lock;
 /**
  * 调度任务说明：
  * 任务类型 TaskTimeType：
- * 1. 应用启动时，从检查点开始扫描到当前格式化时间
- * 2. 定时调度，从当前格式化时间开始到一个间隔后格式化时间
+ * 1. 应用启动时，检查点类型
+ * 对于延时消息，从检查点开始扫描到 当前格式化结束时间（间隔的末尾，被格式化后得到的是间隔区间的开始时间，加上间隔后得到结束时间）
+ * 对于即时消息，从检查点开始扫描到 当前格式化束时间
+ * 2. 定时调度
+ * 对于延时消息，从当前格式化开始时间到格式化结束时间
+ * 对于即时消息，从当前格式化时间的开始，减去一定的容错时间范围，如一分钟， 到格式化结束时间
  * 并发调度：
  * 当1和2多实例下并发时，启动优于调度。启动间需要争抢锁，调度间需要争抢锁。
  * 调度需要在无应用启动时进入调度逻辑。
+ * <p>
+ * 3. TODO  即时检查点纠错任务
+ * 当检查点检测到距离当前时间大于了一个间隔时，会立即调度，此时开始时间对应检查点给出的时间，结束时间对应当前格式化结束时间。
+ * 检查服务可以选择在调用时给出开始和结束时间。
  * <p>
  *
  * @author ZSP
@@ -121,7 +129,7 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
     LocalDateTime startTime;
     LocalDateTime endTime;
     TaskTimeTypeEnum taskTimeType = getTaskTimeType();
-    int intervalMinutes = scheduleTimeEvaluator.getTableIntervalMinutes(targetTableName);
+    int intervalMinutes = scheduleTimeEvaluator.getTableLoadIntervalMinutes(targetTableName);
 
     // checkpoint -> formatted now plus interval
     if (TaskTimeTypeEnum.CheckpointTimeTask.equals(taskTimeType)) {
@@ -131,6 +139,11 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
       // formatted now -> plus interval
       startTime = scheduleTimeEvaluator.formatTimeWithInterval(now, intervalMinutes);
       endTime = startTime.plusSeconds(intervalMinutes);
+    }
+
+    if (!scheduleTimeEvaluator.isDelayTable(targetTableName)) {
+      // 即时消息容错处理
+      startTime = startTime.minusMinutes(scheduleTimeEvaluator.getTableLoadIntervalMinutes(targetTableName) / 3);
     }
     return new LocalDateTime[]{startTime, endTime};
   }

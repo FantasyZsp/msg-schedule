@@ -5,6 +5,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
+ * TODO 开放自定义配置
+ *
  * @author zhaosp
  */
 @Getter

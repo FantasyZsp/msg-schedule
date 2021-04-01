@@ -2,6 +2,7 @@ package xyz.mydev.msg.schedule;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -37,6 +38,18 @@ public class ScheduledTableRegistry implements Iterable<ScheduledTableRegistry.T
 
   public static void removeTable(String tableName) {
     REGISTRY.remove(tableName);
+  }
+
+  public static TableScheduleProperties getTableProperties(String tableName) {
+    return Objects.requireNonNull(REGISTRY.get(tableName));
+  }
+
+  public static int getTableLoadIntervalMinutes(String tableName) {
+    return ScheduledTableRegistry.getTableProperties(tableName).getLoadInterval();
+  }
+
+  public static boolean isDelayTable(String tableName) {
+    return ScheduledTableRegistry.getTableProperties(tableName).getIsDelay();
   }
 
   public static class TableSchedulePropertiesWrapper extends TableScheduleProperties {

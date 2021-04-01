@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.common.util.CallerRunsPolicy;
 import xyz.mydev.msg.common.util.PrefixNameThreadFactory;
+import xyz.mydev.msg.schedule.TableScheduleProperties;
 import xyz.mydev.msg.schedule.bean.InstantMessage;
 
 import java.util.concurrent.ExecutorService;
@@ -29,6 +30,7 @@ public class DefaultInstantMessagePorter implements Porter<InstantMessage> {
   private final TransferTaskFactory<InstantMessage> transferTaskFactory;
   private final ExecutorService transferExecutor;
   private final ExecutorService portExecutor;
+  private TableScheduleProperties tableScheduleProperties;
 
 
   public DefaultInstantMessagePorter(String targetTableName,

@@ -150,8 +150,9 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
       }
 
       DefaultInstantMessagePorter porter = new DefaultInstantMessagePorter(tableName, new DefaultInstantMessageTransferTaskFactory(mqProducer));
+      // don't forget to set tableScheduleProperty
+      porter.setTableScheduleProperties(tableScheduleProperty);
       porter.init();
-
       router.putIfAbsent(tableName, porter);
       ScheduledTableRegistry.registerTableByConfig(tableName, tableScheduleProperty);
 
@@ -179,6 +180,8 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
           transferQueue,
           defaultDelayMessageTransferTaskFactory,
           new DefaultDelayMessagePortTaskFactory(mqProducer, transferQueue));
+      // don't forget to set tableScheduleProperty
+      porter.setTableScheduleProperties(tableScheduleProperty);
       porter.init();
       router.putIfAbsent(tableName, porter);
       ScheduledTableRegistry.registerTableByConfig(tableName, tableScheduleProperty);

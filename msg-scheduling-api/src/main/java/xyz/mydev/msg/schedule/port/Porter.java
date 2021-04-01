@@ -33,8 +33,10 @@ public interface Porter<E> {
    */
   @Nullable
   default TableScheduleProperties getTableScheduleProperties() {
-    return null;
+    return new TableScheduleProperties();
   }
+
+  void setTableScheduleProperties(TableScheduleProperties tableScheduleProperties);
 
   ExecutorService getTransferExecutor();
 
@@ -66,7 +68,9 @@ public interface Porter<E> {
   }
 
 
-  void init();
+  default void init() {
+    getTableScheduleProperties().validate();
+  }
 
   void shutdown();
 }

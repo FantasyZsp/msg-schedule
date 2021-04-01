@@ -3,6 +3,7 @@ package xyz.mydev.msg.schedule.port;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import xyz.mydev.msg.schedule.TableScheduleProperties;
 
 /**
  * 消息搬运工
@@ -23,6 +24,7 @@ public abstract class AbstractPorter<E> extends Thread implements Porter<E> {
 
   private PortTaskFactory<E> portTaskFactory;
   private TransferTaskFactory<E> transferTaskFactory;
+  private TableScheduleProperties tableScheduleProperties;
 
   public AbstractPorter(String targetTableName,
                         TransferQueue<E> transferQueue,
@@ -87,6 +89,7 @@ public abstract class AbstractPorter<E> extends Thread implements Porter<E> {
 
   @Override
   public void init() {
+    getTableScheduleProperties().validate();
     Runtime.getRuntime().addShutdownHook((new Thread(AbstractPorter.this::shutdown)));
   }
 
