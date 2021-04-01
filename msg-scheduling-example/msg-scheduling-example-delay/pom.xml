@@ -12,4 +12,24 @@
   <artifactId>msg-scheduling-example-delay</artifactId>
 
 
+  <dependencies>
+    <dependency>
+      <groupId>xyz.mydev</groupId>
+      <artifactId>msg-scheduling-autoconfig</artifactId>
+      <version>${revision}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <executable>true</executable>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>

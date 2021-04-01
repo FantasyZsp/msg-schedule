@@ -1,0 +1,42 @@
+msg-schedule:
+  scheduler: # 调度组件
+    enable: true
+    # 线程池配置
+    schedule-executor: # 定时调度用，每个表都对应一个task供定时调度，所以线程数最好不小于独立调度的表个数
+      min-thread: 2 # 需要调度的表个数
+      max-thread: 2 # 需要调度的表个数
+      depend-on-table-size: true # 默认true，开启时其他配置无效，检查需要调度的表的个数，建立对应个数的线程
+    checkpoint-executor:
+      min-thread: 2 # 需要检查的表个数
+      max-thread: 2 # 需要检查的表个数
+      depend-on-table-size: true # 默认true，开启时其他配置无效，检查需要调度的表的个数，建立对应个数的线程
+    default-schedule-interval:
+      checkpoint-interval: 15 # 默认不写15分钟维护一次，route中不写默认以此值为默认值
+      load-interval: 30 # 默认不写30分钟维护一次，route中不写默认以此值为默认值
+    route: # 表与调度组件关系。调度组件包含 MessageRepository、TransferQueue、Porter、Loader、CheckpointService
+      load-from-repository-api: false # TODO 配置后，需要调度的表从 MessageRepository 实现类获取，tables中仅作为调度参数；当false时，调度的table对象从tables属性中获取，未指出的不调度。
+      tables:
+        delay:
+          delayMsgTableA: # 消息表名，仓储层将实现接口与此对应(不一定就是db表名，仅为了区分)
+            checkpoint-interval: 15 # 15分钟维护一次
+            load-interval: 30 # 30分钟调度一次；对于延时消息，预加载30分钟的内容或检查点到格式化时间的内容；对于事务消息，前置检查30分钟的消息或检查点到当前时间
+            table-entity-class: xyz.mydev.msg.schedule.CoreAppTest.TmpDelayMsg
+        instant:
+          txMsgTableB:
+            checkpoint-interval: 15
+            load-interval: 15
+            table-entity-class: xyz.mydev.msg.schedule.CoreAppTest.PersonMessage
+          txMsgTableC:
+            use-default-config: true # 指定使用默认配置
+            table-entity-class: xyz.mydev.msg.schedule.CoreAppTest.PersonMessage
+rocketmq:
+  name-server: "local-vm:9876"
+  producer:
+    group: msg-schedule-pg
+redis-lock:
+  enable: true
+redisson:
+  address: redis://${spring.redis.host:127.0.0.1}:${spring.redis.port:6379}
+  database: ${spring.redis.database:1}
+  connection-pool-size: 32
+  mode: single

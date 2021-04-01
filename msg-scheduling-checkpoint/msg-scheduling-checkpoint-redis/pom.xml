@@ -25,12 +25,6 @@
       <artifactId>redis-lock-starter</artifactId>
       <version>${redis_lock_version}</version>
     </dependency>
-
-    <!--spring体系-->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-configuration-processor</artifactId>
-    </dependency>
   </dependencies>
 
 </project>

@@ -6,6 +6,7 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import xyz.mydev.msg.schedule.ScheduledTableRegistry;
 import xyz.mydev.msg.schedule.TableScheduleProperties;
 import xyz.mydev.msg.schedule.bean.BaseMessage;
@@ -30,11 +31,15 @@ public class SchedulerProperties {
   private static final int DEFAULT_LOAD_INTERVALS = 30;
 
   private boolean enable;
+  @NestedConfigurationProperty
   private ExecutorProperties scheduleExecutor;
+  @NestedConfigurationProperty
   private ExecutorProperties checkpointExecutor;
 
+  @NestedConfigurationProperty
   private TableScheduleProperties defaultScheduleInterval = new TableScheduleProperties();
 
+  @NestedConfigurationProperty
   private TableRouteProperties route = new TableRouteProperties();
 
   public void init() {
@@ -138,7 +143,7 @@ public class SchedulerProperties {
     ScheduledTableRegistry.registerTableByConfig(tableName, tableScheduleProperties);
   }
 
-  public Set<String> getScheduledTableNames() {
+  public Set<String> scheduledTableNames() {
     Set<String> tableNameSet = new HashSet<>();
     tableNameSet.addAll(route.getTables().delay.keySet());
     tableNameSet.addAll(route.getTables().instant.keySet());

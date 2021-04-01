@@ -94,7 +94,7 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
 
     });
     // put default for remaining
-    Set<String> all = schedulerProperties.getScheduledTableNames();
+    Set<String> all = schedulerProperties.scheduledTableNames();
     all.removeAll(router.tableNameSet());
 
     if (!all.isEmpty()) {
