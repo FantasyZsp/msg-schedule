@@ -40,11 +40,7 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
   private final String targetTableName;
   private final Porter<T> porter;
   private final MessageLoader messageLoader;
-
   private final CheckpointService checkpointService;
-
-  private final ScheduleTimeEvaluator scheduleTimeEvaluator;
-
   private final TaskTimeTypeEnum taskTimeType;
 
   /**
@@ -56,7 +52,6 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
                       Porter<T> porter,
                       MessageLoader messageLoader,
                       CheckpointService checkpointService,
-                      ScheduleTimeEvaluator scheduleTimeEvaluator,
                       TaskTimeTypeEnum taskTimeType,
                       boolean isStartingTask) {
 
@@ -64,7 +59,6 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
     this.porter = porter;
     this.messageLoader = messageLoader;
     this.checkpointService = checkpointService;
-    this.scheduleTimeEvaluator = scheduleTimeEvaluator;
     this.taskTimeType = taskTimeType;
     this.isStartingTask = isStartingTask;
   }
@@ -129,21 +123,21 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
     LocalDateTime startTime;
     LocalDateTime endTime;
     TaskTimeTypeEnum taskTimeType = getTaskTimeType();
-    int intervalMinutes = scheduleTimeEvaluator.getTableLoadIntervalMinutes(targetTableName);
+    int intervalMinutes = ScheduleTimeEvaluator.getTableLoadIntervalMinutes(targetTableName);
 
     // checkpoint -> formatted now plus interval
     if (TaskTimeTypeEnum.CheckpointTimeTask.equals(taskTimeType)) {
       startTime = checkpointService.readCheckpoint(getTargetTableName());
-      endTime = scheduleTimeEvaluator.formatTimeWithInterval(now, intervalMinutes).plusMinutes(intervalMinutes);
+      endTime = ScheduleTimeEvaluator.formatTimeWithInterval(now, intervalMinutes).plusMinutes(intervalMinutes);
     } else {
       // formatted now -> plus interval
-      startTime = scheduleTimeEvaluator.formatTimeWithInterval(now, intervalMinutes);
+      startTime = ScheduleTimeEvaluator.formatTimeWithInterval(now, intervalMinutes);
       endTime = startTime.plusSeconds(intervalMinutes);
     }
 
-    if (!scheduleTimeEvaluator.isDelayTable(targetTableName)) {
+    if (!ScheduleTimeEvaluator.isDelayTable(targetTableName)) {
       // 即时消息容错处理
-      startTime = startTime.minusMinutes(scheduleTimeEvaluator.getTableLoadIntervalMinutes(targetTableName) / 3);
+      startTime = startTime.minusMinutes(ScheduleTimeEvaluator.getTableLoadIntervalMinutes(targetTableName) / 3);
     }
     return new LocalDateTime[]{startTime, endTime};
   }
@@ -153,6 +147,6 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
    * endTimeSequence格式: 当天间隔顺序号，从0开始。如30分钟，那么结束时间 1:00对应的就是2 = 60/30
    */
   protected String buildLoadLockName(LocalDateTime correctedEndTime) {
-    return "ld:" + targetTableName + ":" + scheduleTimeEvaluator.intervalSequenceNo(targetTableName, correctedEndTime);
+    return "ld:" + targetTableName + ":" + ScheduleTimeEvaluator.intervalSequenceNo(correctedEndTime, targetTableName);
   }
 }

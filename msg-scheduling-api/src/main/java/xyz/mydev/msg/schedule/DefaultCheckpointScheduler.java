@@ -1,6 +1,7 @@
 package xyz.mydev.msg.schedule;
 
 import lombok.extern.slf4j.Slf4j;
+import xyz.mydev.msg.common.util.PrefixNameThreadFactory;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointUpdateStrategy;
 import xyz.mydev.msg.schedule.load.checkpoint.route.CheckpointServiceRouter;
@@ -17,27 +18,25 @@ import java.util.concurrent.TimeUnit;
  * @author ZSP
  */
 @Slf4j
-public abstract class AbstractCheckpointScheduler {
+public class DefaultCheckpointScheduler implements CheckpointScheduler {
 
   private final CheckpointServiceRouter checkpointServiceRouter;
-  private final ScheduledExecutorService scheduledExecutorService;
+  private ScheduledExecutorService scheduledExecutorService;
 
-  public AbstractCheckpointScheduler(CheckpointServiceRouter checkpointServiceRouter) {
-    this.checkpointServiceRouter = Objects.requireNonNull(checkpointServiceRouter);
+  public DefaultCheckpointScheduler(CheckpointServiceRouter checkpointServiceRouter) {
 
-
+    this.checkpointServiceRouter = checkpointServiceRouter;
     int size = checkpointServiceRouter.size();
-    // TODO 个性化配置线程池
     this.scheduledExecutorService = Executors.newScheduledThreadPool(size, r -> new Thread(r, "cpUpdateThread"));
   }
 
-  public AbstractCheckpointScheduler(CheckpointServiceRouter checkpointServiceRouter, ScheduledExecutorService scheduledExecutorService) {
+  public DefaultCheckpointScheduler(CheckpointServiceRouter checkpointServiceRouter, ScheduledExecutorService scheduledExecutorService) {
     this.checkpointServiceRouter = Objects.requireNonNull(checkpointServiceRouter);
     this.scheduledExecutorService = Objects.requireNonNull(scheduledExecutorService);
   }
 
+  @Override
   public void start() {
-    // TODO 外部化配置调度参数
     for (CheckpointService checkpointService : checkpointServiceRouter) {
       checkpointService.getTableNames().forEach(tableName -> {
         CheckpointUpdateStrategy updateStrategy = checkpointService.getUpdateStrategy(tableName);
@@ -48,7 +47,15 @@ public abstract class AbstractCheckpointScheduler {
     }
   }
 
+  protected void initExecutor() {
+    this.scheduledExecutorService = Executors.newScheduledThreadPool(checkpointServiceRouter.size(), new PrefixNameThreadFactory("CpScheduler"));
+  }
+
   public void stop() {
     scheduledExecutorService.shutdown();
+  }
+
+  public void setScheduledExecutorService(ScheduledExecutorService scheduledExecutorService) {
+    this.scheduledExecutorService = scheduledExecutorService;
   }
 }

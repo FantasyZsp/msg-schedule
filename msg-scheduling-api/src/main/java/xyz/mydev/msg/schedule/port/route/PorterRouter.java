@@ -2,6 +2,8 @@ package xyz.mydev.msg.schedule.port.route;
 
 import xyz.mydev.msg.schedule.port.Porter;
 
+import java.util.Set;
+
 /**
  * tableName -> AbstractPorter
  *
@@ -14,5 +16,7 @@ public interface PorterRouter extends Iterable<Porter<?>> {
   void put(String key, Porter<?> val);
 
   int size();
+
+  Set<String> getScheduledTables();
 
 }

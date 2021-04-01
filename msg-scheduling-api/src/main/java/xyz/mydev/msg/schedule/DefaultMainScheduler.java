@@ -30,40 +30,35 @@ import java.util.concurrent.TimeUnit;
  * @see ScheduledTableRegistry
  */
 @Slf4j
-public abstract class AbstractScheduler {
+public class DefaultMainScheduler implements MainScheduler {
 
-  private final ScheduleTimeEvaluator scheduleTimeEvaluator;
   private final PorterRouter porterRouter;
   private final MessageLoader messageLoader;
   private final CheckpointServiceRouter checkpointServiceRouter;
 
   private ScheduledExecutorService scheduledExecutorService;
 
-  public AbstractScheduler(ScheduleTimeEvaluator scheduleTimeEvaluator,
-                           PorterRouter porterRouter,
-                           MessageLoader messageLoader,
-                           CheckpointServiceRouter checkpointServiceRouter) {
+  public DefaultMainScheduler(PorterRouter porterRouter,
+                              MessageLoader messageLoader,
+                              CheckpointServiceRouter checkpointServiceRouter) {
 
-    this.scheduleTimeEvaluator = scheduleTimeEvaluator;
     this.porterRouter = porterRouter;
     this.messageLoader = messageLoader;
     this.checkpointServiceRouter = checkpointServiceRouter;
-
   }
 
 
-  public AbstractScheduler(ScheduleTimeEvaluator scheduleTimeEvaluator,
-                           PorterRouter porterRouter,
-                           MessageLoader messageLoader,
-                           CheckpointServiceRouter checkpointServiceRouter,
-                           ScheduledExecutorService scheduledExecutorService) {
-    this.scheduleTimeEvaluator = scheduleTimeEvaluator;
+  public DefaultMainScheduler(PorterRouter porterRouter,
+                              MessageLoader messageLoader,
+                              CheckpointServiceRouter checkpointServiceRouter,
+                              ScheduledExecutorService scheduledExecutorService) {
     this.porterRouter = porterRouter;
     this.messageLoader = messageLoader;
     this.checkpointServiceRouter = checkpointServiceRouter;
     this.scheduledExecutorService = scheduledExecutorService;
   }
 
+  @Override
   public void start() {
     initExecutor();
 
@@ -86,7 +81,9 @@ public abstract class AbstractScheduler {
   }
 
   protected void initExecutor() {
-    this.scheduledExecutorService = Executors.newScheduledThreadPool(porterRouter.size() * 2, new PrefixNameThreadFactory("Scheduler"));
+    if (scheduledExecutorService == null) {
+      this.scheduledExecutorService = Executors.newScheduledThreadPool(porterRouter.size() * 2, new PrefixNameThreadFactory("MainScheduler"));
+    }
   }
 
   /**
@@ -97,7 +94,7 @@ public abstract class AbstractScheduler {
    * @return 距离下一个调度时间的毫秒数
    */
   protected long calculateInitialDelay(LocalDateTime snapshotTime, TableScheduleProperties tableScheduleProperties) {
-    LocalDateTime intervalStart = scheduleTimeEvaluator.formatTimeWithInterval(snapshotTime, tableScheduleProperties.getLoadInterval());
+    LocalDateTime intervalStart = ScheduleTimeEvaluator.formatTimeWithInterval(snapshotTime, tableScheduleProperties.getLoadInterval());
     return snapshotTime.until(intervalStart.plusMinutes(tableScheduleProperties.getLoadInterval()), ChronoUnit.MILLIS);
   }
 
@@ -106,11 +103,12 @@ public abstract class AbstractScheduler {
       porterRouter.get(tableName),
       messageLoader,
       Objects.requireNonNull(checkpointServiceRouter.get(tableName)),
-      scheduleTimeEvaluator,
       isStartingTask ? TaskTimeType.TaskTimeTypeEnum.CheckpointTimeTask : TaskTimeType.TaskTimeTypeEnum.IntervalTimeTask,
       isStartingTask
     );
   }
 
-
+  public void setScheduledExecutorService(ScheduledExecutorService scheduledExecutorService) {
+    this.scheduledExecutorService = scheduledExecutorService;
+  }
 }

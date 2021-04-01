@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author ZSP
  */
 @Slf4j
-class AbstractSchedulerTest {
+class DefaultMainSchedulerTest {
 
   private static final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2, new ThreadFactory() {
 

@@ -13,7 +13,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import xyz.mydev.msg.common.util.PrefixNameThreadFactory;
+import xyz.mydev.msg.schedule.CheckpointScheduler;
+import xyz.mydev.msg.schedule.DefaultCheckpointScheduler;
+import xyz.mydev.msg.schedule.DefaultMainScheduler;
+import xyz.mydev.msg.schedule.MainScheduler;
 import xyz.mydev.msg.schedule.ScheduledTableRegistry;
 import xyz.mydev.msg.schedule.TableScheduleProperties;
 import xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties;
@@ -38,12 +44,15 @@ import xyz.mydev.msg.schedule.port.Porter;
 import xyz.mydev.msg.schedule.port.route.DefaultMessagePorterRouter;
 import xyz.mydev.msg.schedule.port.route.PorterRouter;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executors;
 
 /**
  * 根据外部化配置，自动装配需要的组件
+ * 废弃从MessageRepositoryRouter加载调度组件的做法，因为会导致配置调度信息的地方过多。
  * <p>
  * TODO 分离对RocketMqAutoConfiguration的依赖，提供中间层，统一自动装配消息中间件
  *
@@ -80,21 +89,28 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
   private static final Logger log = LoggerFactory.getLogger(MessageScheduleAutoConfiguration.class);
 
 
+  /**
+   * TODO bean注册与初始化逻辑分开
+   */
   @Bean
   @ConditionalOnMissingBean
   public CheckpointServiceRouter checkpointServiceRouter() {
     DefaultCheckpointServiceRouter router = new DefaultCheckpointServiceRouter();
     // put user custom
     checkpointServiceObjectProvider.ifAvailable(cp -> {
-
       if (CollectionUtils.isEmpty(cp.getTableNames())) {
         throw new IllegalArgumentException("user custom cp tableNames must not be empty");
       }
       router.put(cp);
-
     });
-    // put default for remaining
+
+    Set<String> tableFromPorter = new HashSet<>();
+    porterObjectProvider.ifAvailable(porter ->
+      tableFromPorter.add(porter.getTargetTableName()));
+
+    // put default for remaining 1.配置 2.porter
     Set<String> all = schedulerProperties.scheduledTableNames();
+    all.addAll(tableFromPorter);
     all.removeAll(router.tableNameSet());
 
     if (!all.isEmpty()) {
@@ -108,7 +124,6 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
 
   @Bean
   @ConditionalOnMissingBean
-  @ConditionalOnBean({MessageRepositoryRouter.class, RedissonClient.class})
   public MessageLoader messageLoader() {
     return new DefaultStringMessageLoader(messageRepositoryRouter, Objects.requireNonNull(redissonClient::getLock));
   }
@@ -130,11 +145,31 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
       ScheduledTableRegistry.registerTableByBean(porter.getTargetTableName(), properties);
     });
 
-    registerYmlDelayPorter(router);
-    registerYmlInstantPorter(router);
+    registerPorterByYml(router);
     log.debug("DefaultMessagePorterRouter init result: {}", router);
 
     return router;
+  }
+
+  @Bean
+  public MainScheduler mainScheduler(PorterRouter porterRouter, MessageLoader messageLoader, CheckpointServiceRouter checkpointServices) {
+    DefaultMainScheduler defaultMainScheduler = new DefaultMainScheduler(porterRouter, messageLoader, checkpointServices);
+    Assert.isTrue(porterRouter.size() != 0, "porterRouter need init ");
+    Assert.isTrue(checkpointServices.size() != 0, "checkpointServices need init ");
+    defaultMainScheduler.setScheduledExecutorService(Executors.newScheduledThreadPool(porterRouter.size() * 2, new PrefixNameThreadFactory("MainScheduler")));
+    return defaultMainScheduler;
+  }
+
+  @Bean
+  public CheckpointScheduler checkpointScheduler(CheckpointServiceRouter checkpointServiceRouter) {
+    Assert.isTrue(checkpointServiceRouter.size() != 0, "checkpointServiceRouter need init ");
+    return new DefaultCheckpointScheduler(checkpointServiceRouter);
+  }
+
+
+  private void registerPorterByYml(DefaultMessagePorterRouter router) {
+    registerYmlDelayPorter(router);
+    registerYmlInstantPorter(router);
   }
 
   private void registerYmlInstantPorter(DefaultMessagePorterRouter router) {

@@ -15,7 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * 2. yml装配
  * 在yml中配置的条目，在自动装配完毕后，会注册到此。
  * <p>
- * * TODO SPI机制
  * TODO 获取这个注册中心可以注册任何组件，而不必使用Router
  *
  * @author ZSP

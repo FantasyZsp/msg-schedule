@@ -3,7 +3,9 @@ package xyz.mydev.msg.schedule.infrastruction.repository.route;
 import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
 
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -27,5 +29,22 @@ public class DefaultMessageRepositoryRouter implements MessageRepositoryRouter {
   @Override
   public <T extends StringMessage> void put(String tableName, MessageRepository<T> messageRepository) {
     repositoryMap.put(tableName, messageRepository);
+  }
+
+  @Override
+  public Set<String> getScheduledTables() {
+    return repositoryMap.keySet();
+  }
+
+  @Override
+  public String toString() {
+    return "DefaultMessageRepositoryRouter{" +
+      "ScheduledTables=" + repositoryMap.keySet() +
+      '}';
+  }
+
+  @Override
+  public Iterator<MessageRepository<?>> iterator() {
+    return repositoryMap.values().iterator();
   }
 }

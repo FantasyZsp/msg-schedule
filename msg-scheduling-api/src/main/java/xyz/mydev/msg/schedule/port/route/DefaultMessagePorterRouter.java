@@ -4,6 +4,7 @@ import xyz.mydev.msg.schedule.port.Porter;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -33,6 +34,11 @@ public class DefaultMessagePorterRouter implements PorterRouter {
   @Override
   public int size() {
     return porters.size();
+  }
+
+  @Override
+  public Set<String> getScheduledTables() {
+    return porters.keySet();
   }
 
   public void putIfAbsent(String key, Porter<?> val) {
