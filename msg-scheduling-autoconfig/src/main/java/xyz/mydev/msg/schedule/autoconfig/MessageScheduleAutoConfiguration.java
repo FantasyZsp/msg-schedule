@@ -62,6 +62,7 @@ import java.util.concurrent.Executors;
  * 废弃从MessageRepositoryRouter加载调度组件的做法，因为会导致配置调度信息的地方过多。
  * <p>
  * TODO 分离对RocketMqAutoConfiguration的依赖，提供中间层，统一自动装配消息中间件
+ * TODO 拆分bridge组件的自动装配到其他部分
  *
  * @author ZSP
  */
