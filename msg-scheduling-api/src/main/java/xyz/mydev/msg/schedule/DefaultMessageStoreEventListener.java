@@ -11,27 +11,24 @@ import java.io.Serializable;
  * @author ZSP
  */
 @Slf4j
-public class DefaultLocalMessageStoreEventListener<T extends SerializableMessage<? extends Serializable>>
-  implements LocalMessageStoreEventListener<T> {
+public class DefaultMessageStoreEventListener<T extends SerializableMessage<? extends Serializable>> implements MessageStoreEventListener<T> {
 
   private final PorterRouter router;
 
-  public DefaultLocalMessageStoreEventListener(PorterRouter router) {
+  public DefaultMessageStoreEventListener(PorterRouter router) {
     this.router = router;
   }
 
   @Override
-  public void onEvent(LocalMessageStoreEvent<T> localMessageStoreEvent) {
+  public void onEvent(MessageStoreEvent<T> messageStoreEvent) {
 
-    T localMessage = localMessageStoreEvent.getLocalMessage();
+    T localMessage = messageStoreEvent.getMessage();
     String targetTableName = localMessage.getTargetTableName();
     Porter<T> porter = router.get(targetTableName);
     if (porter != null) {
       porter.transfer(localMessage);
     } else {
-      log.warn("porter 404 for {}, please check config", targetTableName);
-
-
+      log.error("porter 404 for {}, please check config", targetTableName);
     }
   }
 }
