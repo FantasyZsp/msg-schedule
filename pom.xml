@@ -6,7 +6,7 @@
   <packaging>pom</packaging>
   <modules>
     <module>msg-scheduling-api</module>
-    <module>msg-scheduling-core</module>
+    <module>msg-scheduling-bridge</module>
     <module>msg-scheduling-checkpoint</module>
     <module>msg-scheduling-example</module>
     <module>msg-scheduling-mq</module>

@@ -1,4 +1,4 @@
-package xyz.mydev.msg.schedule.core.event;
+package xyz.mydev.msg.schedule.bridge.event;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.event.TransactionalEventListener;

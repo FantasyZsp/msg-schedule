@@ -14,7 +14,7 @@
   <dependencies>
     <dependency>
       <groupId>xyz.mydev</groupId>
-      <artifactId>msg-scheduling-core</artifactId>
+      <artifactId>msg-scheduling-bridge</artifactId>
       <version>${revision}</version>
     </dependency>
 

@@ -10,7 +10,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>msg-scheduling-core</artifactId>
+  <artifactId>msg-scheduling-bridge</artifactId>
 
   <dependencies>
     <dependency>

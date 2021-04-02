@@ -1,9 +1,9 @@
-package xyz.mydev.msg.schedule.core.store;
+package xyz.mydev.msg.schedule.bridge.store;
 
 import xyz.mydev.msg.schedule.MessageStoreEventPublisher;
 import xyz.mydev.msg.schedule.MessageStoreService;
 import xyz.mydev.msg.schedule.bean.StringMessage;
-import xyz.mydev.msg.schedule.core.event.GenericMessageStoreEvent;
+import xyz.mydev.msg.schedule.bridge.event.GenericMessageStoreEvent;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
 
 import java.util.Objects;

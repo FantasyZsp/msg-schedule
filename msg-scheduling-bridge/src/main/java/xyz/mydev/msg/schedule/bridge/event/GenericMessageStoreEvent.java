@@ -1,4 +1,4 @@
-package xyz.mydev.msg.schedule.core.event;
+package xyz.mydev.msg.schedule.bridge.event;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.core.ResolvableType;
