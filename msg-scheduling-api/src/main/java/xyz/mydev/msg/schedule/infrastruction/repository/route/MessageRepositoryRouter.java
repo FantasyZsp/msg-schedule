@@ -20,4 +20,13 @@ public interface MessageRepositoryRouter extends Iterable<MessageRepository<?>> 
 
   Set<String> getScheduledTables();
 
+  void init();
+
+  /**
+   * 是否支持流处理
+   */
+  default boolean supportStream() {
+    return false;
+  }
+
 }

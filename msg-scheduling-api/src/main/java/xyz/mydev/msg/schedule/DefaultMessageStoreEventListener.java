@@ -20,13 +20,11 @@ public class DefaultMessageStoreEventListener<T extends SerializableMessage<? ex
   }
 
   @Override
-  public void onEvent(MessageStoreEvent<T> messageStoreEvent) {
-
-    T localMessage = messageStoreEvent.getMessage();
-    String targetTableName = localMessage.getTargetTableName();
+  public void onEvent(T message) {
+    String targetTableName = message.getTargetTableName();
     Porter<T> porter = router.get(targetTableName);
     if (porter != null) {
-      porter.transfer(localMessage);
+      porter.transfer(message);
     } else {
       log.error("porter 404 for {}, please check config", targetTableName);
     }

@@ -19,12 +19,19 @@ import xyz.mydev.msg.common.util.PrefixNameThreadFactory;
 import xyz.mydev.msg.schedule.CheckpointScheduler;
 import xyz.mydev.msg.schedule.DefaultCheckpointScheduler;
 import xyz.mydev.msg.schedule.DefaultMainScheduler;
+import xyz.mydev.msg.schedule.DefaultMessageStoreEventListener;
 import xyz.mydev.msg.schedule.MainScheduler;
+import xyz.mydev.msg.schedule.MessageStoreEventPublisher;
+import xyz.mydev.msg.schedule.MessageStoreService;
 import xyz.mydev.msg.schedule.ScheduledTableRegistry;
 import xyz.mydev.msg.schedule.TableScheduleProperties;
 import xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties;
 import xyz.mydev.msg.schedule.bean.DelayMessage;
 import xyz.mydev.msg.schedule.bean.InstantMessage;
+import xyz.mydev.msg.schedule.bean.StringMessage;
+import xyz.mydev.msg.schedule.core.event.DefaultMessageStoreEventPublisher;
+import xyz.mydev.msg.schedule.core.event.GenericMessageStoreEventListenerAdapter;
+import xyz.mydev.msg.schedule.core.store.DefaultMessageStoreService;
 import xyz.mydev.msg.schedule.delay.port.RedisDelayTransferQueue;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
 import xyz.mydev.msg.schedule.load.DefaultStringMessageLoader;
@@ -164,6 +171,31 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
   public CheckpointScheduler checkpointScheduler(CheckpointServiceRouter checkpointServiceRouter) {
     Assert.isTrue(checkpointServiceRouter.size() != 0, "checkpointServiceRouter need init ");
     return new DefaultCheckpointScheduler(checkpointServiceRouter);
+  }
+
+
+  @Bean
+  @ConditionalOnMissingBean
+  public DefaultMessageStoreEventListener<StringMessage> messageStoreEventListener(PorterRouter porterRouter) {
+    return new DefaultMessageStoreEventListener<>(porterRouter);
+  }
+
+  @Bean(initMethod = "init")
+  @ConditionalOnBean(DefaultMessageStoreEventListener.class)
+  public GenericMessageStoreEventListenerAdapter genericMessageStoreEventListenerAdapter(DefaultMessageStoreEventListener<StringMessage> defaultMessageStoreEventListener) {
+    return new GenericMessageStoreEventListenerAdapter(defaultMessageStoreEventListener);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public MessageStoreEventPublisher messageStoreEventPublisher() {
+    return new DefaultMessageStoreEventPublisher();
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public MessageStoreService messageStoreService(MessageStoreEventPublisher messageStoreEventPublisher, MessageRepositoryRouter messageRepositoryRouter) {
+    return new DefaultMessageStoreService(messageStoreEventPublisher, messageRepositoryRouter);
   }
 
 

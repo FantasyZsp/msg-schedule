@@ -37,6 +37,16 @@ public class DefaultMessageRepositoryRouter implements MessageRepositoryRouter {
   }
 
   @Override
+  public void init() {
+    // TODO need check not empty here?
+    if (!supportStream()) {
+      if (repositoryMap.isEmpty()) {
+        throw new IllegalStateException("not found MessageRepository implements");
+      }
+    }
+  }
+
+  @Override
   public String toString() {
     return "DefaultMessageRepositoryRouter{" +
       "ScheduledTables=" + repositoryMap.keySet() +
