@@ -47,16 +47,4 @@ public class DefaultInstantMessagePorter implements Porter<InstantMessage> {
 
     this.portExecutor = transferExecutor;
   }
-
-  @Override
-  public void init() {
-
-  }
-
-  @Override
-  public void shutdown() {
-
-  }
-
-
 }

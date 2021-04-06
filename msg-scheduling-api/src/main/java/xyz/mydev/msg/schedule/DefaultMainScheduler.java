@@ -73,19 +73,26 @@ public class DefaultMainScheduler implements MainScheduler {
 
       Runnable scheduleTask = buildTask(tableName, false);
       TableScheduleProperties tableScheduleProperties = Objects.requireNonNull(porter.getTableScheduleProperties());
-      long loadInterval = tableScheduleProperties.validate().getLoadInterval();
+      long loadIntervalMinutes = tableScheduleProperties.validate().getLoadInterval();
       LocalDateTime snapshotTime = LocalDateTime.now();
 
       // 延时尽可能小
       long initialDelay = calculateInitialDelay(snapshotTime, tableScheduleProperties);
-      scheduledExecutorService.scheduleAtFixedRate(scheduleTask, initialDelay, loadInterval, TimeUnit.MILLISECONDS);
+      scheduledExecutorService.scheduleAtFixedRate(scheduleTask, initialDelay, loadIntervalMinutes * 60_000, TimeUnit.MILLISECONDS);
     }
 
   }
 
+  @Override
+  public void stop() {
+    for (Porter<?> porter : porterRouter) {
+      porter.shutdown();
+    }
+  }
+
   protected void initExecutor() {
     if (scheduledExecutorService == null) {
-      this.scheduledExecutorService = Executors.newScheduledThreadPool(porterRouter.size() * 2, new PrefixNameThreadFactory("MainScheduler"));
+      this.scheduledExecutorService = Executors.newScheduledThreadPool(porterRouter.size() * 2, new PrefixNameThreadFactory("MnS"));
     }
   }
 

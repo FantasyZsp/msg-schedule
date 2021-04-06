@@ -1,8 +1,10 @@
 package xyz.mydev.msg.schedule.load.checkpoint.redis;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
+import org.springframework.util.Assert;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointService;
 import xyz.mydev.msg.schedule.load.checkpoint.CheckpointUpdateStrategy;
@@ -63,7 +65,16 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
     this.tableNames = new HashSet<>();
   }
 
+  @Override
   public void init() {
+
+    Assert.notEmpty(tableNames, "RedisCheckPointServiceImpl tableNames must not be empty");
+
+    Set<String> scheduledTables = messageRepositoryRouter.getScheduledTables();
+    Collection<String> subtract = CollectionUtils.subtract(tableNames, scheduledTables);
+    if (!subtract.isEmpty()) {
+      throw new IllegalArgumentException("there are some RedisCheckPointServiceImpl tables cannot find repository, as " + subtract);
+    }
     initCpHolderPool();
     initWriteLockPool();
     initScheduleLockPool();
@@ -160,7 +171,7 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
   public LocalDateTime loadNextCheckpoint(String targetTableName, LocalDateTime currentCheckPoint) {
     Objects.requireNonNull(currentCheckPoint);
     Optional<LocalDateTime> nextCheckpoint = messageRepositoryRouter.get(targetTableName).findNextCheckpointAfter(currentCheckPoint);
-    log.info("currentCheckPoint: {}, nextCheckpoint: {}", currentCheckPoint, nextCheckpoint);
+    log.info("{} currentCheckPoint: {}, nextCheckpoint: {}", targetTableName, currentCheckPoint, nextCheckpoint);
     return nextCheckpoint.orElse(currentCheckPoint);
   }
 

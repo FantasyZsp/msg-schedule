@@ -5,4 +5,6 @@ package xyz.mydev.msg.schedule;
  */
 public interface Scheduler {
   void start();
+  void stop();
+
 }

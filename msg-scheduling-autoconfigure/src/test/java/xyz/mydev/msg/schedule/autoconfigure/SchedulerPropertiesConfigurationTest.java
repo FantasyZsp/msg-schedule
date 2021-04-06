@@ -1,5 +1,6 @@
 package xyz.mydev.msg.schedule.autoconfigure;
 
+import com.sishu.redis.lock.util.ThreadUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,6 +37,7 @@ class SchedulerPropertiesConfigurationTest {
   @Test
   void schedulerProperties() {
     System.out.println(schedulerProperties);
+    ThreadUtils.sleepSeconds(500);
   }
 
   @Test

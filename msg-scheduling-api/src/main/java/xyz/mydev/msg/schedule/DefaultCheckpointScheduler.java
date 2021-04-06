@@ -9,6 +9,7 @@ import xyz.mydev.msg.schedule.load.checkpoint.route.CheckpointServiceRouter;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 
@@ -26,7 +27,7 @@ public class DefaultCheckpointScheduler implements CheckpointScheduler {
   public DefaultCheckpointScheduler(CheckpointServiceRouter checkpointServiceRouter) {
     this.checkpointServiceRouter = checkpointServiceRouter;
     int size = checkpointServiceRouter.size();
-    this.scheduledExecutorService = Executors.newScheduledThreadPool(size, r -> new Thread(r, "cpUpdateThread"));
+    this.scheduledExecutorService = Executors.newScheduledThreadPool(size, new PrefixNameThreadFactory("CpScheduler"));
   }
 
   public DefaultCheckpointScheduler(CheckpointServiceRouter checkpointServiceRouter, ScheduledExecutorService scheduledExecutorService) {
@@ -40,16 +41,13 @@ public class DefaultCheckpointScheduler implements CheckpointScheduler {
       checkpointService.getTableNames().forEach(tableName -> {
         CheckpointUpdateStrategy updateStrategy = checkpointService.getUpdateStrategy(tableName);
         if (updateStrategy != null) {
-          scheduledExecutorService.scheduleWithFixedDelay(() -> updateStrategy.updateCheckpoint(tableName), 2, ScheduledTableRegistry.getCheckpointIntervalMinutes(tableName), TimeUnit.MINUTES);
+          scheduledExecutorService.scheduleWithFixedDelay(() -> updateStrategy.updateCheckpoint(tableName), ThreadLocalRandom.current().nextInt(1000, 10000), ScheduledTableRegistry.getCheckpointIntervalMinutes(tableName) * 60_000, TimeUnit.MILLISECONDS);
         }
       });
     }
   }
 
-  protected void initExecutor() {
-    this.scheduledExecutorService = Executors.newScheduledThreadPool(checkpointServiceRouter.size(), new PrefixNameThreadFactory("CpScheduler"));
-  }
-
+  @Override
   public void stop() {
     scheduledExecutorService.shutdown();
   }

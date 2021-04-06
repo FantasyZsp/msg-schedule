@@ -32,7 +32,7 @@ public abstract class AbstractPorter<E> extends Thread implements Porter<E> {
                         TransferQueue<E> transferQueue,
                         TransferTaskFactory<E> transferTaskFactory,
                         PortTaskFactory<E> portTaskFactory) {
-    super("pt-" + targetTableName);
+    super(targetTableName + "-pt");
     this.transferQueue = transferQueue;
     this.targetTableName = targetTableName;
     this.portTaskFactory = portTaskFactory;

@@ -66,7 +66,7 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
   @Override
   public void run() {
 
-    log.info("task type: {}, isStartingTask: {}", getTaskTimeType(), isStartingTask());
+    log.info("schedule for {}, task type: {}, isStartingTask: {}", targetTableName, getTaskTimeType(), isStartingTask());
 
     LocalDateTime now = LocalDateTime.now();
 
@@ -81,23 +81,23 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
 
         List<T> msgListWillSend = load(now, startTime, endTime);
 
-        log.info("invoke transfer {} msg", msgListWillSend.size());
+        log.info("invoke transfer {} msg for {}", msgListWillSend.size(), targetTableName);
 
         transfer(msgListWillSend);
 
-        log.info("invoke transfer success");
+        log.info("invoke transfer success for {}", targetTableName);
 
       } catch (Throwable ex) {
-        log.error("schedule load business ex", ex);
+        log.error("schedule load business ex for {}", targetTableName, ex);
       } finally {
         try {
           scheduleLock.unlock();
         } catch (Throwable ex) {
-          log.warn("scheduleLock unlock ex", ex);
+          log.warn("scheduleLock unlock ex  for {}", targetTableName, ex);
         }
       }
     } else {
-      log.info("there is a task invoking by other app instance, so skip this one");
+      log.info("there is a task for {} invoking by other app instance, so skip this one", targetTableName);
     }
   }
 
@@ -114,7 +114,7 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
                          LocalDateTime endTime) {
 
 
-    log.info("task type [{}], working at [{}] ,formatted at [{}], end at [{}]", getTaskTimeType(), now, startTime, endTime);
+    log.info("load for {}, task type [{}], working at [{}] ,formatted at [{}], end at [{}]", targetTableName, getTaskTimeType(), now, startTime, endTime);
     return messageLoader.load(getTargetTableName(), startTime, endTime);
   }
 

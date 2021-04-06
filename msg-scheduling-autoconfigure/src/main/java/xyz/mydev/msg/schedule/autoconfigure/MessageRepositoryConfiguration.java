@@ -26,7 +26,7 @@ public class MessageRepositoryConfiguration {
   public MessageRepositoryRouter messageRepositoryRouter() {
     DefaultMessageRepositoryRouter router = new DefaultMessageRepositoryRouter();
     provider.ifAvailable(repository -> router.put(repository.getTableName(), repository));
-    router.init();
+//    router.init();
     return router;
   }
 

@@ -73,5 +73,13 @@ public interface Porter<E> {
     Objects.requireNonNull(getTableScheduleProperties()).validate();
   }
 
-  void shutdown();
+  default void shutdown() {
+    if (getTransferExecutor() != null) {
+      getTransferExecutor().shutdown();
+    }
+
+    if (getPortExecutor() != null) {
+      getPortExecutor().shutdown();
+    }
+  }
 }

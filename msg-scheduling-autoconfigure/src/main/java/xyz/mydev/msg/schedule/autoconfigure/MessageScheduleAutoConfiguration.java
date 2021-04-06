@@ -124,6 +124,7 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
     if (!all.isEmpty()) {
       RedisCheckPointServiceImpl redisCheckPointService = new RedisCheckPointServiceImpl(redissonClient, messageRepositoryRouter);
       redisCheckPointService.getTableNames().addAll(all);
+      // check
       redisCheckPointService.init();
       router.put(redisCheckPointService);
     }
@@ -161,7 +162,7 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
   }
 
 
-  @Bean(initMethod = "start")
+  @Bean(initMethod = "start", destroyMethod = "stop")
   public CheckpointScheduler checkpointScheduler(CheckpointServiceRouter checkpointServiceRouter) {
     Assert.isTrue(checkpointServiceRouter.size() != 0, "checkpointServiceRouter need init ");
     return new DefaultCheckpointScheduler(checkpointServiceRouter);

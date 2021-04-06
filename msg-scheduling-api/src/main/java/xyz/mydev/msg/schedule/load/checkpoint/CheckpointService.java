@@ -19,4 +19,9 @@ public interface CheckpointService extends BaseCheckpointService<String, LocalDa
 
   CheckpointUpdateStrategy getUpdateStrategy(String targetTableName);
 
+  /**
+   * 检查必要的组件是否完备
+   */
+  void init();
+
 }
