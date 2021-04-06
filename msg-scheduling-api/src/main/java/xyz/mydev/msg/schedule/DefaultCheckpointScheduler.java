@@ -24,7 +24,6 @@ public class DefaultCheckpointScheduler implements CheckpointScheduler {
   private ScheduledExecutorService scheduledExecutorService;
 
   public DefaultCheckpointScheduler(CheckpointServiceRouter checkpointServiceRouter) {
-
     this.checkpointServiceRouter = checkpointServiceRouter;
     int size = checkpointServiceRouter.size();
     this.scheduledExecutorService = Executors.newScheduledThreadPool(size, r -> new Thread(r, "cpUpdateThread"));
@@ -41,7 +40,7 @@ public class DefaultCheckpointScheduler implements CheckpointScheduler {
       checkpointService.getTableNames().forEach(tableName -> {
         CheckpointUpdateStrategy updateStrategy = checkpointService.getUpdateStrategy(tableName);
         if (updateStrategy != null) {
-          scheduledExecutorService.scheduleWithFixedDelay(() -> updateStrategy.updateCheckpoint(tableName), 2, 30, TimeUnit.MINUTES);
+          scheduledExecutorService.scheduleWithFixedDelay(() -> updateStrategy.updateCheckpoint(tableName), 2, ScheduledTableRegistry.getCheckpointIntervalMinutes(tableName), TimeUnit.MINUTES);
         }
       });
     }

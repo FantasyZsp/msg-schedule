@@ -46,8 +46,12 @@ public class ScheduledTableRegistry implements Iterable<ScheduledTableRegistry.T
     return Objects.requireNonNull(REGISTRY.get(tableName));
   }
 
-  public static int getTableLoadIntervalMinutes(String tableName) {
+  public static int getLoadIntervalMinutes(String tableName) {
     return ScheduledTableRegistry.getTableProperties(tableName).getLoadInterval();
+  }
+
+  public static int getCheckpointIntervalMinutes(String tableName) {
+    return ScheduledTableRegistry.getTableProperties(tableName).getCheckpointInterval();
   }
 
   public static boolean isDelayTable(String tableName) {

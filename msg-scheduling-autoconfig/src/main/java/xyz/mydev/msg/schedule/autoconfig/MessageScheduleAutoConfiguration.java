@@ -149,6 +149,7 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
       if (properties == null) {
         throw new IllegalStateException("customized porter's tableScheduleProperties must be not null");
       }
+      porter.init();
       router.put(porter.getTargetTableName(), porter);
       ScheduledTableRegistry.registerTableByBean(porter.getTargetTableName(), properties);
     });

@@ -41,7 +41,7 @@ public class ScheduleTimeEvaluator {
   }
 
   public static int getTableLoadIntervalMinutes(String tableName) {
-    return ScheduledTableRegistry.getTableLoadIntervalMinutes(tableName);
+    return ScheduledTableRegistry.getLoadIntervalMinutes(tableName);
   }
 
   public static boolean isDelayTable(String tableName) {

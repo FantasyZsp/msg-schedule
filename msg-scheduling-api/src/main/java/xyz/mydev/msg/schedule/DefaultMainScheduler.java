@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.common.util.PrefixNameThreadFactory;
 import xyz.mydev.msg.schedule.load.MessageLoader;
 import xyz.mydev.msg.schedule.load.checkpoint.route.CheckpointServiceRouter;
+import xyz.mydev.msg.schedule.port.AbstractPorter;
 import xyz.mydev.msg.schedule.port.Porter;
 import xyz.mydev.msg.schedule.port.route.PorterRouter;
 
@@ -63,6 +64,9 @@ public class DefaultMainScheduler implements MainScheduler {
     initExecutor();
 
     for (Porter<?> porter : porterRouter) {
+      if (porter instanceof AbstractPorter) {
+        ((AbstractPorter<?>) porter).start();
+      }
       String tableName = porter.getTargetTableName();
       Runnable startingTask = buildTask(tableName, true);
       scheduledExecutorService.execute(startingTask);
@@ -74,7 +78,6 @@ public class DefaultMainScheduler implements MainScheduler {
 
       // 延时尽可能小
       long initialDelay = calculateInitialDelay(snapshotTime, tableScheduleProperties);
-
       scheduledExecutorService.scheduleAtFixedRate(scheduleTask, initialDelay, loadInterval, TimeUnit.MILLISECONDS);
     }
 
