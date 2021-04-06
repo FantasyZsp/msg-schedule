@@ -1,4 +1,4 @@
-package xyz.mydev.msg.schedule.autoconfig;
+package xyz.mydev.msg.schedule.autoconfigure;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

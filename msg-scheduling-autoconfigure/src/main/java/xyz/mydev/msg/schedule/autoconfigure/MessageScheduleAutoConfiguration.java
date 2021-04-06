@@ -160,19 +160,20 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
     return router;
   }
 
-  @Bean
+
+  @Bean(initMethod = "start")
+  public CheckpointScheduler checkpointScheduler(CheckpointServiceRouter checkpointServiceRouter) {
+    Assert.isTrue(checkpointServiceRouter.size() != 0, "checkpointServiceRouter need init ");
+    return new DefaultCheckpointScheduler(checkpointServiceRouter);
+  }
+
+  @Bean(initMethod = "start")
   public MainScheduler mainScheduler(PorterRouter porterRouter, MessageLoader messageLoader, CheckpointServiceRouter checkpointServices) {
     DefaultMainScheduler defaultMainScheduler = new DefaultMainScheduler(porterRouter, messageLoader, checkpointServices);
     Assert.isTrue(porterRouter.size() != 0, "porterRouter need init ");
     Assert.isTrue(checkpointServices.size() != 0, "checkpointServices need init ");
     defaultMainScheduler.setScheduledExecutorService(Executors.newScheduledThreadPool(porterRouter.size() * 2, new PrefixNameThreadFactory("MainScheduler")));
     return defaultMainScheduler;
-  }
-
-  @Bean
-  public CheckpointScheduler checkpointScheduler(CheckpointServiceRouter checkpointServiceRouter) {
-    Assert.isTrue(checkpointServiceRouter.size() != 0, "checkpointServiceRouter need init ");
-    return new DefaultCheckpointScheduler(checkpointServiceRouter);
   }
 
 
