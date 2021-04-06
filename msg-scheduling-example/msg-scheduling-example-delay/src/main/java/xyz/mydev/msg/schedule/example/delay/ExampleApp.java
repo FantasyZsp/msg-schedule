@@ -1,4 +1,4 @@
-package xyz.mydev.msg.schedule;
+package xyz.mydev.msg.schedule.example.delay;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
