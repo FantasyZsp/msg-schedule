@@ -1,4 +1,4 @@
-package xyz.mydev.msg.schedule.autoconfig;
+package xyz.mydev.msg.schedule.autoconfigure;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -26,6 +26,7 @@ public class MessageRepositoryConfiguration {
   public MessageRepositoryRouter messageRepositoryRouter() {
     DefaultMessageRepositoryRouter router = new DefaultMessageRepositoryRouter();
     provider.ifAvailable(repository -> router.put(repository.getTableName(), repository));
+    router.init();
     return router;
   }
 

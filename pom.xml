@@ -11,7 +11,7 @@
     <module>msg-scheduling-example</module>
     <module>msg-scheduling-mq</module>
     <module>msg-scheduling-port</module>
-    <module>msg-scheduling-autoconfig</module>
+    <module>msg-scheduling-autoconfigure</module>
   </modules>
 
 

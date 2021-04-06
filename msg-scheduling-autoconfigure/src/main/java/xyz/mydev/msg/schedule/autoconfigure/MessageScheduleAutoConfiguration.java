@@ -1,4 +1,4 @@
-package xyz.mydev.msg.schedule.autoconfig;
+package xyz.mydev.msg.schedule.autoconfigure;
 
 import com.sishu.redis.lock.annotation.RedisLockAnnotationSupportAutoConfig;
 import org.redisson.api.RedissonClient;
@@ -25,7 +25,7 @@ import xyz.mydev.msg.schedule.MessageStoreEventPublisher;
 import xyz.mydev.msg.schedule.MessageStoreService;
 import xyz.mydev.msg.schedule.ScheduledTableRegistry;
 import xyz.mydev.msg.schedule.TableScheduleProperties;
-import xyz.mydev.msg.schedule.autoconfig.properties.SchedulerProperties;
+import xyz.mydev.msg.schedule.autoconfigure.properties.SchedulerProperties;
 import xyz.mydev.msg.schedule.bean.DelayMessage;
 import xyz.mydev.msg.schedule.bean.InstantMessage;
 import xyz.mydev.msg.schedule.bean.StringMessage;
