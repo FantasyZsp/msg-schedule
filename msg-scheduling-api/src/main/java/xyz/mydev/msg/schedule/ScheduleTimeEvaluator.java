@@ -32,7 +32,7 @@ public class ScheduleTimeEvaluator {
     return TimeIntervalCorrector.intervalSequenceNo(snapshotTime, getTableLoadIntervalMinutes(tableName));
   }
 
-  public static boolean shouldPutDirect(LocalDateTime taskExecuteTime, String tableName) {
+  public static boolean shouldPutNow(LocalDateTime taskExecuteTime, String tableName) {
     TableScheduleProperties tableProperties = ScheduledTableRegistry.getTableProperties(tableName);
     if (!tableProperties.getIsDelay()) {
       return true;

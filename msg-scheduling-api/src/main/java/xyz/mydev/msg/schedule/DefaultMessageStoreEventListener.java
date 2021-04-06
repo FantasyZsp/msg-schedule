@@ -1,6 +1,7 @@
 package xyz.mydev.msg.schedule;
 
 import lombok.extern.slf4j.Slf4j;
+import xyz.mydev.msg.schedule.bean.DelayMessage;
 import xyz.mydev.msg.schedule.bean.SerializableMessage;
 import xyz.mydev.msg.schedule.port.Porter;
 import xyz.mydev.msg.schedule.port.route.PorterRouter;
@@ -23,10 +24,23 @@ public class DefaultMessageStoreEventListener<T extends SerializableMessage<? ex
   public void onEvent(T message) {
     String targetTableName = message.getTargetTableName();
     Porter<T> porter = router.get(targetTableName);
-    if (porter != null) {
-      porter.transfer(message);
-    } else {
+    if (porter == null) {
       log.error("porter 404 for {}, please check config", targetTableName);
+      return;
+    }
+    transferIfPossible(message, porter);
+  }
+
+  private void transferIfPossible(T message, Porter<T> porter) {
+    if (message instanceof DelayMessage) {
+      DelayMessage delayMessage = (DelayMessage) message;
+      if (ScheduleTimeEvaluator.shouldPutNow(delayMessage.getTime(), delayMessage.getTargetTableName())) {
+        porter.transfer(message);
+      } else {
+        log.warn("delayMessage time at {}, need not to publish now", ((DelayMessage) message).getTime());
+      }
+    } else {
+      porter.transfer(message);
     }
   }
 }

@@ -25,6 +25,9 @@ public class ScheduledTableRegistry implements Iterable<ScheduledTableRegistry.T
   public static final int REGISTER_WAY_YML = 2;
 
 
+  /**
+   * tableName -> TableSchedulePropertiesWrapper
+   */
   private static final Map<String, TableSchedulePropertiesWrapper> REGISTRY = new ConcurrentHashMap<>();
 
   public static void registerTableByConfig(String tableName, TableScheduleProperties tableScheduleProperties) {

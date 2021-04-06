@@ -4,6 +4,7 @@ import xyz.mydev.msg.schedule.TableScheduleProperties;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -69,7 +70,7 @@ public interface Porter<E> {
 
 
   default void init() {
-    getTableScheduleProperties().validate();
+    Objects.requireNonNull(getTableScheduleProperties()).validate();
   }
 
   void shutdown();

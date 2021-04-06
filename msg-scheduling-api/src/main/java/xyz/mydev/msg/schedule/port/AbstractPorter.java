@@ -5,6 +5,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.schedule.TableScheduleProperties;
 
+import java.util.Objects;
+
 /**
  * 消息搬运工
  * 负责消息的投递
@@ -89,7 +91,7 @@ public abstract class AbstractPorter<E> extends Thread implements Porter<E> {
 
   @Override
   public void init() {
-    getTableScheduleProperties().validate();
+    Objects.requireNonNull(getTableScheduleProperties()).validate();
     Runtime.getRuntime().addShutdownHook((new Thread(AbstractPorter.this::shutdown)));
   }
 
