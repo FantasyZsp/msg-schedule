@@ -15,7 +15,7 @@
   <dependencies>
     <dependency>
       <groupId>xyz.mydev</groupId>
-      <artifactId>msg-scheduling-autoconfig</artifactId>
+      <artifactId>msg-scheduling-autoconfigure</artifactId>
       <version>${revision}</version>
     </dependency>
   </dependencies>

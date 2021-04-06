@@ -71,12 +71,17 @@ public class DefaultRocketMqProducer implements MqProducer, InitializingBean {
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    this.producer = new TransactionMQProducer(rocketMQProperties.getProducer().getGroup());
+    this.producer = new TransactionMQProducer(rocketMQProperties.getProducer().getGroup() + "-tx");
     this.producer.setTransactionListener(transactionMessageListener);
     this.producer.setNamesrvAddr(rocketMQProperties.getNameServer());
   }
 
-  private void startProducer() throws MQClientException {
+  @Override
+  public void shutdown() {
+    producer.shutdown();
+  }
+
+  protected void startProducer() throws MQClientException {
     int count = Math.min(Runtime.getRuntime().availableProcessors() / 2, 4);
     ExecutorService executorService =
       new ThreadPoolExecutor(count, count + 1, 30, TimeUnit.MINUTES,
@@ -90,7 +95,12 @@ public class DefaultRocketMqProducer implements MqProducer, InitializingBean {
     producer.start();
   }
 
-  public void start() throws Exception {
-    startProducer();
+  @Override
+  public void start() {
+    try {
+      startProducer();
+    } catch (MQClientException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

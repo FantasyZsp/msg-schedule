@@ -15,4 +15,8 @@ public interface MqProducer {
    */
   Object sendWithTx(Message message);
 
+  void start();
+
+  void shutdown();
+
 }

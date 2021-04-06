@@ -32,7 +32,7 @@ public class RocketMqAutoConfiguration {
     this.rocketMQProperties = rocketMqProperties;
   }
 
-  @Bean
+  @Bean(initMethod = "start", destroyMethod = "shutdown")
   @ConditionalOnMissingBean(MqProducer.class)
   public MqProducer mqProducer(TransactionMessageListenerImpl transactionMessageListener) {
     return new DefaultRocketMqProducer(transactionMessageListener, rocketMQProperties);
