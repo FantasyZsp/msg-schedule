@@ -1,4 +1,7 @@
-package xyz.mydev.msg.schedule.example.delay.repository;
+package xyz.mydev.msg.schedule.example.delay.repository.impl;
+
+import xyz.mydev.msg.schedule.example.delay.repository.LocalDelayMessage;
+import xyz.mydev.msg.schedule.example.delay.repository.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;

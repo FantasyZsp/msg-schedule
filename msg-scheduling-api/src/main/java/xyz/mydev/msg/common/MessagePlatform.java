@@ -8,7 +8,7 @@ package xyz.mydev.msg.common;
  */
 public interface MessagePlatform extends MessageTag {
 
-  int getPlatform();
+  Integer getPlatform();
 
   String getPlatformMsgId();
 

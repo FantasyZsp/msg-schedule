@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @ToString
 public class LocalDelayMessage implements DelayMessage {
 
-  public static final String TARGET_TABLE_NAME = "local_delay_message";
+  public static final String TARGET_TABLE_NAME = LocalDelayMessage.class.getSimpleName();
 
   private String id;
   private String topic;

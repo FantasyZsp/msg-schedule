@@ -1,5 +1,6 @@
 package xyz.mydev.msg.schedule.example.delay.repository;
 
+import xyz.mydev.msg.schedule.example.delay.repository.impl.LocalDelayMessageDao;
 import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
 
 import java.time.LocalDateTime;

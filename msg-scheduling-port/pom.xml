@@ -20,7 +20,7 @@
 
     <!-- redis lock -->
     <dependency>
-      <groupId>com.sishu</groupId>
+      <groupId>xyz.mydev</groupId>
       <artifactId>redis-lock-starter</artifactId>
       <version>${redis_lock_version}</version>
     </dependency>

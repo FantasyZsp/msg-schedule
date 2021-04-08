@@ -1,6 +1,5 @@
 package xyz.mydev.msg.schedule.autoconfigure;
 
-import com.sishu.redis.lock.annotation.RedisLockAnnotationSupportAutoConfig;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +49,7 @@ import xyz.mydev.msg.schedule.port.DefaultInstantMessageTransferTaskFactory;
 import xyz.mydev.msg.schedule.port.Porter;
 import xyz.mydev.msg.schedule.port.route.DefaultMessagePorterRouter;
 import xyz.mydev.msg.schedule.port.route.PorterRouter;
+import xyz.mydev.redis.lock.annotation.RedisLockAnnotationSupportAutoConfig;
 
 import java.util.HashSet;
 import java.util.Map;

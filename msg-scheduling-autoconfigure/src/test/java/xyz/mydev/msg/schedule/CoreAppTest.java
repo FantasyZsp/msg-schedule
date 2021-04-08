@@ -78,7 +78,7 @@ public class CoreAppTest {
     }
 
     @Override
-    public int getPlatform() {
+    public Integer getPlatform() {
       return 0;
     }
 
@@ -146,7 +146,7 @@ public class CoreAppTest {
     }
 
     @Override
-    public int getPlatform() {
+    public Integer getPlatform() {
       return 0;
     }
 
