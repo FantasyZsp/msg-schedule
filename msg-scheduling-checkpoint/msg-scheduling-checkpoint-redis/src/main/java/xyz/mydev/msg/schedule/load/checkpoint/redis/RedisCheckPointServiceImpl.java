@@ -111,7 +111,7 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
    * @author ZSP
    */
   public static String getWriteLockName(String targetTableName) {
-    return "rcpwl:" + targetTableName;
+    return "cpwl:" + targetTableName;
   }
 
   /**
@@ -120,7 +120,7 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
    * @author ZSP
    */
   public static String getScheduleLockName(String targetTableName) {
-    return "rcpsl:" + targetTableName;
+    return "cpsl:" + targetTableName;
   }
 
   /**
@@ -129,7 +129,7 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
    * @author ZSP
    */
   public static String getCpHolderName(String targetTableName) {
-    return "rcph:" + targetTableName;
+    return "checkpoint:" + targetTableName;
   }
 
 

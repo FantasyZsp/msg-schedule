@@ -74,7 +74,7 @@ public class RedisDelayTransferQueue<E extends DelayMessage> implements Transfer
   }
 
   public RedisDelayTransferQueue(RedissonClient redissonClient, String targetTableName) {
-    this(redissonClient, "tq:" + targetTableName, "dstk");
+    this(redissonClient, "trans:" + targetTableName, "cache");
   }
 
 

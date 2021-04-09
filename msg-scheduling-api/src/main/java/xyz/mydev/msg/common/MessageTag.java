@@ -5,4 +5,6 @@ package xyz.mydev.msg.common;
  */
 public interface MessageTag {
   String getTag();
+
+  void setTag(String tag);
 }

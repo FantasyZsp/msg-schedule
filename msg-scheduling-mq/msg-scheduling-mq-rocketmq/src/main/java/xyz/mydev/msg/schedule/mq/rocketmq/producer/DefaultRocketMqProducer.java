@@ -43,7 +43,7 @@ public class DefaultRocketMqProducer implements MqProducer, InitializingBean {
     try {
       sendResult = this.producer.sendMessageInTransaction(message, message.getProperty(Constants.MsgPropertiesKey.BUSINESS_ID));
     } catch (Exception e) {
-      log.error("msg send error: {} ,error info: [{}]", message, e);
+      log.error("msg send error: {} ,error info:", message, e);
     }
 
     log.info("msg send result: [{}] ", sendResult);
@@ -97,10 +97,13 @@ public class DefaultRocketMqProducer implements MqProducer, InitializingBean {
 
   @Override
   public void start() {
+    log.info("DefaultRocketMqProducer starting...");
     try {
       startProducer();
     } catch (MQClientException e) {
       throw new RuntimeException(e);
     }
+    log.info("DefaultRocketMqProducer started");
+
   }
 }

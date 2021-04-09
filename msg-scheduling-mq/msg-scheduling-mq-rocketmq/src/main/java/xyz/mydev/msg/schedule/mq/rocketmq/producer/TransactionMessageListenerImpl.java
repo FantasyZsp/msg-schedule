@@ -8,12 +8,12 @@ import org.apache.rocketmq.client.producer.TransactionListener;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import xyz.mydev.msg.common.Constants;
 import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
-import xyz.mydev.msg.schedule.mq.error.record.MqMessageErrorRecord;
+import xyz.mydev.msg.schedule.mq.error.record.ErrorMessage;
 import xyz.mydev.msg.schedule.mq.error.record.MsgSendErrorCodeEnum;
-import xyz.mydev.msg.schedule.mq.error.record.RocketMqMsgSendFailureHandler;
 
 /**
  * @author zhaosp
@@ -23,12 +23,12 @@ import xyz.mydev.msg.schedule.mq.error.record.RocketMqMsgSendFailureHandler;
 public class TransactionMessageListenerImpl implements TransactionListener {
 
   private final MessageRepositoryRouter messageRepositoryRouter;
-  private final RocketMqMsgSendFailureHandler rocketMqMsgSendFailureHandler;
+  private final RocketMqSendFailureHandler rocketMqSendFailureHandler;
 
   public TransactionMessageListenerImpl(MessageRepositoryRouter messageRepositoryRouter,
-                                        RocketMqMsgSendFailureHandler rocketMqMsgSendFailureHandler) {
+                                        RocketMqSendFailureHandler rocketMqSendFailureHandler) {
     this.messageRepositoryRouter = messageRepositoryRouter;
-    this.rocketMqMsgSendFailureHandler = rocketMqMsgSendFailureHandler;
+    this.rocketMqSendFailureHandler = rocketMqSendFailureHandler;
   }
 
   /**
@@ -51,6 +51,7 @@ public class TransactionMessageListenerImpl implements TransactionListener {
    * @param businessId 透传业务id
    */
   @Override
+  @Transactional
   public LocalTransactionState executeLocalTransaction(Message msg, Object businessId) {
     log.info("executing LocalTransaction, msgKey [{}] topic [{}] , businessId [{}]------------", msg.getKeys(), msg.getTopic(), businessId);
 
@@ -63,10 +64,10 @@ public class TransactionMessageListenerImpl implements TransactionListener {
       }
 
       recordSendFailureAndRemoveCacheQuietly(msg.getTopic(), msg.getKeys(),
-        MqMessageErrorRecord.MATCHED,
+        ErrorMessage.MATCHED,
         null,
         msg.getProperty(Constants.MsgPropertiesKey.BUSINESS_ID),
-        0, 0,
+        0,
         MsgSendErrorCodeEnum.EXECUTE_LOCAL_TX.getDescription(),
         MsgSendErrorCodeEnum.EXECUTE_LOCAL_TX.getCode());
       return LocalTransactionState.ROLLBACK_MESSAGE;
@@ -115,11 +116,10 @@ public class TransactionMessageListenerImpl implements TransactionListener {
 
           recordSendFailureAndRemoveCacheQuietly(msg.getTopic(),
             msg.getKeys(),
-            MqMessageErrorRecord.NOT_MATCHED,
+            ErrorMessage.NOT_MATCHED,
             msg.getMsgId(),
             msg.getProperty(Constants.MsgPropertiesKey.BUSINESS_ID),
             checkTimes,
-            0,
             MsgSendErrorCodeEnum.CHECK_LOCAL_TX_MAX_RETRY_NO_MSG.getDescription(),
             MsgSendErrorCodeEnum.CHECK_LOCAL_TX_MAX_RETRY_NO_MSG.getCode());
 
@@ -128,11 +128,10 @@ public class TransactionMessageListenerImpl implements TransactionListener {
           messageRepositoryRouter.get(tableName).updateStatus(msgIdInDb, Constants.MessageStatus.SEND_ERROR);
           recordSendFailureAndRemoveCacheQuietly(msg.getTopic(),
             msg.getKeys(),
-            MqMessageErrorRecord.MATCHED,
+            ErrorMessage.MATCHED,
             msg.getMsgId(),
             msg.getProperty(Constants.MsgPropertiesKey.BUSINESS_ID),
             checkTimes,
-            0,
             MsgSendErrorCodeEnum.CHECK_LOCAL_TX_MAX_RETRY.getDescription(),
             MsgSendErrorCodeEnum.CHECK_LOCAL_TX_MAX_RETRY.getCode());
         }
@@ -152,21 +151,20 @@ public class TransactionMessageListenerImpl implements TransactionListener {
    * 记录失败的消息
    * 删除计数缓存
    *
-   * @param mqPlatformMsgId 当执行本地事务时，总是拿不到。回查时才会有
-   * @param matched         回查时查不到主表消息时，就是没匹配到
+   * @param platformMsgId 当执行本地事务时，总是拿不到。回查时才会有
+   * @param matched       回查时查不到主表消息时，就是没匹配到
    */
   private void recordSendFailureAndRemoveCacheQuietly(String topic,
                                                       String idInMsgDb,
                                                       int matched,
-                                                      String mqPlatformMsgId,
+                                                      String platformMsgId,
                                                       String businessId,
                                                       int retryTimes,
-                                                      int retryTimesWhenFailed,
                                                       String errorReason,
                                                       int errorCode) {
     try {
 
-      rocketMqMsgSendFailureHandler.recordSendFailure(topic, idInMsgDb, matched, mqPlatformMsgId, businessId, retryTimes, retryTimesWhenFailed, errorReason, errorCode);
+      rocketMqSendFailureHandler.recordSendFailure(topic, idInMsgDb, matched, platformMsgId, businessId, retryTimes, errorReason, errorCode);
 
     } catch (Throwable ignoredEx) {
 

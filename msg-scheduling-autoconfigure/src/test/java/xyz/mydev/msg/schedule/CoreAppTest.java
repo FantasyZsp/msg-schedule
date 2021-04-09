@@ -11,8 +11,8 @@ import xyz.mydev.msg.schedule.bean.StringMessage;
 import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.DefaultMessageRepositoryRouter;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
-import xyz.mydev.msg.schedule.mq.error.record.MqMessageErrorRecord;
-import xyz.mydev.msg.schedule.mq.error.record.MqMessageErrorRecordDao;
+import xyz.mydev.msg.schedule.mq.error.record.ErrorMessage;
+import xyz.mydev.msg.schedule.mq.error.record.ErrorMessageRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,15 +34,10 @@ public class CoreAppTest {
   }
 
   @Bean
-  public static MqMessageErrorRecordDao test() {
-    return new MqMessageErrorRecordDao() {
+  public static ErrorMessageRepository test() {
+    return new ErrorMessageRepository() {
       @Override
-      public int deleteByPrimaryKey(String id) {
-        return 0;
-      }
-
-      @Override
-      public int insert(MqMessageErrorRecord record) {
+      public int insert(ErrorMessage record) {
         return 0;
       }
     };
@@ -68,8 +63,18 @@ public class CoreAppTest {
     }
 
     @Override
+    public void setTraceId(String traceId) {
+
+    }
+
+    @Override
     public String getTraceVersion() {
       return null;
+    }
+
+    @Override
+    public void setTraceVersion(String traceVersion) {
+
     }
 
     @Override
@@ -83,8 +88,18 @@ public class CoreAppTest {
     }
 
     @Override
+    public void setPlatform(Integer platform) {
+
+    }
+
+    @Override
     public String getPlatformMsgId() {
       return null;
+    }
+
+    @Override
+    public void setPlatformMsgId(String platformMsgId) {
+
     }
 
     @Override
@@ -93,8 +108,18 @@ public class CoreAppTest {
     }
 
     @Override
+    public void setTag(String tag) {
+
+    }
+
+    @Override
     public String getId() {
       return null;
+    }
+
+    @Override
+    public void setId(String id) {
+
     }
 
     @Override
@@ -103,13 +128,28 @@ public class CoreAppTest {
     }
 
     @Override
+    public void setTopic(String topic) {
+
+    }
+
+    @Override
     public String getPayload() {
       return null;
     }
 
     @Override
+    public void setPayload(String payload) {
+
+    }
+
+    @Override
     public Integer getStatus() {
       return null;
+    }
+
+    @Override
+    public void setStatus(Integer status) {
+
     }
 
     @Override
@@ -136,8 +176,18 @@ public class CoreAppTest {
     }
 
     @Override
+    public void setTraceId(String traceId) {
+
+    }
+
+    @Override
     public String getTraceVersion() {
       return null;
+    }
+
+    @Override
+    public void setTraceVersion(String traceVersion) {
+
     }
 
     @Override
@@ -151,8 +201,18 @@ public class CoreAppTest {
     }
 
     @Override
+    public void setPlatform(Integer platform) {
+
+    }
+
+    @Override
     public String getPlatformMsgId() {
       return null;
+    }
+
+    @Override
+    public void setPlatformMsgId(String platformMsgId) {
+
     }
 
     @Override
@@ -161,8 +221,18 @@ public class CoreAppTest {
     }
 
     @Override
+    public void setTag(String tag) {
+
+    }
+
+    @Override
     public String getId() {
       return null;
+    }
+
+    @Override
+    public void setId(String id) {
+
     }
 
     @Override
@@ -171,13 +241,28 @@ public class CoreAppTest {
     }
 
     @Override
+    public void setTopic(String topic) {
+
+    }
+
+    @Override
     public String getPayload() {
       return null;
     }
 
     @Override
+    public void setPayload(String payload) {
+
+    }
+
+    @Override
     public Integer getStatus() {
       return null;
+    }
+
+    @Override
+    public void setStatus(Integer status) {
+
     }
 
     @Override

@@ -1,6 +1,5 @@
 package xyz.mydev.msg.schedule.autoconfigure;
 
-import com.sishu.redis.lock.util.ThreadUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +10,7 @@ import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryR
 import xyz.mydev.msg.schedule.load.MessageLoader;
 import xyz.mydev.msg.schedule.mq.producer.MqProducer;
 import xyz.mydev.msg.schedule.port.route.PorterRouter;
+import xyz.mydev.redis.lock.util.ThreadUtils;
 
 /**
  * @author ZSP

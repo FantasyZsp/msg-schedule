@@ -24,11 +24,17 @@ public class DefaultDelayMessagePortTaskFactory implements PortTaskFactory<Delay
   public @NotNull Runnable newTask(DelayMessage delayMessage) {
     return () -> {
       Object transactionSendResult = mqProducer.sendWithTx(delayMessage);
-      boolean remove = transferQueue.remove(delayMessage);
-      log.info("send success, remove msg. msgId [{}] transactionSendResult {}", delayMessage.getId(), transactionSendResult);
-      if (!remove) {
-        log.warn("remove false , maybe already not exists");
+
+      if (transactionSendResult != null) {
+        boolean remove = transferQueue.remove(delayMessage);
+        log.info("send success, remove msg. msgId [{}] transactionSendResult {}", delayMessage.getId(), transactionSendResult);
+        if (!remove) {
+          log.warn("remove false , maybe already not exists");
+        }
+      } else {
+        log.error("send error, waiter for retry id {}", delayMessage.getId());
       }
+
     };
   }
 }

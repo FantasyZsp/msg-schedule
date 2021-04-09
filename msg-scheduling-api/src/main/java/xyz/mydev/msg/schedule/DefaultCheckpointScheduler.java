@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 定时维护检查点
+ * TODO 与调度联动
  *
  * @author ZSP
  */

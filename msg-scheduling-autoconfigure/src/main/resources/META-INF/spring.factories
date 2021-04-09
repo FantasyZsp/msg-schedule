@@ -1,1 +1,3 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=xyz.mydev.msg.schedule.autoconfigure.MessageRepositoryConfiguration,xyz.mydev.msg.schedule.autoconfigure.MessageScheduleAutoConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=xyz.mydev.msg.schedule.autoconfigure.RedissonClientCodecConfiguration,\
+  xyz.mydev.msg.schedule.autoconfigure.MessageRepositoryConfiguration,\
+  xyz.mydev.msg.schedule.autoconfigure.MessageScheduleAutoConfiguration

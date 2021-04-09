@@ -1,10 +1,12 @@
-package xyz.mydev.msg.schedule.mq.error.record;
+package xyz.mydev.msg.schedule.mq.rocketmq.producer;
 
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import xyz.mydev.msg.common.Constants;
 import xyz.mydev.msg.schedule.IdGenerator;
+import xyz.mydev.msg.schedule.mq.error.record.ErrorMessage;
+import xyz.mydev.msg.schedule.mq.error.record.ErrorMessageRepository;
 
 import java.time.LocalDateTime;
 
@@ -25,13 +27,13 @@ import java.time.LocalDateTime;
  */
 @Slf4j
 @Component
-public class RocketMqMsgSendFailureHandler {
-  private final MqMessageErrorRecordService mqMessageErrorRecordService;
+public class RocketMqSendFailureHandler {
+  private final ErrorMessageRepository errorMessageRepository;
   private final IdGenerator idGenerator;
 
-  public RocketMqMsgSendFailureHandler(MqMessageErrorRecordService mqMessageErrorRecordService,
-                                       IdGenerator idGenerator) {
-    this.mqMessageErrorRecordService = mqMessageErrorRecordService;
+  public RocketMqSendFailureHandler(ErrorMessageRepository errorMessageRepository,
+                                    IdGenerator idGenerator) {
+    this.errorMessageRepository = errorMessageRepository;
     this.idGenerator = idGenerator;
   }
 
@@ -45,27 +47,25 @@ public class RocketMqMsgSendFailureHandler {
                                 String mqPlatformMsgId,
                                 String businessId,
                                 int retryTimes,
-                                int retryTimesWhenFailed,
                                 String errorReason,
                                 int errorCode) {
 
     int mqPlatForm = Constants.MqPlatform.ROCKETMQ;
-    MqMessageErrorRecord errorRecord = MqMessageErrorRecord.builder()
+    ErrorMessage errorRecord = ErrorMessage.builder()
       .id(idGenerator.get())
       // 消息表总会把主键放在RocketMq的Message中。除非消息本身不存储在消息表。
       .msgId(idInMsgDb)
       .matched(matched)
 
-      .channel(topic)
+      .topic(topic)
 
-      .mqPlatform(mqPlatForm)
-      .mqPlatformMsgId(mqPlatformMsgId)
+      .platform(mqPlatForm)
+      .platformMsgId(mqPlatformMsgId)
 
       .businessId(businessId)
-      .errorType(MqMessageErrorRecord.ERROR_TYPE_SEND)
+      .errorType(ErrorMessage.ERROR_TYPE_SEND)
 
       .retryTimes(retryTimes)
-      .retryTimesWhenFailed(retryTimesWhenFailed)
       .errorReason(errorReason)
       .errorCode(errorCode)
       .createdAt(LocalDateTime.now())
@@ -73,7 +73,7 @@ public class RocketMqMsgSendFailureHandler {
       .build();
 
     log.error("send error record id and reason: {}, {}", errorRecord.getId(), errorReason);
-    mqMessageErrorRecordService.save(errorRecord);
+    errorMessageRepository.insert(errorRecord);
 
 
   }

@@ -16,12 +16,12 @@ import java.time.LocalDateTime;
 @ToString
 public class LocalDelayMessage implements DelayMessage {
 
-  public static final String TARGET_TABLE_NAME = LocalDelayMessage.class.getSimpleName();
+  public static final String TARGET_TABLE_NAME = "localDelayMessage";
 
   private String id;
   private String topic;
   private String tag;
-  private Integer isTx;
+  private Integer isTx = 1;
   /**
    * {@link xyz.mydev.msg.common.Constants.MqPlatform}
    */
@@ -36,6 +36,7 @@ public class LocalDelayMessage implements DelayMessage {
   @Nullable
   private String traceVersion;
 
+  @Nullable
   private String businessId;
 
   private String payload;
@@ -52,7 +53,6 @@ public class LocalDelayMessage implements DelayMessage {
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 
-
   @Override
   public String getTargetTableName() {
     return TARGET_TABLE_NAME;
@@ -61,5 +61,22 @@ public class LocalDelayMessage implements DelayMessage {
   @Override
   public Boolean isTx() {
     return isTx != 0;
+  }
+
+  public static LocalDelayMessage of(String id, String topic, String tag, Integer isTx, String businessId, String payload, LocalDateTime time) {
+    LocalDelayMessage localDelayMessage = new LocalDelayMessage();
+    localDelayMessage.setId(id); // set by IdGenerator
+    localDelayMessage.setTopic(topic);
+    localDelayMessage.setTag(tag);
+    localDelayMessage.setIsTx(isTx);
+    localDelayMessage.setBusinessId(businessId);
+    localDelayMessage.setPayload(payload);
+    localDelayMessage.setTime(time);
+
+    LocalDateTime now = LocalDateTime.now();
+    localDelayMessage.setStatus(0); // default
+    localDelayMessage.setCreatedAt(now); // default
+    localDelayMessage.setUpdatedAt(now); // default
+    return localDelayMessage;
   }
 }

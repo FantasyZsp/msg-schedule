@@ -21,7 +21,11 @@ public class DefaultInstantMessageTransferTaskFactory implements TransferTaskFac
   public @NotNull Runnable newTask(InstantMessage instantMessage) {
     return () -> {
       Object transactionSendResult = mqProducer.sendWithTx(instantMessage);
-      log.info("send success, remove msg. msgId [{}] transactionSendResult {}", instantMessage.getId(), transactionSendResult);
+      if (transactionSendResult != null) {
+        log.info("send success, remove msg. msgId [{}] transactionSendResult {}", instantMessage.getId(), transactionSendResult);
+      } else {
+        log.error("send error, waiter for retry id {}", instantMessage.getId());
+      }
     };
   }
 }

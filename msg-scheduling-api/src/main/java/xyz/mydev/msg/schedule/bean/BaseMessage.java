@@ -12,28 +12,22 @@ public interface BaseMessage<T> extends MessageType {
 
   String getId();
 
+  void setId(String id);
+
   String getTopic();
+
+  void setTopic(String topic);
 
   T getPayload();
 
+  void setPayload(T payload);
+
   Integer getStatus();
+
+  void setStatus(Integer status);
 
   /**
    * 隶属的表名
    */
   String getTargetTableName();
-
-  /**
-   * 快照版本，一般用于写幂等
-   */
-  default Long getVersion() {
-    return 0L;
-  }
-
-  /**
-   * 消息设计版本，兼容不同版本消息使用。
-   */
-  default Integer getDesignedVersion() {
-    return 0;
-  }
 }
