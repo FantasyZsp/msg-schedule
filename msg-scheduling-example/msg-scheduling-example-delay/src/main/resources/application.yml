@@ -39,8 +39,8 @@ mybatis:
     map-underscore-to-camel-case: true
 logging:
   level:
-    root: info
-    xyz.mydev.msg.schedule.example.delay.repository.impl.LocalDelayMessageMapper: debug
+    root: error
+    xyz.mydev.msg.schedule.example.delay.repository.impl.LocalDelayMessageMapper: error
 
 spring:
   datasource:

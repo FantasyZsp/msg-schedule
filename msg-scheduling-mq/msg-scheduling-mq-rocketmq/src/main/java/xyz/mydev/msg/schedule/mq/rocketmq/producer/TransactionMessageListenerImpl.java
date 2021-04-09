@@ -8,6 +8,7 @@ import org.apache.rocketmq.client.producer.TransactionListener;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import xyz.mydev.msg.common.Constants;
 import xyz.mydev.msg.schedule.bean.StringMessage;
@@ -52,28 +53,28 @@ public class TransactionMessageListenerImpl implements TransactionListener {
    * @param businessId 透传业务id
    */
   @Override
-  @Transactional
+  @Transactional(isolation = Isolation.READ_COMMITTED)
   public LocalTransactionState executeLocalTransaction(Message msg, Object businessId) {
     log.info("executing LocalTransaction, msgKey [{}] topic [{}] , businessId [{}]------------", msg.getKeys(), msg.getTopic(), businessId);
 
     String tableName = msg.getProperty("tableName");
     MessageRepository<StringMessage> repository = messageRepositoryRouter.get(tableName);
 
-    StringMessage message = repository.selectById(msg.getKeys());
-    if (message == null) {
-      // should never happen, remove half msg
-      return LocalTransactionState.ROLLBACK_MESSAGE;
-    }
-
-    if (message.getStatus().equals(Constants.MessageStatus.SENT)) {
-      // maybe failover and schedule concurrently, remove half msg
-      return LocalTransactionState.ROLLBACK_MESSAGE;
-    }
-
 
     boolean success = repository.updateToSent(msg.getKeys());
 
     if (!success) {
+      StringMessage message = repository.selectById(msg.getKeys());
+      if (message == null) {
+        // should never happen, remove half msg
+        return LocalTransactionState.ROLLBACK_MESSAGE;
+      }
+
+      if (message.getStatus().equals(Constants.MessageStatus.SENT)) {
+        // maybe failover and schedule concurrently, remove half msg
+        return LocalTransactionState.ROLLBACK_MESSAGE;
+      }
+
       if (log.isDebugEnabled()) {
         log.debug("msg [{}] update status error, rollback message[{}] ", msg.getKeys(), new String(msg.getBody()));
       }
@@ -88,7 +89,7 @@ public class TransactionMessageListenerImpl implements TransactionListener {
       return LocalTransactionState.ROLLBACK_MESSAGE;
     }
 
-    log.info("submit msg: msgKey [{}] topic [{}]------------", msg.getKeys(), msg.getTopic());
+    log.debug("submit msg: msgKey [{}] topic [{}]------------", msg.getKeys(), msg.getTopic());
     return LocalTransactionState.COMMIT_MESSAGE;
   }
 

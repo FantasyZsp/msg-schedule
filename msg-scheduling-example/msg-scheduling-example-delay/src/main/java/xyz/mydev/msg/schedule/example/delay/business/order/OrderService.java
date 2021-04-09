@@ -25,6 +25,7 @@ public class OrderService {
 
   @Transactional
   public void saveAndSend(Order order) throws Exception {
+    order.setId(idGenerator.get());
     orderMapper.insert(order);
 
     String payload = JsonUtil.obj2String(order);

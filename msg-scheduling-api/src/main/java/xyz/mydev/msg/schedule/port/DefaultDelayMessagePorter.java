@@ -43,7 +43,7 @@ public class DefaultDelayMessagePorter extends AbstractPorter<DelayMessage> {
   public void initExecutor() {
     log.info("init porter executor");
     if (portExecutor == null) {
-      this.portExecutor = new ThreadPoolExecutor(2, 2, 1, TimeUnit.HOURS,
+      this.portExecutor = new ThreadPoolExecutor(4, 8, 1, TimeUnit.HOURS,
         new LinkedBlockingQueue<>(2000),
         new PrefixNameThreadFactory(getName() + "-port"),
         new CallerRunsPolicy(getTransferQueue().getTargetQueue())
@@ -51,7 +51,7 @@ public class DefaultDelayMessagePorter extends AbstractPorter<DelayMessage> {
     }
 
     if (transferExecutor == null) {
-      this.transferExecutor = new ThreadPoolExecutor(2, 2, 1, TimeUnit.HOURS,
+      this.transferExecutor = new ThreadPoolExecutor(4, 8, 1, TimeUnit.HOURS,
         new LinkedBlockingQueue<>(2000),
         new PrefixNameThreadFactory(getName() + "-trans"),
         new CallerRunsPolicy(getTransferQueue().getTargetQueue())
