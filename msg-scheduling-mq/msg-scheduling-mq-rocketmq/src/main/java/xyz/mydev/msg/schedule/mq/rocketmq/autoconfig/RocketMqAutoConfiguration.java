@@ -1,5 +1,6 @@
 package xyz.mydev.msg.schedule.mq.rocketmq.autoconfig;
 
+import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration;
 import org.apache.rocketmq.spring.autoconfigure.RocketMQProperties;
 import org.slf4j.Logger;
@@ -37,8 +38,8 @@ public class RocketMqAutoConfiguration {
 
   @Bean(initMethod = "start", destroyMethod = "shutdown")
   @ConditionalOnMissingBean(MqProducer.class)
-  public MqProducer mqProducer(TransactionMessageListenerImpl transactionMessageListener) {
-    return new DefaultRocketMqProducer(transactionMessageListener, rocketMQProperties);
+  public MqProducer mqProducer(TransactionMessageListenerImpl transactionMessageListener, DefaultMQProducer defaultMQProducer) {
+    return new DefaultRocketMqProducer(transactionMessageListener, defaultMQProducer, rocketMQProperties);
   }
 
   @Bean

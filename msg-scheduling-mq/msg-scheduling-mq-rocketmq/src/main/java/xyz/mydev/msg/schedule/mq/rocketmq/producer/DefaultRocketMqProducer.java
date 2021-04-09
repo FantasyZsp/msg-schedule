@@ -1,13 +1,14 @@
 package xyz.mydev.msg.schedule.mq.rocketmq.producer;
 
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.client.producer.TransactionSendResult;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.spring.autoconfigure.RocketMQProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import xyz.mydev.msg.common.Constants;
 import xyz.mydev.msg.schedule.mq.producer.MqProducer;
@@ -21,22 +22,22 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author ZSP
  */
-@Slf4j
 public class DefaultRocketMqProducer implements MqProducer, InitializingBean {
 
   private final RocketMQProperties rocketMQProperties;
-
-  @Getter
-  private TransactionMQProducer producer;
-  private final TransactionMessageListenerImpl transactionMessageListener;
+  private final TransactionMQProducer producer;
 
 
   public DefaultRocketMqProducer(TransactionMessageListenerImpl transactionMessageListener,
+                                 DefaultMQProducer defaultMQProducer,
                                  RocketMQProperties rocketMqProperties) {
-
-    this.transactionMessageListener = transactionMessageListener;
     this.rocketMQProperties = rocketMqProperties;
+
+    this.producer = (TransactionMQProducer) defaultMQProducer;
+    this.producer.setTransactionListener(transactionMessageListener);
   }
+
+  private final static Logger log = LoggerFactory.getLogger(DefaultRocketMqProducer.class);
 
   private TransactionSendResult sendMessage(Message message) {
     TransactionSendResult sendResult = null;
@@ -71,9 +72,6 @@ public class DefaultRocketMqProducer implements MqProducer, InitializingBean {
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    this.producer = new TransactionMQProducer(rocketMQProperties.getProducer().getGroup() + "-tx");
-    this.producer.setTransactionListener(transactionMessageListener);
-    this.producer.setNamesrvAddr(rocketMQProperties.getNameServer());
   }
 
   @Override
@@ -92,7 +90,7 @@ public class DefaultRocketMqProducer implements MqProducer, InitializingBean {
           return thread;
         });
     this.producer.setExecutorService(executorService);
-    producer.start();
+    // do not start producer because rocketMQTemplate will start it
   }
 
   @Override

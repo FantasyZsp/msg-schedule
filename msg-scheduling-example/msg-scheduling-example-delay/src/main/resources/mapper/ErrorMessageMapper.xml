@@ -11,10 +11,10 @@
                               created_at)
     values (#{id}, #{msgId}, #{topic}, #{matched}, #{platform}, #{platformMsgId},
             #{businessId},
-            #{error_type},
-            #{retry_times},
-            #{error_reason},
-            #{error_code},
+            #{errorType},
+            #{retryTimes},
+            #{errorReason},
+            #{errorCode},
             #{createdAt})
   </insert>
 

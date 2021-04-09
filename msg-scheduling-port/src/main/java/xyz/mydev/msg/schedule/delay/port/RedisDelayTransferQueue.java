@@ -141,7 +141,7 @@ public class RedisDelayTransferQueue<E extends DelayMessage> implements Transfer
   public void start() {
     E e;
     while ((e = consumingQueue.pollLastAndOfferFirstTo(readyQueue.getName())) != null) {
-      log.info("transfer {}", e);
+      log.info("transfer [{}] when start", e.getId());
     }
     log.info("failover finish");
   }

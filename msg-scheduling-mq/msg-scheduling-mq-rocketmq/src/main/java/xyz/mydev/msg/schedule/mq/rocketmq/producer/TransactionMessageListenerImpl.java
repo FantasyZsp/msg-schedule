@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import xyz.mydev.msg.common.Constants;
 import xyz.mydev.msg.schedule.bean.StringMessage;
+import xyz.mydev.msg.schedule.infrastruction.repository.MessageRepository;
 import xyz.mydev.msg.schedule.infrastruction.repository.route.MessageRepositoryRouter;
 import xyz.mydev.msg.schedule.mq.error.record.ErrorMessage;
 import xyz.mydev.msg.schedule.mq.error.record.MsgSendErrorCodeEnum;
@@ -56,7 +57,21 @@ public class TransactionMessageListenerImpl implements TransactionListener {
     log.info("executing LocalTransaction, msgKey [{}] topic [{}] , businessId [{}]------------", msg.getKeys(), msg.getTopic(), businessId);
 
     String tableName = msg.getProperty("tableName");
-    boolean success = messageRepositoryRouter.get(tableName).updateToSent(msg.getKeys());
+    MessageRepository<StringMessage> repository = messageRepositoryRouter.get(tableName);
+
+    StringMessage message = repository.selectById(msg.getKeys());
+    if (message == null) {
+      // should never happen, remove half msg
+      return LocalTransactionState.ROLLBACK_MESSAGE;
+    }
+
+    if (message.getStatus().equals(Constants.MessageStatus.SENT)) {
+      // maybe failover and schedule concurrently, remove half msg
+      return LocalTransactionState.ROLLBACK_MESSAGE;
+    }
+
+
+    boolean success = repository.updateToSent(msg.getKeys());
 
     if (!success) {
       if (log.isDebugEnabled()) {

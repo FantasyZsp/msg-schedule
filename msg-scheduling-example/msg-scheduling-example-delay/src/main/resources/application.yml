@@ -24,7 +24,8 @@ msg-schedule:
 rocketmq:
   name-server: "local-vm:9876"
   producer:
-    group: msg-schedule-pg
+    group: msg-schedule-pg-tx
+    sendMessageTimeout: 100000
 redis-lock:
   enable: true
 redisson:
