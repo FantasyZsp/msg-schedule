@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * TODO 提供自动实现机制，类似mybatis-plus baseMapper
+ *
  * @author ZSP
  */
 @Repository
@@ -20,6 +22,9 @@ public class LocalDelayMessageRepository implements MessageRepository<LocalDelay
     this.localDelayMessageMapper = localDelayMessageMapper;
   }
 
+  /**
+   * TODO 内置化这个实现，防止人为配置总出错
+   */
   @Override
   public String getTableName() {
     return LocalDelayMessage.TARGET_TABLE_NAME;

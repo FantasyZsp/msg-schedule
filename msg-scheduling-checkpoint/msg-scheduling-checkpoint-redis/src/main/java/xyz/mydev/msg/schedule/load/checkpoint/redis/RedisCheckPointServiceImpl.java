@@ -73,7 +73,7 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
     Set<String> scheduledTables = messageRepositoryRouter.getScheduledTables();
     Collection<String> subtract = CollectionUtils.subtract(tableNames, scheduledTables);
     if (!subtract.isEmpty()) {
-      throw new IllegalArgumentException("there are some RedisCheckPointServiceImpl tables cannot find repository, as " + subtract);
+      throw new IllegalStateException("there are some RedisCheckPointServiceImpl tables cannot find repository, as " + subtract);
     }
     initCpHolderPool();
     initWriteLockPool();

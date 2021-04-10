@@ -17,6 +17,9 @@ public class DefaultCheckpointServiceRouter implements CheckpointServiceRouter {
    */
   private final Map<String, CheckpointService> holder = new ConcurrentHashMap<>();
 
+  /**
+   * TODO 重复处理  抛错？ 优先级覆盖？
+   */
   @Override
   public void put(CheckpointService checkpointService) {
     for (String tableName : checkpointService.getTableNames()) {

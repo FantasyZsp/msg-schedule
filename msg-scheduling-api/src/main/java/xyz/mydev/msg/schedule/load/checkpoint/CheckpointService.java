@@ -21,6 +21,7 @@ public interface CheckpointService extends BaseCheckpointService<String, LocalDa
 
   /**
    * 检查必要的组件是否完备
+   * 初始化内部组件
    */
   void init();
 

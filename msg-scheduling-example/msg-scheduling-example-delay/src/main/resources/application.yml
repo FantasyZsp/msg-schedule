@@ -21,6 +21,11 @@ msg-schedule:
             checkpoint-interval: 15 # 15分钟维护一次
             load-interval: 30 # 30分钟调度一次；对于延时消息，预加载30分钟的内容或检查点到格式化时间的内容；对于事务消息，前置检查30分钟的消息或检查点到当前时间
             table-entity-class: xyz.mydev.msg.schedule.example.delay.repository.LocalDelayMessage
+        instant:
+          localInstantMessage: # 消息表名,，仓储层将实现接口与此对应(不一定就是db表名，仅为了区分)
+            checkpoint-interval: 5
+            load-interval: 5
+            table-entity-class: xyz.mydev.msg.schedule.example.delay.repository.LocalInstantMessage
 rocketmq:
   name-server: "local-vm:9876"
   producer:
@@ -39,8 +44,8 @@ mybatis:
     map-underscore-to-camel-case: true
 logging:
   level:
-    root: error
-    xyz.mydev.msg.schedule.example.delay.repository.impl.LocalDelayMessageMapper: error
+    root: info
+#    xyz.mydev.msg.schedule.example.delay.repository.impl.LocalDelayMessageMapper: error
 
 spring:
   datasource:

@@ -104,8 +104,8 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
   @ConditionalOnMissingBean
   public CheckpointServiceRouter checkpointServiceRouter() {
     DefaultCheckpointServiceRouter router = new DefaultCheckpointServiceRouter();
-    // put user custom
-    checkpointServiceObjectProvider.ifAvailable(cp -> {
+    // put user custom cpService
+    checkpointServiceObjectProvider.forEach(cp -> {
       if (CollectionUtils.isEmpty(cp.getTableNames())) {
         throw new IllegalArgumentException("user custom cp tableNames must not be empty");
       }
@@ -113,7 +113,7 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
     });
 
     Set<String> tableFromPorter = new HashSet<>();
-    porterObjectProvider.ifAvailable(porter ->
+    porterObjectProvider.forEach(porter ->
       tableFromPorter.add(porter.getTargetTableName()));
 
     // put default for remaining 1.配置 2.porter
@@ -145,7 +145,7 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
   public PorterRouter messagePorterRouter() {
     DefaultMessagePorterRouter router = new DefaultMessagePorterRouter();
     // put user custom
-    porterObjectProvider.ifAvailable(porter -> {
+    porterObjectProvider.forEach(porter -> {
       TableScheduleProperties properties = porter.getTableScheduleProperties();
       if (properties == null) {
         throw new IllegalStateException("customized porter's tableScheduleProperties must be not null");
@@ -156,8 +156,7 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
     });
 
     registerPorterByYml(router);
-    log.debug("DefaultMessagePorterRouter init result: {}", router);
-
+    log.info("DefaultMessagePorterRouter init result: {}", router);
     return router;
   }
 
@@ -168,7 +167,7 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
     return new DefaultCheckpointScheduler(checkpointServiceRouter);
   }
 
-  @Bean(initMethod = "start")
+  @Bean(initMethod = "start", destroyMethod = "stop")
   public MainScheduler mainScheduler(PorterRouter porterRouter, MessageLoader messageLoader, CheckpointServiceRouter checkpointServices) {
     DefaultMainScheduler defaultMainScheduler = new DefaultMainScheduler(porterRouter, messageLoader, checkpointServices);
     Assert.isTrue(porterRouter.size() != 0, "porterRouter need init ");

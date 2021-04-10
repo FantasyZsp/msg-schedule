@@ -25,7 +25,7 @@ public class MessageRepositoryConfiguration {
   @ConditionalOnMissingBean
   public MessageRepositoryRouter messageRepositoryRouter() {
     DefaultMessageRepositoryRouter router = new DefaultMessageRepositoryRouter();
-    provider.ifAvailable(repository -> router.put(repository.getTableName(), repository));
+    provider.forEach(repository -> router.put(repository.getTableName(), repository));
     router.init();
     return router;
   }

@@ -24,7 +24,7 @@ public class DefaultInstantMessageTransferTaskFactory implements TransferTaskFac
       if (transactionSendResult != null) {
         log.info("send success, remove msg. msgId [{}] transactionSendResult {}", instantMessage.getId(), transactionSendResult);
       } else {
-        log.error("send error, waiter for retry id {}", instantMessage.getId());
+        log.error("send error, wait for retry id {}", instantMessage.getId());
       }
     };
   }

@@ -73,6 +73,9 @@ public interface Porter<E> {
     Objects.requireNonNull(getTableScheduleProperties()).validate();
   }
 
+  /**
+   * TODO 抽离抽象初始化行为。子类有很多相同的实现
+   */
   default void shutdown() {
     if (getTransferExecutor() != null) {
       getTransferExecutor().shutdown();

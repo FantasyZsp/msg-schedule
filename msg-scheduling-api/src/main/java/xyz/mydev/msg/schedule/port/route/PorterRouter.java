@@ -5,7 +5,7 @@ import xyz.mydev.msg.schedule.port.Porter;
 import java.util.Set;
 
 /**
- * tableName -> AbstractPorter
+ * tableName -> Porter
  *
  * @author ZSP
  */

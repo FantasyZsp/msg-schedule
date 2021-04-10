@@ -3,7 +3,7 @@ package xyz.mydev.msg.schedule.example.delay.repository;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import xyz.mydev.msg.schedule.bean.DelayMessage;
+import xyz.mydev.msg.schedule.bean.InstantMessage;
 
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
@@ -14,12 +14,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-public class LocalDelayMessage implements DelayMessage {
+public class LocalInstantMessage implements InstantMessage {
 
-  /**
-   * 和yml中的配置保持一致。同表调度的地方，关于targetTableName都需要统一
-   */
-  public static final String TARGET_TABLE_NAME = "localDelayMessage";
+  public static final String TARGET_TABLE_NAME = "localInstantMessage";
 
   private String id;
   private String topic;
@@ -43,10 +40,6 @@ public class LocalDelayMessage implements DelayMessage {
   private String businessId;
 
   private String payload;
-  /**
-   * 生效时间
-   */
-  private LocalDateTime time;
 
   /**
    * {@link xyz.mydev.msg.common.Constants.MessageStatus}
@@ -66,20 +59,19 @@ public class LocalDelayMessage implements DelayMessage {
     return isTx != 0;
   }
 
-  public static LocalDelayMessage of(String id, String topic, String tag, Integer isTx, String businessId, String payload, LocalDateTime time) {
-    LocalDelayMessage localDelayMessage = new LocalDelayMessage();
-    localDelayMessage.setId(id); // set by IdGenerator
-    localDelayMessage.setTopic(topic);
-    localDelayMessage.setTag(tag);
-    localDelayMessage.setIsTx(isTx);
-    localDelayMessage.setBusinessId(businessId);
-    localDelayMessage.setPayload(payload);
-    localDelayMessage.setTime(time);
+  public static LocalInstantMessage of(String id, String topic, String tag, Integer isTx, String businessId, String payload) {
+    LocalInstantMessage localInstantMessage = new LocalInstantMessage();
+    localInstantMessage.setId(id); // set by IdGenerator
+    localInstantMessage.setTopic(topic);
+    localInstantMessage.setTag(tag);
+    localInstantMessage.setIsTx(isTx);
+    localInstantMessage.setBusinessId(businessId);
+    localInstantMessage.setPayload(payload);
 
     LocalDateTime now = LocalDateTime.now();
-    localDelayMessage.setStatus(0); // default
-    localDelayMessage.setCreatedAt(now); // default
-    localDelayMessage.setUpdatedAt(now); // default
-    return localDelayMessage;
+    localInstantMessage.setStatus(0); // default
+    localInstantMessage.setCreatedAt(now); // default
+    localInstantMessage.setUpdatedAt(now); // default
+    return localInstantMessage;
   }
 }

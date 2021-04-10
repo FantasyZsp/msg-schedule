@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import xyz.mydev.msg.schedule.TableScheduleProperties;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 消息搬运工
@@ -27,6 +28,8 @@ public abstract class AbstractPorter<E> extends Thread implements Porter<E> {
   private PortTaskFactory<E> portTaskFactory;
   private TransferTaskFactory<E> transferTaskFactory;
   private TableScheduleProperties tableScheduleProperties;
+
+  private AtomicBoolean shutdown = new AtomicBoolean(false);
 
   public AbstractPorter(String targetTableName,
                         TransferQueue<E> transferQueue,
@@ -72,9 +75,11 @@ public abstract class AbstractPorter<E> extends Thread implements Porter<E> {
 
   @Override
   public void shutdown() {
-    interrupt();
-    shutDownExecutors();
-    transferQueue.destroy();
+    if (shutdown.compareAndSet(false, true)) {
+      interrupt();
+      shutDownExecutors();
+      transferQueue.destroy();
+    }
   }
 
   protected void shutDownExecutors() {

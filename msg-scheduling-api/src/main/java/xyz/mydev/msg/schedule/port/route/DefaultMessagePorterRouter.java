@@ -8,8 +8,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 依赖外部化配置初始化所有的porter
- *
  * @author ZSP
  */
 public class DefaultMessagePorterRouter implements PorterRouter {

@@ -32,7 +32,7 @@ public class DefaultDelayMessagePortTaskFactory implements PortTaskFactory<Delay
           log.warn("remove false , maybe already not exists");
         }
       } else {
-        log.error("send error, waiter for retry id {}", delayMessage.getId());
+        log.error("send error, wait for retry id {}", delayMessage.getId());
       }
 
     };

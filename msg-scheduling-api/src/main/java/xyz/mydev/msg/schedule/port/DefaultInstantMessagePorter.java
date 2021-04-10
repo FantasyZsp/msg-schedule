@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 消息搬运工
@@ -47,4 +48,25 @@ public class DefaultInstantMessagePorter implements Porter<InstantMessage> {
 
     this.portExecutor = transferExecutor;
   }
+
+  private AtomicBoolean shutdown = new AtomicBoolean(false);
+
+  @Override
+  public void shutdown() {
+    if (shutdown.compareAndSet(false, true)) {
+      shutDownExecutors();
+    }
+  }
+
+  protected void shutDownExecutors() {
+    // input first
+    if (getTransferExecutor() != null) {
+      getTransferExecutor().shutdownNow();
+    }
+
+    if (getPortExecutor() != null) {
+      getPortExecutor().shutdownNow();
+    }
+  }
+
 }
