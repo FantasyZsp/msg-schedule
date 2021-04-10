@@ -209,7 +209,6 @@ public class RedisCheckPointServiceImpl implements CheckpointService {
   public void writeCheckpoint(String targetTableName, LocalDateTime checkpoint) {
     Objects.requireNonNull(checkpoint);
     cpHolderPool.get(targetTableName).set(checkpoint.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-    log.info("writeCheckpoint for {}: {}", targetTableName, checkpoint);
   }
 
   @Override

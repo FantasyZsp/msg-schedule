@@ -51,6 +51,7 @@ logging:
     xyz.mydev.msg.schedule.port.DefaultDelayMessagePortTaskFactory: debug
     xyz.mydev.msg.schedule.port.DefaultInstantMessageTransferTaskFactory: debug
     xyz.mydev.msg.schedule.delay.port.RedisDelayTransferQueue: debug
+    xyz.mydev.redis.lock: debug
 
 spring:
   datasource:

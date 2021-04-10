@@ -28,28 +28,25 @@ public class DefaultCheckpointUpdateStrategy implements CheckpointUpdateStrategy
     boolean enableSchedule = scheduleLock.tryLock();
 
     if (!enableSchedule) {
-      log.info("schedule to update checkpoint by other app for {}", targetTableName);
+      log.info("other app working for {}", targetTableName);
+      return;
     }
 
-    if (enableSchedule) {
+    try {
+      Lock writeLock = checkpointService.getReadWriteLock(targetTableName).writeLock();
+      // 调度任务拿到的检查点一定是可靠的、最新的，阻塞写入
+      writeLock.lock();
       try {
-        Lock writeLock = checkpointService.getReadWriteLock(targetTableName).writeLock();
-
-        // 调度任务拿到的检查点一定是可靠的、最新的，阻塞写入
-        writeLock.lock();
-        try {
-          LocalDateTime next = checkpointService.loadNextCheckpoint(targetTableName);
-          checkpointService.writeCheckpoint(targetTableName, next);
-          log.info("update checkpoint success for {} , {}", targetTableName, next);
-        } finally {
-          writeLock.unlock();
-        }
-
-      } catch (Throwable ex) {
-        log.error("update checkpoint failed for {}", targetTableName, ex);
+        LocalDateTime next = checkpointService.loadNextCheckpoint(targetTableName);
+        checkpointService.writeCheckpoint(targetTableName, next);
+        log.info("new checkpoint for {} , {}", targetTableName, next);
       } finally {
-        scheduleLock.unlock();
+        writeLock.unlock();
       }
+    } catch (Throwable ex) {
+      log.error("failed for {}", targetTableName, ex);
+    } finally {
+      scheduleLock.unlock();
     }
 
 
