@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.mydev.msg.schedule.example.multi.repository.impl.ErrorMessageMapper">
+  <insert id="insert">
+    insert into error_message(id, msg_id, topic, matched, platform, platform_msg_id,
+                              business_id,
+                              error_type,
+                              retry_times,
+                              error_reason,
+                              error_code,
+                              created_at)
+    values (#{id}, #{msgId}, #{topic}, #{matched}, #{platform}, #{platformMsgId},
+            #{businessId},
+            #{errorType},
+            #{retryTimes},
+            #{errorReason},
+            #{errorCode},
+            #{createdAt})
+  </insert>
+
+</mapper>

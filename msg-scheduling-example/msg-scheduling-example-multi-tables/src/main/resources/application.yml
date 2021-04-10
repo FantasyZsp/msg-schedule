@@ -1,0 +1,60 @@
+msg-schedule:
+  scheduler:
+    enable: true
+    default-schedule-interval:
+      checkpoint-interval: 15
+      load-interval: 30
+    route:
+      tables:
+        delay:
+          localDelayMessage:
+            checkpoint-interval: 15
+            load-interval: 30
+            table-entity-class: xyz.mydev.msg.schedule.example.multi.repository.LocalDelayMessage
+        instant:
+          localInstantMessage:
+            checkpoint-interval: 5
+            load-interval: 5
+            table-entity-class: xyz.mydev.msg.schedule.example.multi.repository.LocalInstantMessage
+rocketmq:
+  name-server: "local-vm:9876"
+  producer:
+    group: msg-schedule-pg-tx
+    sendMessageTimeout: 100000
+redis-lock:
+  enable: true
+redisson:
+  address: redis://${spring.redis.host:127.0.0.1}:${spring.redis.port:6379}
+  database: ${spring.redis.database:1}
+  connection-pool-size: 32
+  mode: single
+mybatis:
+  mapper-locations: "classpath*:/mapper/*.xml"
+  configuration:
+    map-underscore-to-camel-case: true
+logging:
+  level:
+    root: info
+    xyz.mydev.msg.schedule: debug
+    xyz.mydev.redis.lock: debug
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/msg_schedule?useSSL=false&serverTimezone=Asia/Shanghai
+    hikari:
+      username: root
+      password: 123456
+      maximum-pool-size: 10
+      minimum-idle: 10
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false

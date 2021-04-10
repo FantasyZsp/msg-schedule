@@ -12,7 +12,7 @@
   <artifactId>msg-scheduling-example</artifactId>
   <packaging>pom</packaging>
   <modules>
-    <module>msg-scheduling-example-delay</module>
+    <module>msg-scheduling-example-multi-tables</module>
   </modules>
 
 

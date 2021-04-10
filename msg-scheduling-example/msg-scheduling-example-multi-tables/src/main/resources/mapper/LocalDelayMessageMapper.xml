@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="xyz.mydev.msg.schedule.example.multi.repository.impl.LocalDelayMessageMapper">
+
+  <update id="updateToSent">
+    update local_delay_message
+    set status = 1
+    where id = #{id}
+      and status = 0
+  </update>
+  <update id="updateStatus">
+    update local_delay_message
+    set status = #{status}
+    where id = #{id}
+  </update>
+
+  <select id="selectById" resultType="xyz.mydev.msg.schedule.example.multi.repository.LocalDelayMessage">
+    select *
+    from local_delay_message
+    where id = #{id}
+  </select>
+  <select id="findWillSend" resultType="xyz.mydev.msg.schedule.example.multi.repository.LocalDelayMessage">
+    select *
+    from local_delay_message
+    where status = 0
+      and time >= #{startTime}
+      and time &lt;= #{endTime}
+    order by time
+  </select>
+
+  <select id="findCheckpoint" resultType="java.time.LocalDateTime">
+    select min(time) as checkPoint
+    from (select min(time) as time
+          from local_delay_message
+          where status = 0
+          union all
+          select max(time) as time
+          from local_delay_message
+          where status != 0) as tmp
+  </select>
+  <select id="findNextCheckpointAfter" resultType="java.time.LocalDateTime">
+    select min(time) as nextCheckPoint
+    from (select min(time) as time
+          from local_delay_message
+          where status = 0
+            and time >= #{oldCheckPoint}
+          union all
+          select max(time) as time
+          from local_delay_message
+          where status != 0
+            and time >= #{oldCheckPoint}) as tmp
+  </select>
+
+  <insert id="insert">
+    insert into local_delay_message(id, topic, tag, is_tx, platform, platform_msg_id, trace_id, trace_version,
+                                    business_id, payload, time,
+                                    status,
+                                    created_at,
+                                    updated_at)
+    values (#{id}, #{topic}, #{tag}, #{isTx}, #{platform}, #{platformMsgId}, #{traceId}, #{traceVersion},
+            #{businessId}, #{payload}, #{time},
+            #{status},
+            #{createdAt},
+            #{updatedAt})
+  </insert>
+
+</mapper>
