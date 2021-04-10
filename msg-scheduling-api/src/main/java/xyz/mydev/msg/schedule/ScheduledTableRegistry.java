@@ -42,6 +42,10 @@ public class ScheduledTableRegistry implements Iterable<ScheduledTableRegistry.T
     REGISTRY.remove(tableName);
   }
 
+  public static boolean hasTable(String tableName) {
+    return REGISTRY.containsKey(tableName);
+  }
+
   public static TableScheduleProperties getTableProperties(String tableName) {
     return Objects.requireNonNull(REGISTRY.get(tableName));
   }

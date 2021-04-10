@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import xyz.mydev.msg.common.Constants;
 import xyz.mydev.msg.schedule.mq.producer.MqProducer;
+import xyz.mydev.msg.schedule.mq.rocketmq.RocketMQUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -47,7 +48,9 @@ public class DefaultRocketMqProducer implements MqProducer, InitializingBean {
       log.error("msg send error: {} ,error info:", message, e);
     }
 
-    log.info("msg send result: [{}] ", sendResult);
+    if (log.isDebugEnabled()) {
+      log.debug("msg send result: [{}] ", sendResult);
+    }
 
     return sendResult;
   }
@@ -61,11 +64,13 @@ public class DefaultRocketMqProducer implements MqProducer, InitializingBean {
     String msgId = msg.getId();
     byte[] body = msg.getPayload().getBytes(StandardCharsets.UTF_8);
 
+    // TODO fix 空字符
     Message message = new Message(msg.getTopic(), msg.getTag(), msgId, body);
-    message.putUserProperty(Constants.MsgPropertiesKey.TABLE_NAME, msg.getTargetTableName());
-    message.putUserProperty(Constants.MsgPropertiesKey.BUSINESS_ID, msg.getBusinessId());
-    message.putUserProperty(Constants.MsgPropertiesKey.TRACE_ID, msg.getTraceId());
-    message.putUserProperty(Constants.MsgPropertiesKey.TRACE_VERSION, msg.getTraceVersion());
+    RocketMQUtils.putValueIfNotNull(message, Constants.MsgPropertiesKey.TABLE_NAME, msg.getTargetTableName());
+    RocketMQUtils.putValueIfNotNull(message, Constants.MsgPropertiesKey.BUSINESS_ID, msg.getBusinessId());
+    RocketMQUtils.putValueIfNotNull(message, Constants.MsgPropertiesKey.TRACE_ID, msg.getTraceId());
+    RocketMQUtils.putValueIfNotNull(message, Constants.MsgPropertiesKey.TRACE_VERSION, msg.getTraceVersion());
+
     return sendMessage(message);
   }
 

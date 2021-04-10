@@ -45,7 +45,12 @@ mybatis:
 logging:
   level:
     root: info
-#    xyz.mydev.msg.schedule.example.delay.repository.impl.LocalDelayMessageMapper: error
+    xyz.mydev.msg.schedule.example.delay.repository.impl.LocalDelayMessageMapper: error
+    xyz.mydev.msg.schedule.mq.rocketmq.producer.TransactionMessageListenerImpl: debug
+    xyz.mydev.msg.schedule.mq.rocketmq.producer.DefaultRocketMqProducer: debug
+    xyz.mydev.msg.schedule.port.DefaultDelayMessagePortTaskFactory: debug
+    xyz.mydev.msg.schedule.port.DefaultInstantMessageTransferTaskFactory: debug
+    xyz.mydev.msg.schedule.delay.port.RedisDelayTransferQueue: debug
 
 spring:
   datasource:

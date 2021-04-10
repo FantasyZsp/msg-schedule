@@ -27,14 +27,15 @@ public class DefaultDelayMessagePortTaskFactory implements PortTaskFactory<Delay
 
       if (transactionSendResult != null) {
         boolean remove = transferQueue.remove(delayMessage);
-        log.info("send success, remove msg. msgId [{}] transactionSendResult {}", delayMessage.getId(), transactionSendResult);
+        if (log.isDebugEnabled()) {
+          log.debug("send success, remove msg. msgId [{}] transactionSendResult {}", delayMessage.getId(), transactionSendResult);
+        }
         if (!remove) {
-          log.warn("remove false , maybe already not exists");
+          log.warn("remove false , maybe {} already not exists", delayMessage.getId());
         }
       } else {
         log.error("send error, wait for retry id {}", delayMessage.getId());
       }
-
     };
   }
 }

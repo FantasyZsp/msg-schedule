@@ -55,11 +55,11 @@ public class TransactionMessageListenerImpl implements TransactionListener {
   @Override
   @Transactional(isolation = Isolation.READ_COMMITTED)
   public LocalTransactionState executeLocalTransaction(Message msg, Object businessId) {
-    log.info("executing LocalTransaction, msgKey [{}] topic [{}] , businessId [{}]------------", msg.getKeys(), msg.getTopic(), businessId);
-
+    if (log.isDebugEnabled()) {
+      log.debug("executing LocalTransaction, msgKey [{}] topic [{}] , businessId [{}]------------", msg.getKeys(), msg.getTopic(), businessId);
+    }
     String tableName = msg.getProperty("tableName");
     MessageRepository<StringMessage> repository = messageRepositoryRouter.get(tableName);
-
 
     boolean success = repository.updateToSent(msg.getKeys());
 
@@ -89,7 +89,9 @@ public class TransactionMessageListenerImpl implements TransactionListener {
       return LocalTransactionState.ROLLBACK_MESSAGE;
     }
 
-    log.debug("submit msg: msgKey [{}] topic [{}]------------", msg.getKeys(), msg.getTopic());
+    if (log.isDebugEnabled()) {
+      log.debug("submit msg: msgKey [{}] topic [{}]------------", msg.getKeys(), msg.getTopic());
+    }
     return LocalTransactionState.COMMIT_MESSAGE;
   }
 
@@ -108,8 +110,9 @@ public class TransactionMessageListenerImpl implements TransactionListener {
     StringMessage messageEntity = messageRepositoryRouter.get(tableName).selectById(msgIdInDb);
 
     if (localTransactionSuccess(messageEntity)) {
-
-      log.info("msg [{}] checkLocalTransaction success", msgIdInDb);
+      if (log.isDebugEnabled()) {
+        log.debug("msg [{}] checkLocalTransaction success", msgIdInDb);
+      }
 
       return LocalTransactionState.COMMIT_MESSAGE;
 
@@ -118,16 +121,15 @@ public class TransactionMessageListenerImpl implements TransactionListener {
 
       int checkTimes = (int) MSG_CHECK_TIMES_MAP.incrementAndGet(msgIdInDb);
 
-      log.info("msg [{}] check times [{}]", msgIdInDb, checkTimes);
+      if (log.isDebugEnabled()) {
+        log.debug("msg [{}] check times [{}]", msgIdInDb, checkTimes);
+      }
 
       if (checkTimes < MAX_CHECK_TIMES) {
-
         return LocalTransactionState.UNKNOW;
-
       } else {
         // 超过最大重试次数，回滚消息。
-        log.info("reach maxCheckTimes ,rollback msg [{}]", msg);
-
+        log.warn("reach maxCheckTimes ,rollback msg [{}]", msg.getKeys());
         if (messageEntity == null) {
 
           recordSendFailureAndRemoveCacheQuietly(msg.getTopic(),

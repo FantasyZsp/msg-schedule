@@ -12,6 +12,7 @@ import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.Codec;
 import org.redisson.client.codec.StringCodec;
+import xyz.mydev.msg.schedule.ScheduledTableRegistry;
 import xyz.mydev.msg.schedule.bean.DelayMessage;
 import xyz.mydev.msg.schedule.port.TransferQueue;
 
@@ -102,9 +103,9 @@ public class RedisDelayTransferQueue<E extends DelayMessage> implements Transfer
   public boolean put(E msg) {
     boolean isNotExists = atomicOfferWithDistinctCache(msg);
     if (isNotExists) {
-      log.info("put msg into redis delay queue [{}] msgId [{}] at [{}]", delayQueueName, msg.getId(), msg.getTime());
+      log.debug("put msg into redis delay queue [{}] msgId [{}] at [{}]", delayQueueName, msg.getId(), msg.getTime());
     } else {
-      log.info("msg is already in redis delay queue [{}], msgId [{}]", delayQueueName, msg.getId());
+      log.debug("msg is already in redis delay queue [{}], msgId [{}]", delayQueueName, msg.getId());
     }
 
     return isNotExists;
@@ -193,8 +194,12 @@ public class RedisDelayTransferQueue<E extends DelayMessage> implements Transfer
     long delayInMs = msg.getDelay(TimeUnit.MILLISECONDS);
     long timeout = (System.currentTimeMillis() + delayInMs);
     long randomId = ThreadLocalRandom.current().nextLong();
-
-    long cacheToLive = distinctCache.getTimeUnit().toSeconds(distinctCache.getTimeToLive());
+    long cacheToLive;
+    if (ScheduledTableRegistry.hasTable(msg.getTargetTableName())) {
+      cacheToLive = ScheduledTableRegistry.getLoadIntervalMinutes(msg.getTargetTableName()) * 60;
+    } else {
+      cacheToLive = distinctCache.getTimeUnit().toSeconds(distinctCache.getTimeToLive());
+    }
 
     return redissonClient.getScript(new StringCodec())
       .eval(RScript.Mode.READ_WRITE,
