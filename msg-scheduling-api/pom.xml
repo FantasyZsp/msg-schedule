@@ -23,9 +23,9 @@
       <version>${commons_lang3_version}</version>
     </dependency>
     <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-      <version>${commons_collections_version}</version>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>4.3</version>
     </dependency>
 
     <!--Jackson JAVA8 TIME支持-->
