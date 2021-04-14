@@ -7,13 +7,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import xyz.mydev.msg.common.util.JsonUtil;
-import xyz.mydev.redis.lock.annotation.RedissonClientAutoConfig;
 
 /**
  * @author ZSP
  */
 @Configuration
-@AutoConfigureBefore({RedissonClientAutoConfig.class})
+@AutoConfigureBefore({MessageScheduleAutoConfiguration.class})
 public class RedissonClientCodecConfiguration {
   @Bean
   @ConditionalOnMissingBean

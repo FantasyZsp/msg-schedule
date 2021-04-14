@@ -49,7 +49,6 @@ import xyz.mydev.msg.schedule.port.DefaultInstantMessageTransferTaskFactory;
 import xyz.mydev.msg.schedule.port.Porter;
 import xyz.mydev.msg.schedule.port.route.DefaultMessagePorterRouter;
 import xyz.mydev.msg.schedule.port.route.PorterRouter;
-import xyz.mydev.redis.lock.annotation.RedisLockAnnotationSupportAutoConfig;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -59,7 +58,6 @@ import java.util.concurrent.Executors;
 
 /**
  * 根据外部化配置，自动装配需要的组件
- * 废弃从MessageRepositoryRouter加载调度组件的做法，因为会导致配置调度信息的地方过多。
  * <p>
  * TODO 分离对RocketMqAutoConfiguration的依赖，提供中间层，统一自动装配消息中间件
  * TODO 拆分bridge组件的自动装配到其他部分
@@ -67,8 +65,7 @@ import java.util.concurrent.Executors;
  * @author ZSP
  */
 @Configuration
-@AutoConfigureAfter({MessageRepositoryConfiguration.class, RedisLockAnnotationSupportAutoConfig.class, RocketMqAutoConfiguration.class})
-@ConditionalOnBean({RedissonClient.class, MqProducer.class})
+@AutoConfigureAfter({MessageRepositoryConfiguration.class, RocketMqAutoConfiguration.class})
 @ConditionalOnProperty(value = "msg-schedule.scheduler.enable", havingValue = "true")
 @EnableConfigurationProperties({SchedulerProperties.class})
 public class MessageScheduleAutoConfiguration implements InitializingBean {
@@ -161,12 +158,18 @@ public class MessageScheduleAutoConfiguration implements InitializingBean {
   }
 
 
+  /**
+   * TODO 最好统一管理组件启动
+   */
   @Bean(initMethod = "start", destroyMethod = "stop")
   public CheckpointScheduler checkpointScheduler(CheckpointServiceRouter checkpointServiceRouter) {
     Assert.isTrue(checkpointServiceRouter.size() != 0, "checkpointServiceRouter need init ");
     return new DefaultCheckpointScheduler(checkpointServiceRouter);
   }
 
+  /**
+   * TODO 最好统一管理组件启动
+   */
   @Bean(initMethod = "start", destroyMethod = "stop")
   public MainScheduler mainScheduler(PorterRouter porterRouter, MessageLoader messageLoader, CheckpointServiceRouter checkpointServices) {
     DefaultMainScheduler defaultMainScheduler = new DefaultMainScheduler(porterRouter, messageLoader, checkpointServices);

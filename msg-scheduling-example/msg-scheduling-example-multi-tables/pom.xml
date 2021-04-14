@@ -39,6 +39,12 @@
       <artifactId>mysql-connector-java</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>xyz.mydev</groupId>
+      <artifactId>redis-lock-starter</artifactId>
+      <version>${redis_lock_version}</version>
+    </dependency>
+
   </dependencies>
 
   <build>

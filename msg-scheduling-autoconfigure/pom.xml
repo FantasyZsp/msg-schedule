@@ -29,6 +29,13 @@
       <artifactId>msg-scheduling-port</artifactId>
       <version>${revision}</version>
     </dependency>
+    <!--redis lock for test-->
+    <dependency>
+      <groupId>xyz.mydev</groupId>
+      <artifactId>redis-lock-starter</artifactId>
+      <version>${redis_lock_version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
 

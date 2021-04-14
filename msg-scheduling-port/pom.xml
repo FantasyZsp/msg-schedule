@@ -18,11 +18,10 @@
       <version>${revision}</version>
     </dependency>
 
-    <!-- redis lock -->
     <dependency>
-      <groupId>xyz.mydev</groupId>
-      <artifactId>redis-lock-starter</artifactId>
-      <version>${redis_lock_version}</version>
+      <groupId>org.redisson</groupId>
+      <artifactId>redisson</artifactId>
+      <version>${redisson_version}</version>
     </dependency>
 
   </dependencies>
