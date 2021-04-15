@@ -19,7 +19,7 @@
       <version>${revision}</version>
     </dependency>
 
-    <!--redis lock-->
+    <!--redisson-->
     <dependency>
       <groupId>org.redisson</groupId>
       <artifactId>redisson</artifactId>
