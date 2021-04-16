@@ -12,6 +12,7 @@
     <module>msg-scheduling-mq</module>
     <module>msg-scheduling-port</module>
     <module>msg-scheduling-autoconfigure</module>
+    <module>msg-schedule-spring-boot-starter</module>
   </modules>
 
 
@@ -175,5 +176,10 @@
       </plugin>
     </plugins>
   </build>
-
+  <distributionManagement>
+    <repository>
+      <id>maven-releases</id>
+      <url>http://192.168.2.112:8081/repository/maven-releases/</url>
+    </repository>
+  </distributionManagement>
 </project>
