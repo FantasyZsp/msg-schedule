@@ -132,11 +132,11 @@ public class ScheduleTask<T> implements Runnable, TaskTimeType {
     } else {
       // formatted now -> plus interval
       startTime = ScheduleTimeEvaluator.formatTimeWithInterval(now, intervalMinutes);
-      endTime = startTime.plusSeconds(intervalMinutes);
+      endTime = startTime.plusMinutes(intervalMinutes);
     }
 
     if (!ScheduleTimeEvaluator.isDelayTable(targetTableName)) {
-      // 即时消息容错处理
+      // 即时消息容错处理，将开始时间前置一段时间
       startTime = startTime.minusMinutes(ScheduleTimeEvaluator.getTableLoadIntervalMinutes(targetTableName) / 3);
     }
     return new LocalDateTime[]{startTime, endTime};
