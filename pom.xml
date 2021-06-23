@@ -53,10 +53,6 @@
 
   <repositories>
     <repository>
-      <id>ss</id>
-      <url>http://192.168.2.112:8081/repository/maven-public/</url>
-    </repository>
-    <repository>
       <id>ali</id>
       <url>https://maven.aliyun.com/nexus/content/groups/public/</url>
     </repository>
@@ -176,10 +172,4 @@
       </plugin>
     </plugins>
   </build>
-  <distributionManagement>
-    <repository>
-      <id>maven-releases</id>
-      <url>http://192.168.2.112:8081/repository/maven-releases/</url>
-    </repository>
-  </distributionManagement>
 </project>
