@@ -17,12 +17,15 @@ import java.time.LocalDateTime;
  */
 @Service
 public class OrderService {
-  @Autowired
-  private OrderMessagePublisher orderMessagePublisher;
-  @Autowired
-  private OrderMapper orderMapper;
-  @Autowired
-  private IdGenerator idGenerator;
+  private final OrderMessagePublisher orderMessagePublisher;
+  private final OrderMapper orderMapper;
+  private final IdGenerator idGenerator;
+
+  public OrderService(OrderMapper orderMapper, IdGenerator idGenerator, OrderMessagePublisher orderMessagePublisher) {
+    this.orderMapper = orderMapper;
+    this.idGenerator = idGenerator;
+    this.orderMessagePublisher = orderMessagePublisher;
+  }
 
   @Transactional
   public void saveAndSend(Order order, boolean delay, boolean instant) throws Exception {
@@ -43,13 +46,13 @@ public class OrderService {
     }
 
     if (instant) {
-// 即时消息
+      // 即时消息
       LocalInstantMessage localInstantMessage = LocalInstantMessage.of(idGenerator.get(), "exampleOrderInstant", "*", 1, order.getId(), payload);
       // 下面的内容不需要业务设置
       localInstantMessage.setPlatform(Constants.MqPlatform.ROCKETMQ); // set by platformInfoProvider impl
-//    localInstantMessage.setPlatformMsgId("xxx"); // set by platformInfoProvider impl
-//    localInstantMessage.setTraceId("get from provider"); // set by platformInfoProvider impl
-//    localInstantMessage.setTraceVersion("get from provider"); // set by platformInfoProvider impl
+      localInstantMessage.setPlatformMsgId("xxx"); // set by platformInfoProvider impl
+      localInstantMessage.setTraceId("get from provider"); // set by platformInfoProvider impl
+      localInstantMessage.setTraceVersion("get from provider"); // set by platformInfoProvider impl
       orderMessagePublisher.publish(localInstantMessage);
     }
 
